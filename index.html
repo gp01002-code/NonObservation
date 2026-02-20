@@ -7,10 +7,10 @@
     <style>
         :root {
             --bg-dark: #020205;
-            --panel-bg: rgba(10, 10, 20, 0.85);
-            --accent-mirror: #00d4ff; /* 階段1：鏡像藍 */
-            --accent-observation: #00ff88; /* 階段2：觀測綠 */
-            --accent-simulacrum: #ff00ff; /* 階段3：擬像紫 */
+            --panel-bg: rgba(10, 10, 20, 0.9);
+            --accent-mirror: #00d4ff; 
+            --accent-observation: #00ff88;
+            --accent-simulacrum: #ff00ff;
             --text-main: #e0e0e0;
             --font-mono: 'Courier New', monospace;
         }
@@ -28,7 +28,6 @@
             padding: 15px;
         }
 
-        /* 面板基礎樣式 */
         .panel {
             background: var(--panel-bg);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -37,12 +36,12 @@
             display: flex;
             flex-direction: column;
             backdrop-filter: blur(10px);
+            z-index: 10;
         }
 
         h1 { font-size: 1.1rem; letter-spacing: 2px; margin-bottom: 20px; text-transform: uppercase; border-bottom: 1px solid rgba(255, 255, 255, 0.2); padding-bottom: 10px; }
         h2 { font-size: 0.8rem; color: #888; margin: 15px 0 10px 0; text-transform: uppercase; }
 
-        /* 階段選擇器 */
         .stage-control {
             background: rgba(255, 255, 255, 0.05);
             padding: 15px;
@@ -64,29 +63,28 @@
             appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #fff; cursor: pointer;
         }
 
-        /* 訊號滑桿 */
         .eeg-group { margin-bottom: 12px; }
         .eeg-header { display: flex; justify-content: space-between; font-size: 0.75rem; color: #aaa; margin-bottom: 5px; }
         .eeg-val { color: #fff; font-weight: bold; }
 
-        /* 中央畫布 */
         .canvas-container {
             position: relative;
             background: #000;
             overflow: hidden;
+            border-radius: 12px;
             display: flex;
             justify-content: center;
             align-items: center;
+            border: 1px solid rgba(255,255,255,0.1);
         }
         canvas { width: 100%; height: 100%; object-fit: cover; }
 
         .overlay-ui {
             position: absolute; top: 20px; left: 20px; pointer-events: none;
-            font-family: var(--font-mono); font-size: 0.8rem;
+            font-family: var(--font-mono); font-size: 0.8rem; z-index: 50;
         }
-        .data-tag { background: rgba(0,0,0,0.7); padding: 4px 8px; border-radius: 4px; margin-bottom: 5px; border-left: 3px solid #fff; }
+        .data-tag { background: rgba(0,0,0,0.8); padding: 4px 10px; border-radius: 4px; margin-bottom: 6px; border-left: 3px solid #fff; }
 
-        /* 日誌系統 */
         .log-container {
             flex-grow: 1;
             background: rgba(0,0,0,0.3);
@@ -98,8 +96,6 @@
             border: 1px solid rgba(255,255,255,0.05);
         }
         .log-entry { margin-bottom: 8px; padding-bottom: 4px; border-bottom: 1px solid rgba(255,255,255,0.02); }
-        .log-time { color: #555; margin-right: 5px; }
-        .log-tag { font-weight: bold; margin-right: 5px; }
 
         button {
             width: 100%; padding: 12px; margin-top: 10px;
@@ -108,17 +104,21 @@
             text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px;
         }
         button:hover { background: #fff; color: #000; }
-        button.active { background: #ff4757; border-color: #ff4757; }
+        button.active { background: var(--accent-observation); border-color: #fff; color: #000; }
+        button.camera-off { border-color: #ff4757; color: #ff4757; }
 
-        /* 階段專屬顏色 */
         .stage-1 .accent { color: var(--accent-mirror); }
         .stage-2 .accent { color: var(--accent-observation); }
         .stage-3 .accent { color: var(--accent-simulacrum); }
+
+        #video { display: none; }
     </style>
 </head>
 <body class="stage-1">
 
-    <!-- 左側面板：腦波與權力控制 -->
+    <video id="video" autoplay playsinline></video>
+
+    <!-- 左側面板 -->
     <div class="panel">
         <h1>⚡ 系統設置</h1>
         
@@ -131,58 +131,44 @@
         </div>
 
         <h2>生理訊號模擬 (EEG)</h2>
-        <div id="eegSliders">
-            <!-- 動態生成 -->
-        </div>
+        <div id="eegSliders"></div>
 
         <h2>系統運作</h2>
         <button id="startBtn">▶ 啟動觀測儀</button>
+        <button id="cameraBtn" class="camera-off">📷 攝影機：關閉</button>
         <button id="resetBtn">⟳ 重置主體資料</button>
-
-        <div style="margin-top: 20px; font-size: 0.7rem; color: #555; line-height: 1.5;">
-            <strong>論文要點：</strong><br>
-            從 Merleau-Ponty 的具身性轉向 Baudrillard 的超真實。
-        </div>
     </div>
 
-    <!-- 中央面板：非觀測場域 -->
+    <!-- 中央畫布 -->
     <div class="panel canvas-container" id="viewport">
         <div class="overlay-ui">
             <div class="data-tag accent" id="statusTag">STATUS: IDLE</div>
             <div class="data-tag" id="latencyTag">LATENCY: 0ms</div>
+            <div class="data-tag" id="dbInfoTag">DATABASE: 0 FRAGMENTS</div>
             <div id="algorithmicTags"></div>
         </div>
         <canvas id="mainCanvas"></canvas>
     </div>
 
-    <!-- 右側面板：系統日誌與分析 -->
+    <!-- 右側面板 -->
     <div class="panel">
-        <h1>📊 演算法分析</h1>
+        <h1>📊 分析日誌</h1>
         
-        <h2>潛在空間監測</h2>
         <div style="background: rgba(0,0,0,0.5); padding: 10px; border-radius: 8px; font-family: monospace; font-size: 0.7rem; margin-bottom: 15px;">
             <div style="display: flex; justify-content: space-between;"><span>對齊度:</span><span id="statAlignment">0%</span></div>
-            <div style="display: flex; justify-content: space-between;"><span>熵值 (Entropy):</span><span id="statEntropy">0.00</span></div>
+            <div style="display: flex; justify-content: space-between;"><span>熵值:</span><span id="statEntropy">0.00</span></div>
             <div style="display: flex; justify-content: space-between;"><span>主體一致性:</span><span id="statSync">100%</span></div>
         </div>
 
-        <h2>執行日誌</h2>
-        <div class="log-container" id="logBox">
-            <div class="log-entry">系統就緒，等待主體接入。</div>
-        </div>
+        <div class="log-container" id="logBox"></div>
 
-        <h2 style="margin-top: 20px;">當前哲學狀態</h2>
+        <h2 style="margin-top: 20px;">哲學引導</h2>
         <p id="philosophyDesc" style="font-size: 0.75rem; color: #aaa; line-height: 1.6; font-style: italic;">
             影像作為主體的延伸，在此階段，你與影像保持著現象學式的統一。
         </p>
     </div>
 
     <script>
-        /**
-         * 自我觀測儀核心邏輯
-         * 呼應論文：被觀看的自我：生成式影像時代的非觀測與主體重構
-         */
-
         const config = {
             bands: [
                 { id: 'delta', label: 'Delta', desc: '深層本我', val: 0.2 },
@@ -192,25 +178,36 @@
                 { id: 'gamma', label: 'Gamma', desc: '高階認知', val: 0.1 }
             ],
             stages: {
-                1: { name: "階段 1: 具身鏡像", desc: "現象學觀看。影像與主體同步，強調身體圖式的完整性與反射感。", color: "#00d4ff", delay: 100, entropy: 0.1 },
-                2: { name: "階段 2: 演算法非觀測", desc: "權力規訓。系統將你轉化為特徵向量，觀看不再是為了理解，而是為了分類。", color: "#00ff88", delay: 3000, entropy: 0.5 },
-                3: { name: "階段 3: 擬像重構", desc: "超真實階段。碎片化的五官拼貼取代了真實自我的統一性。擬像不再需要原件。", color: "#ff00ff", delay: 7000, entropy: 0.9 }
+                1: { name: "階段 1: 具身鏡像", desc: "現象學觀看。影像即時反應，攝影機捕捉你的肉身，透過腦波與你產生具身連結。", color: "#00d4ff", delay: 100 },
+                2: { name: "階段 2: 演算法非觀測", desc: "權力規訓。系統擷取影像片段進行數據化分析，出現延遲與掃描格柵，主體被轉化為資料集。", color: "#00ff88", delay: 2500 },
+                3: { name: "階段 3: 擬像重構", desc: "超真實重組。真實影像消逝，系統根據你的數據拼湊出碎片化的主體擬像，展現高變化度的五官組合。", color: "#ff00ff", delay: 6000 }
             }
         };
 
         const state = {
             isRunning: false,
+            cameraActive: false,
             currentStage: 1,
             eeg: {},
             buffer: [],
-            frameCount: 0
+            frameCount: 0,
+            video: document.getElementById('video'),
+            facialDatabase: [] // 儲存預生成的五官片段
         };
 
         const canvas = document.getElementById('mainCanvas');
         const ctx = canvas.getContext('2d');
         const logBox = document.getElementById('logBox');
 
-        // 初始化滑桿
+        function init() {
+            initUI();
+            generateFacialFragments();
+            resize();
+            window.addEventListener('resize', resize);
+            addLog("自我觀測系統已就緒。", "SYSTEM");
+            requestAnimationFrame(loop);
+        }
+
         function initUI() {
             const container = document.getElementById('eegSliders');
             config.bands.forEach(band => {
@@ -219,27 +216,131 @@
                 div.className = 'eeg-group';
                 div.innerHTML = `
                     <div class="eeg-header">
-                        <span>${band.label} (${band.desc})</span>
+                        <span>${band.label}</span>
                         <span class="eeg-val" id="val-${band.id}">${Math.floor(band.val * 100)}%</span>
                     </div>
                     <input type="range" id="slider-${band.id}" min="0" max="100" value="${band.val * 100}">
                 `;
                 container.appendChild(div);
-                
                 document.getElementById(`slider-${band.id}`).oninput = (e) => {
-                    const v = e.target.value / 100;
-                    state.eeg[band.id] = v;
+                    state.eeg[band.id] = e.target.value / 100;
                     document.getElementById(`val-${band.id}`).textContent = e.target.value + '%';
                 };
             });
 
-            document.getElementById('stageSlider').oninput = (e) => {
-                const s = parseInt(e.target.value);
-                setStage(s);
-            };
-
+            document.getElementById('stageSlider').oninput = (e) => setStage(parseInt(e.target.value));
             document.getElementById('startBtn').onclick = toggleSystem;
+            document.getElementById('cameraBtn').onclick = toggleCamera;
             document.getElementById('resetBtn').onclick = resetSystem;
+        }
+
+        // ==================== 五官資料庫生成 (v3 邏輯) ====================
+        function generateFacialFragments() {
+            state.facialDatabase = [];
+            const types = ['eye', 'nose', 'mouth'];
+            const eyeStyles = ['single', 'double', 'almond', 'round', 'hooded', 'downturned'];
+            const noseStyles = ['high', 'flat', 'wide', 'narrow', 'aquiline'];
+            const mouthStyles = ['smile', 'closed', 'thick', 'thin', 'pout', 'open'];
+
+            for (let i = 0; i < 30; i++) {
+                const fragCanvas = document.createElement('canvas');
+                fragCanvas.width = 120;
+                fragCanvas.height = 120;
+                const fctx = fragCanvas.getContext('2d');
+                
+                // 膚色背景
+                const h = 20 + Math.random() * 20;
+                const s = 30 + Math.random() * 40;
+                const l = 50 + Math.random() * 30;
+                fctx.fillStyle = `hsl(${h}, ${s}%, ${l}%)`;
+                fctx.fillRect(0, 0, 120, 120);
+
+                const type = types[i % 3];
+                fctx.translate(60, 60);
+
+                if (type === 'eye') {
+                    drawEyeFragment(fctx, eyeStyles[Math.floor(Math.random()*eyeStyles.length)]);
+                } else if (type === 'nose') {
+                    drawNoseFragment(fctx, noseStyles[Math.floor(Math.random()*noseStyles.length)]);
+                } else {
+                    drawMouthFragment(fctx, mouthStyles[Math.floor(Math.random()*mouthStyles.length)]);
+                }
+                
+                state.facialDatabase.push(fragCanvas);
+            }
+            document.getElementById('dbInfoTag').textContent = `DATABASE: ${state.facialDatabase.length} FRAGMENTS`;
+            addLog("完成 30 組高變化度五官擬像生成。", "DATABASE");
+        }
+
+        function drawEyeFragment(ctx, style) {
+            ctx.fillStyle = "#fff";
+            ctx.beginPath();
+            ctx.ellipse(0, 0, 40, 18, 0, 0, Math.PI*2);
+            ctx.fill();
+            ctx.strokeStyle = "#333";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            // 瞳孔
+            ctx.fillStyle = "#000";
+            ctx.beginPath();
+            ctx.arc((Math.random()-0.5)*10, 0, 12, 0, Math.PI*2);
+            ctx.fill();
+            // 高光
+            ctx.fillStyle = "#fff";
+            ctx.beginPath();
+            ctx.arc(-5, -5, 4, 0, Math.PI*2);
+            ctx.fill();
+        }
+
+        function drawNoseFragment(ctx, style) {
+            ctx.strokeStyle = "rgba(0,0,0,0.4)";
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(0, -30);
+            ctx.quadraticCurveTo(15, 0, 0, 30);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(-10, 25, 5, 0, Math.PI*2);
+            ctx.arc(10, 25, 5, 0, Math.PI*2);
+            ctx.stroke();
+        }
+
+        function drawMouthFragment(ctx, style) {
+            ctx.fillStyle = "rgba(180, 50, 50, 0.8)";
+            ctx.beginPath();
+            ctx.ellipse(0, 0, 40, 12, 0, 0, Math.PI*2);
+            ctx.fill();
+            ctx.strokeStyle = "rgba(0,0,0,0.3)";
+            ctx.beginPath();
+            ctx.moveTo(-40, 0);
+            ctx.lineTo(40, 0);
+            ctx.stroke();
+        }
+
+        // ==================== 核心循環 ====================
+
+        async function toggleCamera() {
+            if (!state.cameraActive) {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    state.video.srcObject = stream;
+                    state.cameraActive = true;
+                    document.getElementById('cameraBtn').textContent = "📷 攝影機：啟動";
+                    document.getElementById('cameraBtn').classList.remove('camera-off');
+                    document.getElementById('cameraBtn').classList.add('active');
+                    addLog("攝影機已連通，讀取具身影像。", "CAMERA");
+                } catch (err) {
+                    addLog("攝影機存取失敗，請確認權限。", "ERROR");
+                }
+            } else {
+                const stream = state.video.srcObject;
+                if (stream) stream.getTracks().forEach(track => track.stop());
+                state.cameraActive = false;
+                document.getElementById('cameraBtn').textContent = "📷 攝影機：關閉";
+                document.getElementById('cameraBtn').classList.add('camera-off');
+                document.getElementById('cameraBtn').classList.remove('active');
+                addLog("攝影機已斷開。", "CAMERA");
+            }
         }
 
         function setStage(s) {
@@ -249,56 +350,40 @@
             document.getElementById('stageName').textContent = data.name;
             document.getElementById('philosophyDesc').textContent = data.desc;
             document.getElementById('latencyTag').textContent = `LATENCY: ${data.delay}ms`;
-            addLog(`主體重構：進入 ${data.name}`, '權力轉向');
-        }
-
-        function addLog(msg, tag = '系統') {
-            const time = new Date().toLocaleTimeString().split(' ')[0];
-            const entry = document.createElement('div');
-            entry.className = 'log-entry';
-            entry.innerHTML = `<span class="log-time">${time}</span><span class="log-tag accent">[${tag}]</span> ${msg}`;
-            logBox.prepend(entry);
-            if(logBox.children.length > 20) logBox.lastChild.remove();
+            addLog(`主體重構：切換至 ${data.name}`, 'STAGE');
         }
 
         function toggleSystem() {
             state.isRunning = !state.isRunning;
-            const btn = document.getElementById('startBtn');
-            btn.textContent = state.isRunning ? "⏸ 停止觀測" : "▶ 啟動觀測儀";
-            btn.classList.toggle('active', state.isRunning);
+            document.getElementById('startBtn').textContent = state.isRunning ? "⏸ 停止觀測" : "▶ 啟動觀測儀";
             document.getElementById('statusTag').textContent = state.isRunning ? "STATUS: OBSERVING" : "STATUS: IDLE";
-            addLog(state.isRunning ? "觀測啟動：正在讀取主體腦波..." : "觀測終止");
         }
 
         function resetSystem() {
             state.buffer = [];
-            addLog("主體緩衝區已清除。資料化過程重置。", "重置");
+            generateFacialFragments(); // 重新生成五官庫
+            addLog("緩衝區與五官庫已重新演算。", "RESET");
         }
 
-        // 核心渲染循環
+        function addLog(msg, tag = 'SYS') {
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.innerHTML = `<span style="color:#666">[${new Date().toLocaleTimeString().split(' ')[0]}]</span> <span class="accent">[${tag}]</span> ${msg}`;
+            logBox.prepend(entry);
+            if(logBox.children.length > 25) logBox.lastChild.remove();
+        }
+
         function loop() {
             if (state.isRunning) {
                 state.frameCount++;
-                
-                // 模擬數據延遲 (非觀測機制)
                 const delayFrames = Math.floor(config.stages[state.currentStage].delay / 16);
-                state.buffer.push({...state.eeg});
+                
+                state.buffer.push({ eeg: {...state.eeg} });
                 if (state.buffer.length > delayFrames + 1) state.buffer.shift();
                 
-                const activeEEG = state.buffer[0] || state.eeg;
+                const activeEEG = state.buffer[0].eeg;
                 render(activeEEG);
                 updateStats();
-                
-                // 隨機日誌 (呼應論文)
-                if (state.frameCount % 240 === 0) {
-                    const stageMsgs = {
-                        1: ["鏡像一致性驗證通過。", "具身反饋穩定。", "現象學連結中..."],
-                        2: ["資料化轉換：主體降維至特徵點。", "正在計算統計合理性。", "非觀測邏輯啟動：略過感官細節。"],
-                        3: ["擬像已吞噬真實。", "發現超真實噪點。", "主體重構：不再依賴原始標記。"]
-                    };
-                    const msg = stageMsgs[state.currentStage][Math.floor(Math.random() * 3)];
-                    addLog(msg, "演算法");
-                }
             }
             requestAnimationFrame(loop);
         }
@@ -308,163 +393,130 @@
             const h = canvas.height;
             const t = performance.now() * 0.001;
 
-            // 基礎背景淡化 (殘影效果體現時間流動)
-            ctx.fillStyle = `rgba(0, 0, 0, ${state.currentStage === 1 ? 0.2 : 0.05})`;
+            ctx.fillStyle = `rgba(0,0,0,${state.currentStage === 1 ? 0.3 : 0.1})`;
             ctx.fillRect(0, 0, w, h);
+
+            // 處理攝影機背景 (階段 1 & 2)
+            if (state.cameraActive && state.currentStage < 3) {
+                ctx.save();
+                if (state.currentStage === 1) {
+                    ctx.translate(w, 0); ctx.scale(-1, 1); // 鏡像
+                    ctx.globalAlpha = 0.6 + Math.sin(t) * 0.1;
+                } else {
+                    ctx.globalAlpha = 0.25;
+                    ctx.filter = 'grayscale(100%) contrast(150%)';
+                }
+                ctx.drawImage(state.video, 0, 0, w, h);
+                ctx.restore();
+            }
 
             ctx.save();
             ctx.translate(w/2, h/2);
 
             if (state.currentStage === 1) {
-                // 階段 1：流動的具身鏡像
-                drawMirror(ctx, eeg, t);
+                drawMirrorWave(eeg, t);
             } else if (state.currentStage === 2) {
-                // 階段 2：資料化的矩陣觀測
-                drawDataObservation(ctx, eeg, t);
-            } else if (state.currentStage === 3) {
-                // 階段 3：五官碎片拼貼 (擬像)
-                drawSimulacrumCollage(ctx, eeg, t);
+                drawObservationGrid(w, h, eeg, t);
+            } else {
+                drawSimulacrumCollage(w, h, eeg, t);
             }
-
             ctx.restore();
         }
 
-        // --- 繪圖子程序 ---
-
-        function drawMirror(ctx, eeg, t) {
-            const color = config.stages[1].color;
-            ctx.strokeStyle = color;
-            ctx.lineWidth = 2;
+        function drawMirrorWave(eeg, t) {
+            ctx.strokeStyle = config.stages[1].color;
+            ctx.lineWidth = 2.5;
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = config.stages[1].color;
             ctx.beginPath();
-            const points = 60 + eeg.alpha * 100;
-            for(let i=0; i <= points; i++) {
-                const angle = (i / points) * Math.PI * 2;
-                const r = 150 + Math.sin(angle * 5 + t) * (eeg.beta * 50);
-                const x = Math.cos(angle) * r;
-                const y = Math.sin(angle) * r;
-                i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+            const pts = 90;
+            for(let i=0; i<=pts; i++){
+                const ang = (i/pts) * Math.PI * 2;
+                const r = 180 + Math.sin(ang * (6 + eeg.gamma*10) + t*2.5) * (40 + eeg.beta*100);
+                const x = Math.cos(ang) * r;
+                const y = Math.sin(ang) * r;
+                i === 0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
             }
             ctx.closePath();
             ctx.stroke();
-            
-            // 輕微的光暈
-            ctx.shadowBlur = 15;
-            ctx.shadowColor = color;
+            ctx.shadowBlur = 0;
         }
 
-        function drawDataObservation(ctx, eeg, t) {
+        function drawObservationGrid(w, h, eeg, t) {
             const color = config.stages[2].color;
             ctx.strokeStyle = color;
-            ctx.fillStyle = color;
-            const size = 300;
-            
-            // 繪製掃描網格 (規訓社會的標尺)
             ctx.lineWidth = 0.5;
-            for(let i = -size; i <= size; i += 40) {
-                ctx.beginPath(); ctx.moveTo(i, -size); ctx.lineTo(i, size); ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(-size, i); ctx.lineTo(size, i); ctx.stroke();
+            const step = 45;
+            // 格柵
+            for(let x=-w/2; x<w/2; x+=step) {
+                ctx.beginPath(); ctx.moveTo(x, -h/2); ctx.lineTo(x, h/2); ctx.stroke();
             }
-
-            // 繪製特徵抓取點
-            const nodes = 8;
-            for(let i=0; i<nodes; i++) {
-                const x = Math.sin(t + i) * size * eeg.theta;
-                const y = Math.cos(t * 0.5 + i) * size * eeg.delta;
-                ctx.beginPath();
-                ctx.arc(x, y, 4, 0, Math.PI*2);
-                ctx.fill();
-                ctx.strokeRect(x-10, y-10, 20, 20);
-                
-                ctx.font = "8px monospace";
-                ctx.fillText(`FEATURE_ID: ${Math.floor(x+y)}`, x+15, y);
+            for(let y=-h/2; y<h/2; y+=step) {
+                ctx.beginPath(); ctx.moveTo(-w/2, y); ctx.lineTo(w/2, y); ctx.stroke();
             }
+            // 特徵點
+            ctx.fillStyle = color;
+            for(let i=0; i<8; i++) {
+                const ox = Math.sin(t*0.7 + i) * 220;
+                const oy = Math.cos(t*0.4 + i) * 220;
+                ctx.strokeRect(ox-20, oy-20, 40, 40);
+                ctx.font = "10px monospace";
+                ctx.fillText(`FEAT_SCAN_${i}: ${(eeg.alpha*100).toFixed(1)}%`, ox+25, oy);
+            }
+            // 橫向掃描線
+            const scanY = (Math.sin(t*2) * 0.5 + 0.5) * h - h/2;
+            ctx.strokeStyle = "rgba(255,255,255,0.4)";
+            ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(-w/2, scanY); ctx.lineTo(w/2, scanY); ctx.stroke();
         }
 
-        /**
-         * 階段 3 核心：擬像重構 (五官拼貼)
-         * 呼應論文：不使用外部照片，而是用 Canvas 繪製「數位化器官」並隨機拼湊
-         */
-        function drawSimulacrumCollage(ctx, eeg, t) {
-            const gridSize = 4;
-            const cellSize = 120;
+        function drawSimulacrumCollage(w, h, eeg, t) {
+            const cols = 5, rows = 4;
+            const cellW = w / cols, cellH = h / rows;
             const color = config.stages[3].color;
 
-            for(let i = -gridSize/2; i < gridSize/2; i++) {
-                for(let j = -gridSize/2; j < gridSize/2; j++) {
-                    // 根據腦波亂數決定該格顯示什麼「擬像器官」
-                    const entropy = Math.random();
-                    const x = i * cellSize + Math.sin(t + i) * 10;
-                    const y = j * cellSize + Math.cos(t + j) * 10;
-
+            for(let i=0; i<cols; i++) {
+                for(let j=0; j<rows; j++) {
+                    const x = (i - cols/2 + 0.5) * cellW;
+                    const y = (j - rows/2 + 0.5) * cellH;
+                    
                     ctx.save();
                     ctx.translate(x, y);
-                    ctx.rotate(Math.sin(t + i*j) * eeg.gamma);
                     
-                    if (entropy > 0.7) {
-                        drawFragmentEye(ctx, color, eeg);
-                    } else if (entropy > 0.4) {
-                        drawFragmentNose(ctx, color, eeg);
-                    } else {
-                        drawFragmentMouth(ctx, color, eeg);
-                    }
+                    // 隨機選擇預生成的五官片段
+                    const seed = Math.floor(Math.abs(Math.sin(i*j + Math.floor(t*0.5)) * state.facialDatabase.length));
+                    const fragment = state.facialDatabase[seed % state.facialDatabase.length];
                     
-                    // 邊框 (資料碎片的邊界)
-                    ctx.strokeStyle = `rgba(255, 0, 255, ${0.1 + eeg.beta * 0.4})`;
-                    ctx.strokeRect(-cellSize/2, -cellSize/2, cellSize, cellSize);
+                    ctx.rotate(Math.sin(t + i*j) * 0.3 * eeg.gamma);
+                    ctx.scale(0.8 + eeg.alpha*0.4, 0.8 + eeg.alpha*0.4);
+                    
+                    // 繪製碎片
+                    ctx.drawImage(fragment, -60, -60, 110, 110);
+                    
+                    // 數位邊界線
+                    ctx.strokeStyle = `rgba(255, 0, 255, ${0.1 + Math.random()*0.3})`;
+                    ctx.lineWidth = 1;
+                    ctx.strokeRect(-cellW/2 + 5, -cellH/2 + 5, cellW-10, cellH-10);
+                    
                     ctx.restore();
                 }
             }
         }
 
-        // 器官碎片繪製 (抽象化、統計化的器官)
-        function drawFragmentEye(ctx, color, eeg) {
-            ctx.strokeStyle = color;
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.ellipse(0, 0, 30, 15 * eeg.alpha, 0, 0, Math.PI * 2);
-            ctx.stroke();
-            ctx.fillStyle = "#fff";
-            ctx.beginPath();
-            ctx.arc(Math.sin(performance.now()*0.01)*5, 0, 8, 0, Math.PI*2);
-            ctx.fill();
-        }
-
-        function drawFragmentNose(ctx, color, eeg) {
-            ctx.strokeStyle = color;
-            ctx.beginPath();
-            ctx.moveTo(-10, -20);
-            ctx.lineTo(0, 10);
-            ctx.lineTo(10, 10);
-            ctx.stroke();
-        }
-
-        function drawFragmentMouth(ctx, color, eeg) {
-            ctx.fillStyle = color;
-            ctx.beginPath();
-            ctx.ellipse(0, 10, 25, 10 * eeg.theta, 0, 0, Math.PI);
-            ctx.fill();
-        }
-
         function updateStats() {
             const s = state.currentStage;
-            document.getElementById('statAlignment').textContent = `${Math.floor(100 - s * 30 + Math.random()*10)}%`;
-            document.getElementById('statEntropy').textContent = (config.stages[s].entropy + Math.random()*0.1).toFixed(2);
-            document.getElementById('statSync').textContent = `${Math.floor(100 / s)}%`;
+            document.getElementById('statAlignment').textContent = `${Math.floor(100 - s * 28)}%`;
+            document.getElementById('statEntropy').textContent = (s * 0.35 + Math.random()*0.05).toFixed(2);
+            document.getElementById('statSync').textContent = `${Math.floor(100/s)}%`;
         }
 
         function resize() {
-            canvas.width = document.getElementById('viewport').clientWidth;
-            canvas.height = document.getElementById('viewport').clientHeight;
+            const vp = document.getElementById('viewport');
+            canvas.width = vp.clientWidth;
+            canvas.height = vp.clientHeight;
         }
 
-        window.addEventListener('resize', resize);
-        window.onload = () => {
-            initUI();
-            resize();
-            setStage(1);
-            loop();
-        };
-
+        window.onload = init;
     </script>
 </body>
 </html>
