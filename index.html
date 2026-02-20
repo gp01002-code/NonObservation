@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>自我觀測儀 | 拼貼實驗版 v3 - 逼真五官</title>
+    <style>
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: rgba(15, 15, 25, 0.9);
+            --accent-1: #00d4ff;
+            --accent-2: #00ff88;
+            --accent-3: #ff00ff;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Helvetica Neue', 'Segoe UI', 'Microsoft JhengHei', sans-serif;
+            background: linear-gradient(135deg, var(--bg-primary) 0%, #1a1a2e 100%);
+            color: #ffffff;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 340px 1fr 340px;
+            height: 100vh;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .panel {
+            background: var(--bg-secondary);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 20px;
+            overflow-y: auto;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            font-size: 1.1rem;
+            color: var(--accent-1);
+            letter-spacing: 2px;
+            margin-bottom: 18px;
+            text-transform: uppercase;
+            border-bottom: 2px solid var(--accent-1);
+            padding-bottom: 8px;
+        }
+
+        h2 {
+            font-size: 0.85rem;
+            color: #888;
+            margin: 20px 0 12px 0;
+            text-transform: uppercase;
+        }
+
+        .concept-box {
+            background: linear-gradient(135deg, rgba(255, 100, 255, 0.15) 0%, rgba(255, 100, 255, 0.05) 100%);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 100, 255, 0.3);
+        }
+
+        .concept-box h3 {
+            font-size: 0.9rem;
+            color: #f0f;
+            margin-bottom: 10px;
+        }
+
+        .concept-box p {
+            font-size: 0.75rem;
+            color: #bbb;
+            line-height: 1.6;
+        }
+
+        .stage-selector {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.15) 0%, rgba(0, 212, 255, 0.05) 100%);
+            padding: 18px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border: 1px solid var(--accent-1);
+        }
+
+        .stage-info {
+            font-size: 1rem;
+            font-weight: bold;
+            color: var(--accent-1);
+            margin-bottom: 12px;
+            text-align: center;
+            text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+        }
+
+        .stage-desc {
+            font-size: 0.75rem;
+            color: #bbb;
+            line-height: 1.5;
+            text-align: center;
+        }
+
+        .camera-control {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .camera-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            font-size: 0.85rem;
+        }
+
+        .camera-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ff4757;
+            animation: blink 2s infinite;
+        }
+
+        .camera-indicator.active {
+            background: var(--accent-2);
+            box-shadow: 0 0 10px var(--accent-2);
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .control-group {
+            margin-bottom: 18px;
+        }
+
+        .label-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            margin-bottom: 8px;
+        }
+
+        .val-num {
+            color: var(--accent-1);
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            appearance: none;
+            background: linear-gradient(90deg, rgba(0, 212, 255, 0.2), rgba(0, 212, 255, 0.5));
+            outline: none;
+            margin: 8px 0;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--accent-1);
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+        }
+
+        .desc-text {
+            font-size: 0.7rem;
+            color: #666;
+            line-height: 1.3;
+            margin-top: 4px;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            margin: 8px 0;
+            background: transparent;
+            border: 2px solid var(--accent-1);
+            border-radius: 8px;
+            color: var(--accent-1);
+            font-size: 0.85rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+        }
+
+        button:hover {
+            background: var(--accent-1);
+            color: #000;
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+        }
+
+        button.active {
+            background: var(--accent-1);
+            color: #000;
+        }
+
+        .canvas-container {
+            position: relative;
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 0 50px rgba(0, 212, 255, 0.2);
+            border: 2px solid rgba(0, 212, 255, 0.3);
+        }
+
+        #mainCanvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        #videoElement {
+            display: none;
+        }
+
+        .overlay {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .status-line {
+            background: rgba(0, 0, 0, 0.9);
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            border-left: 3px solid var(--accent-1);
+        }
+
+        .param-display {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 12px;
+            border-radius: 8px;
+            margin: 12px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.75rem;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+        }
+
+        .param-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 6px 0;
+            padding: 6px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .log-box {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 8px;
+            padding: 12px;
+            height: 160px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.7rem;
+            line-height: 1.6;
+            border: 1px solid rgba(0, 212, 255, 0.1);
+        }
+
+        .log-entry {
+            margin-bottom: 8px;
+            padding: 6px;
+            border-left: 2px solid rgba(0, 212, 255, 0.3);
+            padding-left: 10px;
+            opacity: 0;
+            animation: fadeIn 0.5s forwards;
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
+        .stage-1 { --accent-1: #00d4ff; }
+        .stage-2 { --accent-1: #00ff88; }
+        .stage-3 { --accent-1: #ff00ff; }
+
+        .badge {
+            display: inline-block;
+            background: rgba(0, 255, 136, 0.2);
+            border: 1px solid var(--accent-2);
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            color: var(--accent-2);
+            margin-left: 5px;
+        }
+    </style>
+</head>
+<body class="stage-1">
+    <div class="container">
+        <!-- 左側控制 -->
+        <div class="panel">
+            <h1>⚡ 拼貼實驗</h1>
+
+            <div class="concept-box">
+                <h3>💡 v3 改進</h3>
+                <p>
+                    生成 30 張<strong>高變化度</strong>的五官：不同眼型、鼻型、嘴型，添加眉毛、陰影、高光
+                </p>
+            </div>
+
+            <div class="stage-selector">
+                <div class="stage-info" id="stageTitle">階段 1: 掃描收集</div>
+                <input type="range" id="stageSlider" min="1" max="3" step="1" value="1">
+                <p class="stage-desc" id="stageDesc">AI 正在掃描並收集特徵</p>
+            </div>
+
+            <div class="camera-control">
+                <div class="camera-status">
+                    <div class="camera-indicator" id="cameraIndicator"></div>
+                    <span id="cameraStatusText">攝影機未啟動</span>
+                </div>
+                <button style="border-color: var(--accent-2); color: var(--accent-2);" id="cameraBtn">📷 啟動攝影機</button>
+            </div>
+
+            <h2>拼貼參數</h2>
+            <div class="control-group">
+                <div class="label-row">
+                    <span>背景透明度</span>
+                    <span class="val-num" id="bgOpacityValue">20%</span>
+                </div>
+                <input type="range" id="bgOpacitySlider" min="0" max="60" value="20">
+                <p class="desc-text">真實影像在背景的可見程度</p>
+            </div>
+
+            <div class="control-group">
+                <div class="label-row">
+                    <span>拼貼密度</span>
+                    <span class="val-num" id="densityValue">16</span>
+                </div>
+                <input type="range" id="densitySlider" min="10" max="35" value="16">
+                <p class="desc-text">拼貼碎片的大小</p>
+            </div>
+
+            <div class="control-group">
+                <div class="label-row">
+                    <span>色彩變化速度</span>
+                    <span class="val-num" id="colorSpeedValue">1.2</span>
+                </div>
+                <input type="range" id="colorSpeedSlider" min="0" max="30" value="12">
+                <p class="desc-text">階段2 色彩變化的速度</p>
+            </div>
+
+            <h2>系統控制</h2>
+            <button id="toggleBtn">▶ 啟動拼貼</button>
+            <button id="regenBtn" style="border-color: var(--accent-3); color: var(--accent-3);">🔄 重新生成五官庫</button>
+            <button id="resetBtn" style="border-color: #ff4757; color: #ff4757;">⟳ 重置</button>
+        </div>
+
+        <!-- 中央畫布 -->
+        <div class="panel canvas-container">
+            <div class="overlay">
+                <div class="status-line">
+                    <div>模式: <span id="modeDisplay" style="color: var(--accent-1);">掃描模式</span></div>
+                    <div>狀態: <span id="statusDisplay">待機</span></div>
+                </div>
+            </div>
+            <canvas id="mainCanvas"></canvas>
+            <video id="videoElement" autoplay playsinline></video>
+        </div>
+
+        <!-- 右側資訊 -->
+        <div class="panel">
+            <h1>📊 拼貼分析</h1>
+
+            <h2>五官資料庫 <span class="badge">v3</span></h2>
+            <div class="param-display">
+                <div class="param-row">
+                    <span>臉部資料庫:</span>
+                    <span class="val-num" id="dbFaces">30 張</span>
+                </div>
+                <div class="param-row">
+                    <span>眼型變化:</span>
+                    <span class="val-num">6 種</span>
+                </div>
+                <div class="param-row">
+                    <span>鼻型變化:</span>
+                    <span class="val-num">5 種</span>
+                </div>
+                <div class="param-row">
+                    <span>嘴型變化:</span>
+                    <span class="val-num">6 種</span>
+                </div>
+            </div>
+
+            <h2>系統日誌</h2>
+            <div class="log-box" id="logBox">
+                <div class="log-entry">
+                    <span style="color: #f0f;">[v3]</span>
+                    <span style="color: #aaa;"> 逼真五官生成系統</span>
+                </div>
+                <div class="log-entry">
+                    <span style="color: #0f8;">[改進]</span>
+                    <span style="color: #aaa;"> 30張高變化度五官</span>
+                </div>
+            </div>
+
+            <h2>五官變化類型</h2>
+            <p class="desc-text" style="color: #888; line-height: 1.6; margin-top: 10px;">
+                <strong style="color: #0df;">眼睛（6種）：</strong><br>
+                單眼皮、雙眼皮、丹鳳眼、杏眼、圓眼、下垂眼<br><br>
+                
+                <strong style="color: #0f8;">鼻子（5種）：</strong><br>
+                高挺、扁平、寬鼻、窄鼻、鷹鉤鼻<br><br>
+                
+                <strong style="color: #f0f;">嘴巴（6種）：</strong><br>
+                微笑、抿嘴、厚唇、薄唇、嘟嘴、開口
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // ==================== 全域狀態 ====================
+        const state = {
+            isRunning: false,
+            currentStage: 1,
+            cameraActive: false,
+            videoStream: null,
+            bgOpacity: 0.2,
+            density: 16,
+            colorSpeed: 1.2,
+            scanProgress: 0,
+            fragmentCount: 0,
+            facialDatabase: [],
+            backgroundDatabase: []
+        };
+
+        const CONFIG = {
+            stages: {
+                1: { 
+                    title: "階段 1: 掃描收集",
+                    desc: "AI 正在掃描並收集特徵",
+                    mode: "掃描模式"
+                },
+                2: { 
+                    title: "階段 2: 色彩重詮釋",
+                    desc: "色彩持續變化，AI 不斷重新理解",
+                    mode: "分析模式"
+                },
+                3: { 
+                    title: "階段 3: 逼真五官拼貼",
+                    desc: "30張高變化度五官資料庫",
+                    mode: "拼貼模式"
+                }
+            }
+        };
+
+        // ==================== DOM 元素 ====================
+        const canvas = document.getElementById('mainCanvas');
+        const ctx = canvas.getContext('2d');
+        const video = document.getElementById('videoElement');
+        const logBox = document.getElementById('logBox');
+
+        const offscreenCanvas = document.createElement('canvas');
+        const offscreenCtx = offscreenCanvas.getContext('2d');
+
+        // ==================== 初始化 ====================
+        function init() {
+            resizeCanvas();
+            setupControls();
+            generateFaceDatabase();
+            
+            window.addEventListener('resize', resizeCanvas);
+            
+            addLog('拼貼實驗 v3 已啟動', 'SYSTEM');
+            
+            drawIdle();
+            requestAnimationFrame(mainLoop);
+        }
+
+        function resizeCanvas() {
+            const parent = canvas.parentElement;
+            canvas.width = parent.clientWidth;
+            canvas.height = parent.clientHeight;
+            
+            offscreenCanvas.width = 640;
+            offscreenCanvas.height = 480;
+        }
+
+        function setupControls() {
+            document.getElementById('stageSlider').addEventListener('input', (e) => {
+                changeStage(parseInt(e.target.value));
+            });
+
+            document.getElementById('bgOpacitySlider').addEventListener('input', (e) => {
+                state.bgOpacity = e.target.value / 100;
+                document.getElementById('bgOpacityValue').textContent = e.target.value + '%';
+            });
+
+            document.getElementById('densitySlider').addEventListener('input', (e) => {
+                state.density = parseInt(e.target.value);
+                document.getElementById('densityValue').textContent = e.target.value;
+            });
+
+            document.getElementById('colorSpeedSlider').addEventListener('input', (e) => {
+                state.colorSpeed = e.target.value / 10;
+                document.getElementById('colorSpeedValue').textContent = (e.target.value / 10).toFixed(1);
+            });
+
+            document.getElementById('cameraBtn').addEventListener('click', toggleCamera);
+            document.getElementById('toggleBtn').addEventListener('click', toggleSystem);
+            document.getElementById('regenBtn').addEventListener('click', () => {
+                generateFaceDatabase();
+                addLog('五官資料庫已重新生成', 'DATABASE');
+            });
+            document.getElementById('resetBtn').addEventListener('click', resetSystem);
+        }
+
+        function changeStage(stage) {
+            state.currentStage = stage;
+            const config = CONFIG.stages[stage];
+            
+            document.body.className = `stage-${stage}`;
+            document.getElementById('stageTitle').textContent = config.title;
+            document.getElementById('stageDesc').textContent = config.desc;
+            document.getElementById('modeDisplay').textContent = config.mode;
+            
+            addLog(`切換至 ${config.title}`, 'STAGE');
+        }
+
+        // ==================== 生成逼真五官資料庫 ====================
+        function generateFaceDatabase() {
+            state.facialDatabase = [];
+            
+            // 30張高變化度的臉部
+            const eyeTypes = ['single', 'double', 'almond', 'round', 'hooded', 'downturned'];
+            const noseTypes = ['high', 'flat', 'wide', 'narrow', 'aquiline'];
+            const mouthTypes = ['smile', 'closed', 'thick', 'thin', 'pout', 'open'];
+            
+            for (let i = 0; i < 30; i++) {
+                const faceCanvas = document.createElement('canvas');
+                faceCanvas.width = 150;
+                faceCanvas.height = 150;
+                const faceCtx = faceCanvas.getContext('2d');
+                
+                // 膚色（更多變化）
+                const skinHue = 20 + Math.random() * 30;
+                const skinSat = 35 + Math.random() * 35;
+                const skinLight = 50 + Math.random() * 25;
+                faceCtx.fillStyle = `hsl(${skinHue}, ${skinSat}%, ${skinLight}%)`;
+                faceCtx.fillRect(0, 0, 150, 150);
+                
+                // 添加皮膚質感
+                for (let j = 0; j < 3000; j++) {
+                    const x = Math.random() * 150;
+                    const y = Math.random() * 150;
+                    const alpha = Math.random() * 0.05;
+                    faceCtx.fillStyle = `rgba(0, 0, 0, ${alpha})`;
+                    faceCtx.fillRect(x, y, 1, 1);
+                }
+                
+                // 選擇隨機五官類型
+                const eyeType = eyeTypes[i % eyeTypes.length];
+                const noseType = noseTypes[Math.floor(i / 6) % noseTypes.length];
+                const mouthType = mouthTypes[Math.floor(i / 5) % mouthTypes.length];
+                
+                // 繪製眉毛
+                drawEyebrow(faceCtx, 40, 45, eyeType);
+                drawEyebrow(faceCtx, 110, 45, eyeType);
+                
+                // 繪製眼睛
+                drawEye(faceCtx, 45, 60, eyeType);
+                drawEye(faceCtx, 105, 60, eyeType);
+                
+                // 繪製鼻子
+                drawNose(faceCtx, 75, 85, noseType);
+                
+                // 繪製嘴巴
+                drawMouth(faceCtx, 75, 110, mouthType);
+                
+                // 添加臉部陰影
+                addFacialShading(faceCtx);
+                
+                state.facialDatabase.push(faceCanvas);
+            }
+            
+            // 背景資料庫
+            state.backgroundDatabase = [];
+            for (let i = 0; i < 15; i++) {
+                const bgCanvas = document.createElement('canvas');
+                bgCanvas.width = 100;
+                bgCanvas.height = 100;
+                const bgCtx = bgCanvas.getContext('2d');
+                
+                const hue = Math.random() * 360;
+                bgCtx.fillStyle = `hsl(${hue}, ${30 + Math.random() * 40}%, ${40 + Math.random() * 30}%)`;
+                bgCtx.fillRect(0, 0, 100, 100);
+                
+                // 紋理
+                const imageData = bgCtx.getImageData(0, 0, 100, 100);
+                const data = imageData.data;
+                for (let j = 0; j < data.length; j += 4) {
+                    const noise = (Math.random() - 0.5) * 50;
+                    data[j] += noise;
+                    data[j + 1] += noise;
+                    data[j + 2] += noise;
+                }
+                bgCtx.putImageData(imageData, 0, 0);
+                
+                state.backgroundDatabase.push(bgCanvas);
+            }
+            
+            addLog('生成30張高變化度五官', 'DATABASE');
+        }
+
+        // 繪製眉毛
+        function drawEyebrow(ctx, x, y, type) {
+            ctx.strokeStyle = 'rgba(40, 20, 10, 0.8)';
+            ctx.lineWidth = 2.5;
+            ctx.lineCap = 'round';
+            
+            ctx.beginPath();
+            if (type === 'double' || type === 'almond') {
+                ctx.moveTo(x - 12, y);
+                ctx.quadraticCurveTo(x, y - 3, x + 12, y);
+            } else {
+                ctx.moveTo(x - 12, y);
+                ctx.quadraticCurveTo(x, y - 2, x + 12, y + 1);
+            }
+            ctx.stroke();
+        }
+
+        // 繪製眼睛（6種變化）
+        function drawEye(ctx, x, y, type) {
+            // 眼白
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+            ctx.beginPath();
+            
+            if (type === 'single') {
+                ctx.ellipse(x, y, 14, 7, 0, 0, Math.PI * 2);
+            } else if (type === 'double') {
+                ctx.ellipse(x, y, 14, 9, 0, 0, Math.PI * 2);
+            } else if (type === 'almond') {
+                ctx.ellipse(x, y, 15, 8, -0.2, 0, Math.PI * 2);
+            } else if (type === 'round') {
+                ctx.arc(x, y, 10, 0, Math.PI * 2);
+            } else if (type === 'hooded') {
+                ctx.ellipse(x, y + 2, 13, 7, 0, 0, Math.PI * 2);
+            } else {
+                ctx.ellipse(x, y, 13, 8, 0.15, 0, Math.PI * 2);
+            }
+            ctx.fill();
+            
+            // 瞳孔
+            const pupilX = x + (Math.random() - 0.5) * 3;
+            const pupilY = y + (Math.random() - 0.5) * 2;
+            
+            // 虹膜
+            const gradient = ctx.createRadialGradient(pupilX, pupilY, 0, pupilX, pupilY, 6);
+            const irisColor = `hsl(${Math.random() * 40 + 20}, 60%, 40%)`;
+            gradient.addColorStop(0, irisColor);
+            gradient.addColorStop(1, 'rgba(0, 0, 0, 0.6)');
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(pupilX, pupilY, 6, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 瞳孔
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.9)';
+            ctx.beginPath();
+            ctx.arc(pupilX, pupilY, 3.5, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 高光
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+            ctx.beginPath();
+            ctx.arc(pupilX - 1.5, pupilY - 1.5, 1.5, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 眼瞼線
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.6)';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            
+            if (type === 'single') {
+                ctx.ellipse(x, y, 14, 7, 0, 0, Math.PI);
+            } else {
+                ctx.ellipse(x, y, 14, 9, 0, 0, Math.PI);
+            }
+            ctx.stroke();
+        }
+
+        // 繪製鼻子（5種變化）
+        function drawNose(ctx, x, y, type) {
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
+            ctx.lineWidth = 2;
+            
+            if (type === 'high') {
+                // 高挺鼻
+                ctx.beginPath();
+                ctx.moveTo(x, y - 15);
+                ctx.lineTo(x, y + 5);
+                ctx.stroke();
+                
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+                ctx.beginPath();
+                ctx.ellipse(x - 3, y + 5, 3, 4, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.ellipse(x + 3, y + 5, 3, 4, 0, 0, Math.PI * 2);
+                ctx.fill();
+            } else if (type === 'flat') {
+                // 扁平鼻
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.12)';
+                ctx.beginPath();
+                ctx.ellipse(x - 4, y + 2, 4, 5, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.ellipse(x + 4, y + 2, 4, 5, 0, 0, Math.PI * 2);
+                ctx.fill();
+            } else if (type === 'wide') {
+                // 寬鼻
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+                ctx.beginPath();
+                ctx.ellipse(x - 5, y + 3, 4, 5, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.ellipse(x + 5, y + 3, 4, 5, 0, 0, Math.PI * 2);
+                ctx.fill();
+            } else if (type === 'narrow') {
+                // 窄鼻
+                ctx.beginPath();
+                ctx.moveTo(x, y - 12);
+                ctx.lineTo(x, y + 3);
+                ctx.stroke();
+                
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.13)';
+                ctx.beginPath();
+                ctx.ellipse(x - 2, y + 3, 2, 3, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.ellipse(x + 2, y + 3, 2, 3, 0, 0, Math.PI * 2);
+                ctx.fill();
+            } else {
+                // 鷹鉤鼻
+                ctx.beginPath();
+                ctx.moveTo(x, y - 15);
+                ctx.quadraticCurveTo(x + 2, y - 5, x, y + 5);
+                ctx.stroke();
+                
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.14)';
+                ctx.beginPath();
+                ctx.ellipse(x - 3, y + 5, 3, 4, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.ellipse(x + 3, y + 5, 3, 4, 0, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        // 繪製嘴巴（6種變化）
+        function drawMouth(ctx, x, y, type) {
+            ctx.lineWidth = 2.5;
+            
+            if (type === 'smile') {
+                // 微笑
+                ctx.strokeStyle = 'rgba(180, 80, 80, 0.8)';
+                ctx.beginPath();
+                ctx.arc(x, y - 5, 22, 0.2, Math.PI - 0.2);
+                ctx.stroke();
+            } else if (type === 'closed') {
+                // 抿嘴
+                ctx.strokeStyle = 'rgba(160, 70, 70, 0.75)';
+                ctx.beginPath();
+                ctx.moveTo(x - 18, y);
+                ctx.lineTo(x + 18, y);
+                ctx.stroke();
+            } else if (type === 'thick') {
+                // 厚唇
+                ctx.fillStyle = 'rgba(180, 80, 80, 0.7)';
+                ctx.beginPath();
+                ctx.ellipse(x, y - 2, 20, 4, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.ellipse(x, y + 4, 20, 5, 0, 0, Math.PI * 2);
+                ctx.fill();
+            } else if (type === 'thin') {
+                // 薄唇
+                ctx.strokeStyle = 'rgba(170, 75, 75, 0.75)';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(x, y, 18, 0.3, Math.PI - 0.3);
+                ctx.stroke();
+            } else if (type === 'pout') {
+                // 嘟嘴
+                ctx.fillStyle = 'rgba(190, 85, 85, 0.75)';
+                ctx.beginPath();
+                ctx.ellipse(x, y, 15, 10, 0, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.strokeStyle = 'rgba(140, 60, 60, 0.6)';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.moveTo(x - 10, y);
+                ctx.lineTo(x + 10, y);
+                ctx.stroke();
+            } else {
+                // 開口
+                ctx.fillStyle = 'rgba(80, 40, 40, 0.8)';
+                ctx.beginPath();
+                ctx.ellipse(x, y + 2, 12, 8, 0, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.strokeStyle = 'rgba(180, 80, 80, 0.8)';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(x, y - 3, 18, 0.2, Math.PI - 0.2);
+                ctx.stroke();
+            }
+        }
+
+        // 添加臉部陰影
+        function addFacialShading(ctx) {
+            // 左側陰影
+            const leftGrad = ctx.createLinearGradient(0, 0, 50, 0);
+            leftGrad.addColorStop(0, 'rgba(0, 0, 0, 0.08)');
+            leftGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            ctx.fillStyle = leftGrad;
+            ctx.fillRect(0, 0, 50, 150);
+            
+            // 右側陰影
+            const rightGrad = ctx.createLinearGradient(100, 0, 150, 0);
+            rightGrad.addColorStop(0, 'rgba(0, 0, 0, 0)');
+            rightGrad.addColorStop(1, 'rgba(0, 0, 0, 0.08)');
+            ctx.fillStyle = rightGrad;
+            ctx.fillRect(100, 0, 50, 150);
+            
+            // 頂部高光
+            const topGrad = ctx.createLinearGradient(0, 0, 0, 40);
+            topGrad.addColorStop(0, 'rgba(255, 255, 255, 0.05)');
+            topGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+            ctx.fillStyle = topGrad;
+            ctx.fillRect(0, 0, 150, 40);
+        }
+
+        // ==================== 攝影機控制 ====================
+        async function toggleCamera() {
+            if (!state.cameraActive) {
+                try {
+                    state.videoStream = await navigator.mediaDevices.getUserMedia({
+                        video: { 
+                            width: { ideal: 640 },
+                            height: { ideal: 480 },
+                            facingMode: 'user'
+                        }
+                    });
+                    
+                    video.srcObject = state.videoStream;
+                    state.cameraActive = true;
+                    
+                    document.getElementById('cameraBtn').textContent = '📷 關閉攝影機';
+                    document.getElementById('cameraIndicator').classList.add('active');
+                    document.getElementById('cameraStatusText').textContent = '運作中';
+                    
+                    addLog('攝影機已啟動', 'CAMERA');
+                    
+                } catch (error) {
+                    addLog('攝影機啟動失敗', 'ERROR');
+                }
+            } else {
+                stopCamera();
+            }
+        }
+
+        function stopCamera() {
+            if (state.videoStream) {
+                state.videoStream.getTracks().forEach(track => track.stop());
+                video.srcObject = null;
+                state.videoStream = null;
+            }
+            state.cameraActive = false;
+            document.getElementById('cameraBtn').textContent = '📷 啟動攝影機';
+            document.getElementById('cameraIndicator').classList.remove('active');
+            document.getElementById('cameraStatusText').textContent = '未啟動';
+        }
+
+        function toggleSystem() {
+            state.isRunning = !state.isRunning;
+            const btn = document.getElementById('toggleBtn');
+            
+            if (state.isRunning) {
+                btn.textContent = '⏸ 停止拼貼';
+                btn.classList.add('active');
+                document.getElementById('statusDisplay').textContent = '運作中';
+                addLog('開始拼貼實驗', 'SYSTEM');
+            } else {
+                btn.textContent = '▶ 啟動拼貼';
+                btn.classList.remove('active');
+                document.getElementById('statusDisplay').textContent = '已暫停';
+            }
+        }
+
+        function resetSystem() {
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            state.scanProgress = 0;
+            state.fragmentCount = 0;
+            drawIdle();
+            addLog('系統已重置', 'SYSTEM');
+        }
+
+        // ==================== 主循環 ====================
+        function mainLoop() {
+            if (state.isRunning && state.cameraActive && video.readyState === video.HAVE_ENOUGH_DATA) {
+                processFrame();
+            }
+            
+            requestAnimationFrame(mainLoop);
+        }
+
+        function processFrame() {
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.globalAlpha = state.bgOpacity;
+            ctx.save();
+            ctx.scale(-1, 1);
+            ctx.drawImage(video, -canvas.width, 0, canvas.width, canvas.height);
+            ctx.restore();
+            ctx.globalAlpha = 1;
+            
+            if (state.currentStage === 1) {
+                drawStage1();
+            } else if (state.currentStage === 2) {
+                drawStage2();
+            } else {
+                drawStage3();
+            }
+        }
+
+        // ==================== 階段 1：掃描線 ====================
+        function drawStage1() {
+            state.scanProgress = (state.scanProgress + 2) % canvas.height;
+            
+            ctx.strokeStyle = 'rgba(0, 212, 255, 0.8)';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(0, state.scanProgress);
+            ctx.lineTo(canvas.width, state.scanProgress);
+            ctx.stroke();
+            
+            const gradient = ctx.createLinearGradient(0, state.scanProgress - 50, 0, state.scanProgress + 50);
+            gradient.addColorStop(0, 'rgba(0, 212, 255, 0)');
+            gradient.addColorStop(0.5, 'rgba(0, 212, 255, 0.2)');
+            gradient.addColorStop(1, 'rgba(0, 212, 255, 0)');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, state.scanProgress - 50, canvas.width, 100);
+            
+            if (Math.random() > 0.7) {
+                const x = Math.random() * canvas.width;
+                const y = state.scanProgress + (Math.random() - 0.5) * 30;
+                
+                ctx.fillStyle = 'rgba(0, 255, 136, 0.6)';
+                ctx.beginPath();
+                ctx.arc(x, y, 4, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            ctx.fillStyle = '#0df';
+            ctx.font = 'bold 12px monospace';
+            ctx.fillText('SCANNING...', 15, 30);
+        }
+
+        // ==================== 階段 2：動態色彩 ====================
+        function drawStage2() {
+            offscreenCtx.save();
+            offscreenCtx.scale(-1, 1);
+            offscreenCtx.drawImage(video, -offscreenCanvas.width, 0, offscreenCanvas.width, offscreenCanvas.height);
+            offscreenCtx.restore();
+            
+            const imageData = offscreenCtx.getImageData(0, 0, offscreenCanvas.width, offscreenCanvas.height);
+            const data = imageData.data;
+            
+            const time = performance.now() * 0.001 * state.colorSpeed;
+            const pixelSize = state.density;
+            const cols = Math.ceil(offscreenCanvas.width / pixelSize);
+            const rows = Math.ceil(offscreenCanvas.height / pixelSize);
+            
+            for (let y = 0; y < rows; y++) {
+                for (let x = 0; x < cols; x++) {
+                    let r = 0, g = 0, b = 0, count = 0;
+                    
+                    for (let py = 0; py < pixelSize; py++) {
+                        for (let px = 0; px < pixelSize; px++) {
+                            const sourceX = x * pixelSize + px;
+                            const sourceY = y * pixelSize + py;
+                            
+                            if (sourceX < offscreenCanvas.width && sourceY < offscreenCanvas.height) {
+                                const index = (sourceY * offscreenCanvas.width + sourceX) * 4;
+                                r += data[index];
+                                g += data[index + 1];
+                                b += data[index + 2];
+                                count++;
+                            }
+                        }
+                    }
+                    
+                    if (count > 0) {
+                        r = Math.floor(r / count);
+                        g = Math.floor(g / count);
+                        b = Math.floor(b / count);
+                        
+                        const hsl = rgbToHsl(r, g, b);
+                        hsl.h = (hsl.h + time * 50 + x * 10 + y * 10) % 360;
+                        hsl.s = Math.max(0, Math.min(100, hsl.s + Math.sin(time + x * 0.1) * 30));
+                        hsl.l = Math.max(0, Math.min(100, hsl.l + Math.cos(time + y * 0.1) * 20));
+                        
+                        const drawX = (x * pixelSize) * (canvas.width / offscreenCanvas.width);
+                        const drawY = (y * pixelSize) * (canvas.height / offscreenCanvas.height);
+                        const drawSize = pixelSize * (canvas.width / offscreenCanvas.width);
+                        
+                        ctx.fillStyle = `hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`;
+                        ctx.fillRect(drawX, drawY, drawSize, drawSize);
+                        
+                        ctx.strokeStyle = 'rgba(0, 255, 136, 0.3)';
+                        ctx.lineWidth = 1;
+                        ctx.strokeRect(drawX, drawY, drawSize, drawSize);
+                    }
+                }
+            }
+            
+            ctx.fillStyle = '#0f8';
+            ctx.font = 'bold 12px monospace';
+            ctx.fillText('COLOR SHIFTING...', 15, 30);
+        }
+
+        function rgbToHsl(r, g, b) {
+            r /= 255; g /= 255; b /= 255;
+            const max = Math.max(r, g, b);
+            const min = Math.min(r, g, b);
+            let h, s, l = (max + min) / 2;
+            
+            if (max === min) {
+                h = s = 0;
+            } else {
+                const d = max - min;
+                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                switch (max) {
+                    case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+                    case g: h = ((b - r) / d + 2) / 6; break;
+                    case b: h = ((r - g) / d + 4) / 6; break;
+                }
+            }
+            
+            return { h: h * 360, s: s * 100, l: l * 100 };
+        }
+
+        // ==================== 階段 3：逼真五官拼貼 ====================
+        function drawStage3() {
+            offscreenCtx.save();
+            offscreenCtx.scale(-1, 1);
+            offscreenCtx.drawImage(video, -offscreenCanvas.width, 0, offscreenCanvas.width, offscreenCanvas.height);
+            offscreenCtx.restore();
+            
+            const pieceSize = state.density * 1.8;
+            const cols = Math.ceil(offscreenCanvas.width / pieceSize);
+            const rows = Math.ceil(offscreenCanvas.height / pieceSize);
+            
+            const faceCenterX = offscreenCanvas.width / 2;
+            const faceCenterY = offscreenCanvas.height / 2;
+            const faceRadiusX = offscreenCanvas.width * 0.28;
+            const faceRadiusY = offscreenCanvas.height * 0.35;
+            
+            for (let y = 0; y < rows; y++) {
+                for (let x = 0; x < cols; x++) {
+                    const blockCenterX = x * pieceSize + pieceSize / 2;
+                    const blockCenterY = y * pieceSize + pieceSize / 2;
+                    
+                    const dx = (blockCenterX - faceCenterX) / faceRadiusX;
+                    const dy = (blockCenterY - faceCenterY) / faceRadiusY;
+                    const inFaceRegion = (dx * dx + dy * dy) < 1;
+                    
+                    const drawX = (x * pieceSize) * (canvas.width / offscreenCanvas.width);
+                    const drawY = (y * pieceSize) * (canvas.height / offscreenCanvas.height);
+                    const drawSize = pieceSize * (canvas.width / offscreenCanvas.width);
+                    
+                    if (inFaceRegion) {
+                        const faceIndex = Math.floor(Math.random() * state.facialDatabase.length);
+                        const selectedFace = state.facialDatabase[faceIndex];
+                        
+                        const cropSize = 60;
+                        const cropX = Math.random() * (selectedFace.width - cropSize);
+                        const cropY = Math.random() * (selectedFace.height - cropSize);
+                        
+                        ctx.drawImage(
+                            selectedFace,
+                            cropX, cropY, cropSize, cropSize,
+                            drawX, drawY, drawSize, drawSize
+                        );
+                        
+                        ctx.strokeStyle = 'rgba(255, 0, 255, 0.35)';
+                        ctx.lineWidth = 2;
+                        ctx.strokeRect(drawX, drawY, drawSize, drawSize);
+                    } else {
+                        const bgIndex = Math.floor(Math.random() * state.backgroundDatabase.length);
+                        const selectedBg = state.backgroundDatabase[bgIndex];
+                        
+                        ctx.drawImage(
+                            selectedBg,
+                            0, 0, selectedBg.width, selectedBg.height,
+                            drawX, drawY, drawSize, drawSize
+                        );
+                    }
+                }
+            }
+            
+            ctx.fillStyle = '#f0f';
+            ctx.font = 'bold 14px monospace';
+            ctx.fillText('REALISTIC FACIAL COLLAGE', 15, 30);
+        }
+
+        function drawIdle() {
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            const cx = canvas.width / 2;
+            const cy = canvas.height / 2;
+            
+            ctx.strokeStyle = 'rgba(255, 0, 255, 0.3)';
+            ctx.lineWidth = 2;
+            
+            for (let i = 0; i < 4; i++) {
+                ctx.beginPath();
+                ctx.arc(cx, cy, 60 + i * 30, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+            
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 20px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('拼貼實驗 v3', cx, cy - 20);
+            
+            ctx.font = '13px Arial';
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+            ctx.fillText('30張高變化度逼真五官', cx, cy + 10);
+        }
+
+        function addLog(msg, tag = 'INFO') {
+            const colors = {
+                'SYSTEM': '#09f',
+                'INFO': '#0df',
+                'STAGE': '#f0f',
+                'CAMERA': '#fa0',
+                'DATABASE': '#0f8',
+                'ERROR': '#f44'
+            };
+            
+            const div = document.createElement('div');
+            div.className = 'log-entry';
+            div.innerHTML = `
+                <span style="color: ${colors[tag] || '#aaa'};">[${tag}]</span>
+                <span style="color: #aaa;"> ${msg}</span>
+            `;
+            
+            logBox.insertBefore(div, logBox.firstChild);
+            
+            while (logBox.children.length > 25) {
+                logBox.removeChild(logBox.lastChild);
+            }
+        }
+
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>
