@@ -25,26 +25,25 @@
             align-items: center;
         }
 
-        /* 主容器 - 確保比例與 Image.png 一致 */
         .machine-wrapper {
             position: relative;
             width: 95vw;
             max-width: 1000px;
             aspect-ratio: 1000 / 667; 
-            background-image: url('./Image.png'); 
+            background-color: #1a1a1a;
+            background-image: url('Image.png'); 
             background-size: contain;
             background-position: center;
             background-repeat: no-repeat;
             box-shadow: 0 0 100px rgba(0, 255, 136, 0.1);
         }
 
-        /* 中央螢幕區域 - 精確對位到圖中的螢幕邊框 */
         .screen-container {
             position: absolute;
-            top: 11.8%;   /* 微調高度 */
-            left: 24.5%;  /* 微調左距 */
-            width: 50.8%; /* 微調寬度 */
-            height: 51.5%;/* 微調高度 */
+            top: 13.8%;
+            left: 24.8%;
+            width: 50.4%;
+            height: 49.5%;
             background: var(--crt-bg);
             border-radius: 4px;
             overflow: hidden;
@@ -57,7 +56,6 @@
             display: block;
         }
 
-        /* CRT 效果疊加層 */
         .crt-overlay {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -68,54 +66,54 @@
             z-index: 5;
         }
 
-        /* 互動旋鈕覆蓋層 (與實體旋鈕重疊) */
         .knob-left { 
             position: absolute; 
-            top: 11%; left: 8%; 
-            width: 13%; height: 21%; 
+            top: 10%; left: 7%; 
+            width: 14%; height: 23%; 
             z-index: 10; 
             cursor: ns-resize; 
+            background: transparent;
+            border-radius: 50%;
         }
         .knob-right { 
             position: absolute; 
-            top: 11%; right: 8%; 
-            width: 13%; height: 21%; 
+            top: 10%; right: 7%; 
+            width: 14%; height: 23%; 
             z-index: 10; 
             cursor: ns-resize; 
+            background: transparent;
+            border-radius: 50%;
         }
 
-        /* 底部模式切換區域 (對應 MODE --- ANALOG --- LIVE EEG 文字區) */
         .mode-selector {
             position: absolute;
-            bottom: 18.5%; left: 27%;
-            width: 46%; height: 9%;
+            bottom: 16%; left: 28%;
+            width: 44%; height: 10%;
             z-index: 10;
             display: flex;
+            background: transparent;
         }
-        .mode-target { 
-            flex: 1; 
-            cursor: pointer; 
-        }
+        .mode-target { flex: 1; cursor: pointer; }
 
-        /* 實體小圓按鈕 (下方左右兩個小黑鈕) */
         .btn-cam { 
             position: absolute; 
-            bottom: 30.5%; left: 19.5%; 
-            width: 4%; height: 5.5%; 
+            bottom: 29.5%; left: 19.8%; 
+            width: 3.5%; height: 5.5%; 
             cursor: pointer; 
             z-index: 10; 
+            background: transparent;
             border-radius: 50%; 
         }
         .btn-run { 
             position: absolute; 
-            bottom: 30.5%; right: 19.5%; 
-            width: 4%; height: 5.5%; 
+            bottom: 29.5%; right: 19.8%; 
+            width: 3.5%; height: 5.5%; 
             cursor: pointer; 
             z-index: 10; 
+            background: transparent;
             border-radius: 50%; 
         }
 
-        /* 指示燈 (對應圖中左右兩個紅色 LED 小點) */
         .light {
             position: absolute;
             width: 8px; height: 8px;
@@ -123,12 +121,11 @@
             transition: all 0.3s;
             background: #200;
         }
-        .light-left { bottom: 22.8%; left: 28.5%; }
-        .light-right { bottom: 22.8%; right: 28.5%; }
+        .light-left { bottom: 21.8%; left: 28.5%; }
+        .light-right { bottom: 21.8%; right: 28.5%; }
         .light.active-red { background: #f00; box-shadow: 0 0 12px #f00; }
         .light.active-green { background: #0f8; box-shadow: 0 0 12px #0f8; }
 
-        /* 螢幕 UI 文字內容 */
         .ui-text {
             position: absolute;
             padding: 12px;
@@ -143,7 +140,6 @@
 
         #videoElement { display: none; }
 
-        /* 提示氣泡 */
         .tooltip {
             position: absolute;
             background: rgba(0,0,0,0.8);
@@ -160,7 +156,6 @@
 <body>
 
     <div class="machine-wrapper" id="machine">
-        <!-- 螢幕視窗 -->
         <div class="screen-container">
             <div class="ui-text ui-top-left">
                 <div id="disp-mode">MODE: MIRROR_STAGE</div>
@@ -173,22 +168,18 @@
             <div class="crt-overlay"></div>
         </div>
 
-        <!-- 旋鈕 hitboxes -->
-        <div class="knob-left" id="knobDensity" title="上下拖動：調整碎片密度"></div>
-        <div class="knob-right" id="knobDistort" title="上下拖動：調整變形強度"></div>
+        <div class="knob-left" id="knobDensity"></div>
+        <div class="knob-right" id="knobDistort"></div>
         
-        <!-- 模式滑塊 hitboxes -->
         <div class="mode-selector">
-            <div class="mode-target" onclick="setMode(1)" title="切換：鏡像階段"></div>
-            <div class="mode-target" onclick="setMode(2)" title="切換：規訓階段"></div>
-            <div class="mode-target" onclick="setMode(3)" title="切換：擬像階段"></div>
+            <div class="mode-target" onclick="setMode(1)"></div>
+            <div class="mode-target" onclick="setMode(2)"></div>
+            <div class="mode-target" onclick="setMode(3)"></div>
         </div>
 
-        <!-- 圓形按鈕 hitboxes -->
-        <div class="btn-cam" id="btnCam" title="切換攝影機"></div>
-        <div class="btn-run" id="btnRun" title="啟動/停止 觀測系統"></div>
+        <div class="btn-cam" id="btnCam"></div>
+        <div class="btn-run" id="btnRun"></div>
 
-        <!-- 實體指示燈 -->
         <div class="light light-left" id="indRed"></div>
         <div class="light light-right" id="indGreen"></div>
 
@@ -203,19 +194,28 @@
         const video = document.getElementById('videoElement');
         const tip = document.getElementById('valTip');
         
+        const captureCanvas = document.createElement('canvas');
+        const captureCtx = captureCanvas.getContext('2d');
+        
         const state = {
             isRunning: false,
             cameraActive: false,
             currentMode: 1,
             density: 20,
-            distortion: 0.5,
+            distortion: 0.7,
             frameCount: 0,
-            fragments: []
+            scanProgress: 0,
+            fragments: [],
+            faceCenter: { x: 0.5, y: 0.45 },
+            faceSize: { w: 0.35, h: 0.45 },
+            lastReshuffleTime: 0,
+            reshuffleSpeed: 2.5
         };
 
         function init() {
             resize();
-            createFragments();
+            captureCanvas.width = 640;
+            captureCanvas.height = 480;
             setupEvents();
             requestAnimationFrame(loop);
             addLog("CORE LINK READY.");
@@ -226,7 +226,7 @@
             document.getElementById('btnRun').onclick = toggleSystem;
             
             setupKnob('knobDensity', (val) => {
-                state.density = Math.floor(5 + val * 45);
+                state.density = Math.floor(10 + val * 30);
                 showTip(`FRAG_DENSITY: ${state.density}`);
             });
             
@@ -248,7 +248,7 @@
         function setupKnob(id, callback) {
             let isDragging = false;
             let lastY = 0;
-            let currentVal = 0.5;
+            let currentVal = (id === 'knobDensity') ? 0.5 : 0.7;
             const el = document.getElementById(id);
             
             el.onmousedown = (e) => { 
@@ -274,7 +274,9 @@
         async function toggleCamera() {
             if (!state.cameraActive) {
                 try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    const stream = await navigator.mediaDevices.getUserMedia({ 
+                        video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' }
+                    });
                     video.srcObject = stream;
                     state.cameraActive = true;
                     document.getElementById('indGreen').classList.add('active-green');
@@ -283,6 +285,7 @@
             } else {
                 const stream = video.srcObject;
                 if (stream) stream.getTracks().forEach(t => t.stop());
+                video.srcObject = null;
                 state.cameraActive = false;
                 document.getElementById('indGreen').classList.remove('active-green');
                 addLog("VIDEO LINK: OFF");
@@ -294,6 +297,10 @@
             document.getElementById('indRed').classList.toggle('active-red', state.isRunning);
             document.getElementById('disp-status').textContent = `SYS: ${state.isRunning ? 'OBSERVING' : 'STANDBY'}`;
             addLog(state.isRunning ? "INITIATING SCAN..." : "SCAN PAUSED.");
+            
+            if (state.isRunning && state.currentMode === 3) {
+                captureAndCreateFragments();
+            }
         }
 
         function setMode(m) {
@@ -301,23 +308,118 @@
             const names = ["", "1_MIRROR_STAGE", "2_DATA_DISCIPLINE", "3_HYPERREAL_SIM"];
             document.getElementById('disp-mode').textContent = `MODE: ${names[m]}`;
             addLog(`STAGE_${m} ACTIVATED.`);
+            
+            if (m === 3 && state.isRunning && state.cameraActive) {
+                captureAndCreateFragments();
+            }
         }
 
-        function createFragments() {
-            state.fragments = [];
-            for(let i=0; i<40; i++) {
-                const c = document.createElement('canvas');
-                c.width = 100; c.height = 100;
-                const _ctx = c.getContext('2d');
-                _ctx.strokeStyle = '#0f8';
-                _ctx.lineWidth = 1.5;
-                _ctx.beginPath();
-                if(i%3==0) _ctx.ellipse(50,50,25,10,0,0,Math.PI*2);
-                else if(i%3==1) { _ctx.moveTo(40,60); _ctx.quadraticCurveTo(50,20,60,60); }
-                else { _ctx.arc(50,45,20,0,Math.PI); }
-                _ctx.stroke();
-                state.fragments.push(c);
+        // ==================== 臉部檢測 ====================
+        function detectFaceCenter() {
+            if (!video.readyState || video.readyState < 2) return;
+            
+            captureCtx.drawImage(video, 0, 0, captureCanvas.width, captureCanvas.height);
+            const imageData = captureCtx.getImageData(0, 0, captureCanvas.width, captureCanvas.height);
+            const data = imageData.data;
+            
+            let maxBrightness = 0;
+            let brightX = captureCanvas.width * 0.5;
+            let brightY = captureCanvas.height * 0.45;
+            
+            const sampleSize = 20;
+            for (let y = 100; y < captureCanvas.height - 100; y += sampleSize) {
+                for (let x = 100; x < captureCanvas.width - 100; x += sampleSize) {
+                    let brightness = 0, count = 0;
+                    
+                    for (let dy = 0; dy < sampleSize; dy++) {
+                        for (let dx = 0; dx < sampleSize; dx++) {
+                            const index = ((y + dy) * captureCanvas.width + (x + dx)) * 4;
+                            brightness += (data[index] + data[index + 1] + data[index + 2]) / 3;
+                            count++;
+                        }
+                    }
+                    
+                    brightness /= count;
+                    if (brightness > maxBrightness) {
+                        maxBrightness = brightness;
+                        brightX = x + sampleSize / 2;
+                        brightY = y + sampleSize / 2;
+                    }
+                }
             }
+            
+            state.faceCenter.x = brightX / captureCanvas.width;
+            state.faceCenter.y = brightY / captureCanvas.height;
+        }
+
+        // ==================== 碎片生成 ====================
+        function captureAndCreateFragments() {
+            if (!video.readyState || video.readyState < 2) return;
+            
+            detectFaceCenter();
+            
+            captureCtx.save();
+            captureCtx.scale(-1, 1);
+            captureCtx.drawImage(video, -captureCanvas.width, 0, captureCanvas.width, captureCanvas.height);
+            captureCtx.restore();
+            
+            state.fragments = [];
+            
+            const faceCenterX = state.faceCenter.x * captureCanvas.width;
+            const faceCenterY = state.faceCenter.y * captureCanvas.height;
+            const faceWidth = state.faceSize.w * captureCanvas.width;
+            const faceHeight = state.faceSize.h * captureCanvas.height;
+            
+            for (let i = 0; i < state.density; i++) {
+                const fragWidth = 30 + Math.random() * 120;
+                const fragHeight = 30 + Math.random() * 120;
+                
+                const angle = Math.random() * Math.PI * 2;
+                const distance = Math.random() * Math.min(faceWidth, faceHeight) * 0.5;
+                
+                const sourceX = Math.max(0, Math.min(
+                    captureCanvas.width - fragWidth,
+                    faceCenterX + Math.cos(angle) * distance - fragWidth / 2
+                ));
+                const sourceY = Math.max(0, Math.min(
+                    captureCanvas.height - fragHeight,
+                    faceCenterY + Math.sin(angle) * distance - fragHeight / 2
+                ));
+                
+                const fragCanvas = document.createElement('canvas');
+                fragCanvas.width = fragWidth;
+                fragCanvas.height = fragHeight;
+                const fragCtx = fragCanvas.getContext('2d');
+                
+                fragCtx.drawImage(captureCanvas, sourceX, sourceY, fragWidth, fragHeight, 0, 0, fragWidth, fragHeight);
+                
+                const transform = {
+                    flipH: Math.random() > 0.6,
+                    flipV: Math.random() > 0.8,
+                    rotate: (Math.random() - 0.5) * 45 * state.distortion,
+                    scaleX: 0.7 + Math.random() * 0.6,
+                    scaleY: 0.7 + Math.random() * 0.6,
+                    skewX: (Math.random() - 0.5) * 0.3 * state.distortion,
+                    skewY: (Math.random() - 0.5) * 0.3 * state.distortion
+                };
+                
+                const targetAngle = Math.random() * Math.PI * 2;
+                const targetDistance = Math.random() * faceWidth * 1.8;
+                
+                const targetX = (state.faceCenter.x * canvas.width) + Math.cos(targetAngle) * targetDistance;
+                const targetY = (state.faceCenter.y * canvas.height) + Math.sin(targetAngle) * targetDistance;
+                
+                state.fragments.push({
+                    canvas: fragCanvas,
+                    width: fragWidth, height: fragHeight,
+                    transform, targetX, targetY,
+                    alpha: 0.75 + Math.random() * 0.25,
+                    zIndex: Math.random()
+                });
+            }
+            
+            state.fragments.sort((a, b) => a.zIndex - b.zIndex);
+            addLog(`FRAGMENTS: ${state.fragments.length}`);
         }
 
         function addLog(msg) {
@@ -334,57 +436,175 @@
             }
         }
 
-        function loop() {
-            if (state.isRunning) {
+        function loop(timestamp) {
+            if (state.isRunning && state.cameraActive && video.readyState >= 2) {
                 state.frameCount++;
+                
+                if (state.currentMode === 3 && timestamp - state.lastReshuffleTime > state.reshuffleSpeed * 1000) {
+                    captureAndCreateFragments();
+                    state.lastReshuffleTime = timestamp;
+                }
+                
                 render();
             }
             requestAnimationFrame(loop);
         }
 
+        // ==================== RGB to HSL ====================
+        function rgbToHsl(r, g, b) {
+            r /= 255; g /= 255; b /= 255;
+            const max = Math.max(r, g, b), min = Math.min(r, g, b);
+            let h, s, l = (max + min) / 2;
+            if (max === min) { h = s = 0; } 
+            else {
+                const d = max - min;
+                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                switch (max) {
+                    case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+                    case g: h = ((b - r) / d + 2) / 6; break;
+                    case b: h = ((r - g) / d + 4) / 6; break;
+                }
+            }
+            return { h: h * 360, s: s * 100, l: l * 100 };
+        }
+
+        // ==================== 繪製 ====================
         function render() {
             const w = canvas.width;
             const h = canvas.height;
-            const time = performance.now() * 0.001;
-            ctx.fillStyle = 'rgba(5, 10, 5, 0.25)';
+            
+            ctx.fillStyle = '#000';
             ctx.fillRect(0, 0, w, h);
 
             if (state.currentMode === 1) {
-                if (state.cameraActive) {
-                    ctx.save();
-                    ctx.translate(w, 0); ctx.scale(-1, 1);
-                    ctx.globalAlpha = 0.5;
-                    ctx.drawImage(video, 0, 0, w, h);
-                    ctx.restore();
-                }
-                ctx.strokeStyle = '#0f8';
+                // 階段1：掃描 + 臉部偵測
+                ctx.globalAlpha = 0.3;
+                ctx.save();
+                ctx.scale(-1, 1);
+                ctx.drawImage(video, -w, 0, w, h);
+                ctx.restore();
+                ctx.globalAlpha = 1;
+                
+                state.scanProgress = (state.scanProgress + 2) % h;
+                
+                ctx.strokeStyle = 'rgba(0, 255, 136, 0.8)';
+                ctx.lineWidth = 3;
                 ctx.beginPath();
-                ctx.arc(w/2, h/2, 70 + Math.sin(time*2.5)*20, 0, Math.PI*2);
+                ctx.moveTo(0, state.scanProgress);
+                ctx.lineTo(w, state.scanProgress);
                 ctx.stroke();
+                
+                const gradient = ctx.createLinearGradient(0, state.scanProgress - 50, 0, state.scanProgress + 50);
+                gradient.addColorStop(0, 'rgba(0, 255, 136, 0)');
+                gradient.addColorStop(0.5, 'rgba(0, 255, 136, 0.2)');
+                gradient.addColorStop(1, 'rgba(0, 255, 136, 0)');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, state.scanProgress - 50, w, 100);
+                
+                const faceCenterX = state.faceCenter.x * w;
+                const faceCenterY = state.faceCenter.y * h;
+                const faceWidth = state.faceSize.w * w;
+                const faceHeight = state.faceSize.h * h;
+                
+                ctx.strokeStyle = '#0f8';
+                ctx.lineWidth = 3;
+                ctx.setLineDash([10, 5]);
+                ctx.strokeRect(faceCenterX - faceWidth/2, faceCenterY - faceHeight/2, faceWidth, faceHeight);
+                ctx.setLineDash([]);
+                
+                ctx.beginPath();
+                ctx.arc(faceCenterX, faceCenterY, Math.min(faceWidth, faceHeight) * 0.6, 0, Math.PI * 2);
+                ctx.stroke();
+                
             } else if (state.currentMode === 2) {
-                ctx.strokeStyle = 'rgba(0, 255, 136, 0.15)';
-                for(let i=0; i<w; i+=30) {
-                    ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, h); ctx.stroke();
+                // 階段2：動態色彩分析
+                captureCtx.save();
+                captureCtx.scale(-1, 1);
+                captureCtx.drawImage(video, -captureCanvas.width, 0, captureCanvas.width, captureCanvas.height);
+                captureCtx.restore();
+                
+                const imageData = captureCtx.getImageData(0, 0, captureCanvas.width, captureCanvas.height);
+                const data = imageData.data;
+                const time = performance.now() * 0.0012;
+                const pixelSize = 15;
+                const cols = Math.ceil(captureCanvas.width / pixelSize);
+                const rows = Math.ceil(captureCanvas.height / pixelSize);
+                
+                for (let y = 0; y < rows; y++) {
+                    for (let x = 0; x < cols; x++) {
+                        let r = 0, g = 0, b = 0, count = 0;
+                        
+                        for (let py = 0; py < pixelSize; py++) {
+                            for (let px = 0; px < pixelSize; px++) {
+                                const sourceX = x * pixelSize + px;
+                                const sourceY = y * pixelSize + py;
+                                if (sourceX < captureCanvas.width && sourceY < captureCanvas.height) {
+                                    const index = (sourceY * captureCanvas.width + sourceX) * 4;
+                                    r += data[index]; 
+                                    g += data[index + 1]; 
+                                    b += data[index + 2];
+                                    count++;
+                                }
+                            }
+                        }
+                        
+                        if (count > 0) {
+                            r = Math.floor(r / count); 
+                            g = Math.floor(g / count); 
+                            b = Math.floor(b / count);
+                            
+                            const hsl = rgbToHsl(r, g, b);
+                            hsl.h = (hsl.h + time * 50 + x * 10 + y * 10) % 360;
+                            hsl.s = Math.max(0, Math.min(100, hsl.s + Math.sin(time + x * 0.1) * 30));
+                            hsl.l = Math.max(0, Math.min(100, hsl.l + Math.cos(time + y * 0.1) * 20));
+                            
+                            const drawX = (x * pixelSize) * (w / captureCanvas.width);
+                            const drawY = (y * pixelSize) * (h / captureCanvas.height);
+                            const drawSize = pixelSize * (w / captureCanvas.width);
+                            
+                            ctx.fillStyle = `hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`;
+                            ctx.fillRect(drawX, drawY, drawSize, drawSize);
+                        }
+                    }
                 }
-                let scanY = (Math.sin(time*1.5) * 0.5 + 0.5) * h;
-                ctx.fillStyle = 'rgba(0, 255, 136, 0.4)';
-                ctx.fillRect(0, scanY, w, 2);
-                ctx.font = '9px monospace';
-                ctx.fillText(`SUBJECT_DATA_${state.frameCount % 999}`, 20, scanY - 8);
+                
             } else if (state.currentMode === 3) {
-                for(let i=0; i<state.density/3; i++) {
-                    const fx = (Math.sin(i * 0.4 + time) * 0.4 + 0.5) * w;
-                    const fy = (Math.cos(i * 0.6 + time) * 0.4 + 0.5) * h;
-                    const frag = state.fragments[i % state.fragments.length];
+                // 階段3：碎片拼貼
+                if (state.fragments.length === 0) return;
+                
+                ctx.globalAlpha = 0.15;
+                ctx.save();
+                ctx.scale(-1, 1);
+                ctx.drawImage(video, -w, 0, w, h);
+                ctx.restore();
+                ctx.globalAlpha = 1;
+                
+                state.fragments.forEach(frag => {
                     ctx.save();
-                    ctx.translate(fx, fy);
-                    ctx.rotate(time * state.distortion + i);
-                    ctx.globalAlpha = 0.6;
-                    ctx.drawImage(frag, -20, -20, 40, 40);
+                    ctx.translate(frag.targetX, frag.targetY);
+                    ctx.rotate(frag.transform.rotate * Math.PI / 180);
+                    
+                    let scaleX = frag.transform.scaleX, scaleY = frag.transform.scaleY;
+                    if (frag.transform.flipH) scaleX *= -1;
+                    if (frag.transform.flipV) scaleY *= -1;
+                    ctx.scale(scaleX, scaleY);
+                    ctx.transform(1, frag.transform.skewY, frag.transform.skewX, 1, 0, 0);
+                    
+                    ctx.globalAlpha = frag.alpha;
+                    const displayWidth = frag.width * (w / captureCanvas.width);
+                    const displayHeight = frag.height * (h / captureCanvas.height);
+                    
+                    ctx.drawImage(frag.canvas, -displayWidth / 2, -displayHeight / 2, displayWidth, displayHeight);
+                    
+                    ctx.globalAlpha = 0.5;
+                    ctx.strokeStyle = '#0f8';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(-displayWidth / 2, -displayHeight / 2, displayWidth, displayHeight);
                     ctx.restore();
-                }
+                });
             }
         }
+        
         window.onload = init;
     </script>
 </body>
