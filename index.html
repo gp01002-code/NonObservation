@@ -42,10 +42,10 @@
         /* 螢幕區域 - 完美對齊 */
         .screen-container {
             position: absolute;
-            top: 8.5%;     /* 再往上移 */
-            left: 24.8%;
-            width: 50.4%;
-            height: 54%;   /* 增加高度填滿 */
+            top: 8.5%;
+            left: 25.5%;    /* 往右移（內縮左邊） */
+            width: 49%;     /* 縮小寬度（內縮左右） */
+            height: 54%;
             background: var(--crt-bg);
             border-radius: 4px;
             overflow: hidden;
@@ -176,8 +176,8 @@
             background: #200;
             z-index: 10;
         }
-        .light-left { bottom: 21.8%; left: 28.5%; }
-        .light-right { bottom: 21.8%; right: 28.5%; }
+        .light-left { bottom: 22.2%; left: 29%; }      /* 精確對準左側金屬點 */
+        .light-right { bottom: 22.2%; right: 29%; }    /* 精確對準右側金屬點 */
         .light.active-red { 
             background: #f00; 
             box-shadow: 0 0 12px #f00, 0 0 20px #f00;
@@ -299,23 +299,11 @@
             distortion: 0.7,
             frameCount: 0,
             scanProgress: 0,
-            facialFragments: [], // 五官碎片
+            facialFragments: [], // 鏡子碎片
             faceCenter: { x: 0.5, y: 0.45 },
             faceSize: { w: 0.35, h: 0.45 },
             lastReshuffleTime: 0,
             reshuffleSpeed: 3.0
-        };
-
-        // 五官位置定義（相對於臉部中心）
-        const FACIAL_POSITIONS = {
-            leftEye: { x: -0.25, y: -0.15 },
-            rightEye: { x: 0.25, y: -0.15 },
-            nose: { x: 0, y: 0.1 },
-            mouth: { x: 0, y: 0.35 },
-            leftCheek: { x: -0.35, y: 0.15 },
-            rightCheek: { x: 0.35, y: 0.15 },
-            forehead: { x: 0, y: -0.35 },
-            chin: { x: 0, y: 0.5 }
         };
 
         function init() {
@@ -473,7 +461,7 @@
             state.faceCenter.y = brightY / captureCanvas.height;
         }
 
-        // ==================== 五官碎片生成（錯位拼貼在臉上）====================
+        // ==================== 鏡子碎片生成（自由遊走）====================
         function captureFacialFragments() {
             if (!video.readyState || video.readyState < 2) return;
             
@@ -491,66 +479,98 @@
             const faceWidth = state.faceSize.w * captureCanvas.width;
             const faceHeight = state.faceSize.h * captureCanvas.height;
             
-            // 獲取所有五官位置名稱
-            const facialKeys = Object.keys(FACIAL_POSITIONS);
-            
-            // 為每個碎片分配來源和目標位置
+            // 為每個碎片創建鏡子
             for (let i = 0; i < state.density; i++) {
-                // 隨機選擇來源五官位置
-                const sourceKey = facialKeys[Math.floor(Math.random() * facialKeys.length)];
-                const sourcePos = FACIAL_POSITIONS[sourceKey];
+                // 不規則碎片大小
+                const fragWidth = 60 + Math.random() * 100;   // 60-160px
+                const fragHeight = 60 + Math.random() * 100;  // 60-160px
                 
-                // **關鍵改進：隨機錯位目標位置**
-                const targetKey = facialKeys[Math.floor(Math.random() * facialKeys.length)];
-                const targetPos = FACIAL_POSITIONS[targetKey];
-                
-                // 碎片大小（縮小 - 更自然）
-                const fragWidth = 25 + Math.random() * 50;   // 25-75px (之前40-120)
-                const fragHeight = 25 + Math.random() * 50;  // 25-75px (之前40-120)
-                
-                // 從來源位置擷取
+                // **關鍵：擷取完整臉部區域作為鏡子**
                 const sourceX = Math.max(0, Math.min(
                     captureCanvas.width - fragWidth,
-                    faceCenterX + sourcePos.x * faceWidth - fragWidth / 2 + (Math.random() - 0.5) * 40
+                    faceCenterX - fragWidth / 2 + (Math.random() - 0.5) * faceWidth * 0.5
                 ));
                 const sourceY = Math.max(0, Math.min(
                     captureCanvas.height - fragHeight,
-                    faceCenterY + sourcePos.y * faceHeight - fragHeight / 2 + (Math.random() - 0.5) * 40
+                    faceCenterY - fragHeight / 2 + (Math.random() - 0.5) * faceHeight * 0.5
                 ));
                 
+                // 創建碎片 canvas（鏡子）
                 const fragCanvas = document.createElement('canvas');
                 fragCanvas.width = fragWidth;
                 fragCanvas.height = fragHeight;
                 const fragCtx = fragCanvas.getContext('2d');
                 
+                // 擷取臉部區域
                 fragCtx.drawImage(captureCanvas, sourceX, sourceY, fragWidth, fragHeight, 0, 0, fragWidth, fragHeight);
                 
+                // 隨機變形
                 const transform = {
-                    flipH: Math.random() > 0.75,  // 降低翻轉機率
-                    flipV: Math.random() > 0.9,
-                    rotate: (Math.random() - 0.5) * 20 * state.distortion,  // 減少旋轉角度
-                    scaleX: 0.85 + Math.random() * 0.3,  // 更溫和的縮放
-                    scaleY: 0.85 + Math.random() * 0.3,
-                    offsetX: (Math.random() - 0.5) * 30,  // 增加隨機偏移，更自然
-                    offsetY: (Math.random() - 0.5) * 30
+                    flipH: Math.random() > 0.7,
+                    flipV: Math.random() > 0.85,
+                    rotate: (Math.random() - 0.5) * 25,
+                    scaleX: 0.8 + Math.random() * 0.4,
+                    scaleY: 0.8 + Math.random() * 0.4
                 };
                 
+                // **初始位置：隨機在畫面中**
+                const startX = Math.random() * canvas.width;
+                const startY = Math.random() * canvas.height;
+                
+                // **運動系統**
                 state.facialFragments.push({
                     canvas: fragCanvas,
                     width: fragWidth,
                     height: fragHeight,
                     transform,
-                    targetPos, // 目標五官位置（會錯位）
-                    sourceKey,
-                    targetKey,
-                    alpha: 0.75 + Math.random() * 0.25,
+                    // 位置與運動
+                    x: startX,
+                    y: startY,
+                    vx: (Math.random() - 0.5) * 2,      // 速度 X
+                    vy: (Math.random() - 0.5) * 2,      // 速度 Y
+                    rotationSpeed: (Math.random() - 0.5) * 0.5,  // 旋轉速度
+                    alpha: 0.7 + Math.random() * 0.3,
                     zIndex: Math.random()
                 });
             }
             
             state.facialFragments.sort((a, b) => a.zIndex - b.zIndex);
-            addLog(`FACIAL FRAG: ${state.facialFragments.length}`);
-            addLog(`MISALIGNMENT APPLIED`);
+            addLog(`MIRROR FRAGS: ${state.facialFragments.length}`);
+            addLog(`FLOATING MODE`);
+        }
+
+        // ==================== 更新鏡子內容（保持運動） ====================
+        function updateMirrorContents() {
+            if (!video.readyState || video.readyState < 2) return;
+            if (state.facialFragments.length === 0) return;
+            
+            captureCtx.save();
+            captureCtx.scale(-1, 1);
+            captureCtx.drawImage(video, -captureCanvas.width, 0, captureCanvas.width, captureCanvas.height);
+            captureCtx.restore();
+            
+            const faceCenterX = state.faceCenter.x * captureCanvas.width;
+            const faceCenterY = state.faceCenter.y * captureCanvas.height;
+            const faceWidth = state.faceSize.w * captureCanvas.width;
+            const faceHeight = state.faceSize.h * captureCanvas.height;
+            
+            // 更新每個碎片的鏡子內容（保持原有運動狀態）
+            state.facialFragments.forEach(frag => {
+                const sourceX = Math.max(0, Math.min(
+                    captureCanvas.width - frag.width,
+                    faceCenterX - frag.width / 2 + (Math.random() - 0.5) * faceWidth * 0.5
+                ));
+                const sourceY = Math.max(0, Math.min(
+                    captureCanvas.height - frag.height,
+                    faceCenterY - frag.height / 2 + (Math.random() - 0.5) * faceHeight * 0.5
+                ));
+                
+                const fragCtx = frag.canvas.getContext('2d');
+                fragCtx.clearRect(0, 0, frag.width, frag.height);
+                fragCtx.drawImage(captureCanvas, sourceX, sourceY, frag.width, frag.height, 0, 0, frag.width, frag.height);
+            });
+            
+            addLog(`MIRRORS UPDATED`);
         }
 
         function addLog(msg) {
@@ -571,15 +591,20 @@
             if (state.isRunning && state.cameraActive && video.readyState >= 2) {
                 state.frameCount++;
                 
-                // 即時追蹤臉部
-                if (state.currentMode === 3) {
+                // 階段1和2：即時追蹤臉部
+                if (state.currentMode === 1 || state.currentMode === 2) {
                     detectFaceCenter();
                 }
                 
-                // 定期重新擷取碎片
-                if (state.currentMode === 3 && timestamp - state.lastReshuffleTime > state.reshuffleSpeed * 1000) {
-                    captureFacialFragments();
-                    state.lastReshuffleTime = timestamp;
+                // 階段3：持續追蹤臉部 + 定期更新碎片內容
+                if (state.currentMode === 3) {
+                    detectFaceCenter();
+                    
+                    // 每5秒重新擷取鏡子內容（更新五官影像）
+                    if (timestamp - state.lastReshuffleTime > 5000) {
+                        updateMirrorContents();
+                        state.lastReshuffleTime = timestamp;
+                    }
                 }
                 
                 render();
@@ -704,32 +729,69 @@
                 }
                 
             } else if (state.currentMode === 3) {
-                // 階段3：五官錯位拼貼在臉上
+                // 階段3：鏡子碎片自由遊走
                 if (state.facialFragments.length === 0) return;
                 
                 // 微弱背景
-                ctx.globalAlpha = 0.12;
+                ctx.globalAlpha = 0.08;
                 ctx.save();
                 ctx.scale(-1, 1);
                 ctx.drawImage(video, -w, 0, w, h);
                 ctx.restore();
                 ctx.globalAlpha = 1;
                 
-                // 即時臉部中心
+                // 即時臉部中心（作為吸引點）
                 const faceCenterX = state.faceCenter.x * w;
                 const faceCenterY = state.faceCenter.y * h;
-                const faceWidth = state.faceSize.w * w;
-                const faceHeight = state.faceSize.h * h;
                 
-                // 繪製所有碎片（錯位貼在臉上，加入自然偏移）
+                // 更新並繪製所有碎片
                 state.facialFragments.forEach(frag => {
+                    // **運動更新**
+                    
+                    // 1. 輕微吸引力朝向臉部中心（25%強度）
+                    const dx = faceCenterX - frag.x;
+                    const dy = faceCenterY - frag.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance > 50) {  // 只在距離較遠時才吸引
+                        const attractionStrength = 0.015;  // 很輕微
+                        frag.vx += (dx / distance) * attractionStrength;
+                        frag.vy += (dy / distance) * attractionStrength;
+                    }
+                    
+                    // 2. 速度阻尼（防止無限加速）
+                    frag.vx *= 0.98;
+                    frag.vy *= 0.98;
+                    
+                    // 3. 隨機擾動（保持自由感）
+                    frag.vx += (Math.random() - 0.5) * 0.1;
+                    frag.vy += (Math.random() - 0.5) * 0.1;
+                    
+                    // 4. 限制速度
+                    const maxSpeed = 2;
+                    const speed = Math.sqrt(frag.vx * frag.vx + frag.vy * frag.vy);
+                    if (speed > maxSpeed) {
+                        frag.vx = (frag.vx / speed) * maxSpeed;
+                        frag.vy = (frag.vy / speed) * maxSpeed;
+                    }
+                    
+                    // 5. 更新位置
+                    frag.x += frag.vx;
+                    frag.y += frag.vy;
+                    
+                    // 6. 邊界反彈
+                    if (frag.x < 0 || frag.x > w) frag.vx *= -0.8;
+                    if (frag.y < 0 || frag.y > h) frag.vy *= -0.8;
+                    frag.x = Math.max(0, Math.min(w, frag.x));
+                    frag.y = Math.max(0, Math.min(h, frag.y));
+                    
+                    // 7. 旋轉更新
+                    frag.transform.rotate += frag.rotationSpeed;
+                    
+                    // **繪製碎片**
                     ctx.save();
                     
-                    // 目標位置（跟隨臉部移動）+ 隨機偏移
-                    const targetX = faceCenterX + frag.targetPos.x * faceWidth + frag.transform.offsetX;
-                    const targetY = faceCenterY + frag.targetPos.y * faceHeight + frag.transform.offsetY;
-                    
-                    ctx.translate(targetX, targetY);
+                    ctx.translate(frag.x, frag.y);
                     ctx.rotate(frag.transform.rotate * Math.PI / 180);
                     
                     let scaleX = frag.transform.scaleX;
@@ -742,12 +804,13 @@
                     const displayWidth = frag.width * (w / captureCanvas.width);
                     const displayHeight = frag.height * (h / captureCanvas.height);
                     
+                    // 繪製鏡子碎片（顯示五官）
                     ctx.drawImage(frag.canvas, -displayWidth / 2, -displayHeight / 2, displayWidth, displayHeight);
                     
-                    // 碎片邊框（改為琥珀色）
-                    ctx.globalAlpha = 0.35;
-                    ctx.strokeStyle = 'rgba(212, 165, 116, 0.6)';
-                    ctx.lineWidth = 1;
+                    // 碎片邊框
+                    ctx.globalAlpha = 0.25;
+                    ctx.strokeStyle = 'rgba(212, 165, 116, 0.5)';
+                    ctx.lineWidth = 1.5;
                     ctx.strokeRect(-displayWidth / 2, -displayHeight / 2, displayWidth, displayHeight);
                     
                     ctx.restore();
