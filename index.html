@@ -170,14 +170,14 @@
         /* 指示燈 */
         .light {
             position: absolute;
-            width: 8px; height: 8px;
+            width: 12px; height: 12px;
             border-radius: 50%;
             transition: all 0.3s;
             background: #200;
             z-index: 10;
         }
-        .light-left { bottom: 22.5%; left: 23.5%; }      /* 精確對準左側螺絲 */
-        .light-right { bottom: 22.5%; right: 23.5%; }    /* 精確對準右側螺絲 */
+        .light-left { top: 5.5%; left: 9.8%; }      /* 綠燈在左上金屬球 */
+        .light-right { top: 5.5%; right: 9.8%; }    /* 紅燈在右上金屬球 */
         .light.active-red { 
             background: #f00; 
             box-shadow: 0 0 12px #f00, 0 0 20px #f00;
@@ -308,11 +308,64 @@
                 skin: []         // 皮膚
             },
             databaseReady: false,
+            useExternalImages: false,  // 是否使用外部圖片
             faceCenter: { x: 0.5, y: 0.45 },
             faceSize: { w: 0.35, h: 0.45 },
             lastReshuffleTime: 0,
             reshuffleSpeed: 3.0
         };
+
+        // ==================== 外部圖片載入（可選） ====================
+        async function loadExternalImages() {
+            addLog("LOADING EXTERNAL DB...");
+            
+            state.facialDatabase = {
+                eyes: [],
+                ears: [],
+                nose: [],
+                mouth: [],
+                skin: []
+            };
+            
+            const parts = ['eyes', 'ears', 'nose', 'mouth', 'skin'];
+            
+            for (const part of parts) {
+                for (let i = 1; i <= 50; i++) {
+                    try {
+                        const img = new Image();
+                        const filename = `facial-parts/${part}/${part}_${String(i).padStart(2, '0')}.png`;
+                        
+                        await new Promise((resolve, reject) => {
+                            img.onload = () => {
+                                const canvas = document.createElement('canvas');
+                                canvas.width = img.width;
+                                canvas.height = img.height;
+                                const ctx = canvas.getContext('2d');
+                                ctx.drawImage(img, 0, 0);
+                                state.facialDatabase[part].push(canvas);
+                                resolve();
+                            };
+                            img.onerror = () => resolve(); // 忽略載入失敗的圖片
+                            img.src = filename;
+                        });
+                    } catch (e) {
+                        console.log(`Skip ${part}_${i}`);
+                    }
+                }
+                addLog(`${part.toUpperCase()}: ${state.facialDatabase[part].length}`);
+            }
+            
+            if (state.facialDatabase.eyes.length > 0) {
+                state.databaseReady = true;
+                state.useExternalImages = true;
+                addLog("EXTERNAL DB READY");
+                captureFacialFragments();
+            } else {
+                addLog("NO EXTERNAL IMAGES");
+                addLog("USING AUTO-BUILD");
+                buildFacialDatabase();
+            }
+        }
 
         function init() {
             resize();
@@ -415,7 +468,8 @@
             
             if (state.isRunning && state.currentMode === 3 && state.cameraActive) {
                 if (!state.databaseReady) {
-                    buildFacialDatabase();
+                    // 先嘗試載入外部圖片，失敗則自動建立
+                    loadExternalImages();
                 } else {
                     captureFacialFragments();
                 }
@@ -436,7 +490,8 @@
             
             if (m === 3 && state.cameraActive && state.isRunning) {
                 if (!state.databaseReady) {
-                    buildFacialDatabase();
+                    // 先嘗試載入外部圖片，失敗則自動建立
+                    loadExternalImages();
                 } else {
                     captureFacialFragments();
                 }
