@@ -170,14 +170,14 @@
         /* 指示燈 */
         .light {
             position: absolute;
-            width: 12px; height: 12px;
+            width: 8px; height: 8px;
             border-radius: 50%;
             transition: all 0.3s;
             background: #200;
             z-index: 10;
         }
-        .light-left { top: 5.5%; left: 9.8%; }      /* 綠燈在左上金屬球 */
-        .light-right { top: 5.5%; right: 9.8%; }    /* 紅燈在右上金屬球 */
+        .light-left { bottom: 22%; left: 17.5%; }      /* 紅燈回到左下 MODE 旁 */
+        .light-right { bottom: 22%; right: 17.5%; }    /* 綠燈回到右下 LIVE EEG 旁 */
         .light.active-red { 
             background: #f00; 
             box-shadow: 0 0 12px #f00, 0 0 20px #f00;
@@ -359,7 +359,10 @@
                 state.databaseReady = true;
                 state.useExternalImages = true;
                 addLog("EXTERNAL DB READY");
-                captureFacialFragments();
+                // 延遲生成碎片，確保 canvas 已正確初始化
+                setTimeout(() => {
+                    captureFacialFragments();
+                }, 500);
             } else {
                 addLog("NO EXTERNAL IMAGES");
                 addLog("USING AUTO-BUILD");
@@ -610,14 +613,20 @@
             addLog(`NOSE: ${state.facialDatabase.nose.length}`);
             addLog(`MOUTH: ${state.facialDatabase.mouth.length}`);
             
-            // 建立完成後，生成碎片
-            captureFacialFragments();
+            // 建立完成後，延遲生成碎片
+            setTimeout(() => {
+                captureFacialFragments();
+            }, 500);
         }
 
         // ==================== 五官拼貼碎片生成 ====================
         // ==================== 五官拼貼碎片生成 ====================
         function captureFacialFragments() {
             if (!state.databaseReady) return;
+            if (canvas.width === 0 || canvas.height === 0) {
+                addLog("CANVAS NOT READY");
+                return;
+            }
             
             state.facialFragments = [];
             
@@ -645,6 +654,7 @@
                 
                 // **初始位置：隨機在畫面中，但避開中心區域**
                 let startX, startY;
+                let attempts = 0;
                 do {
                     startX = Math.random() * canvas.width;
                     startY = Math.random() * canvas.height;
@@ -652,7 +662,9 @@
                         Math.pow(startX - canvas.width/2, 2) + 
                         Math.pow(startY - canvas.height/2, 2)
                     );
-                } while (centerDist < 100); // 確保不在中心100px內
+                    attempts++;
+                    if (attempts > 10 || centerDist >= 100) break;
+                } while (false);
                 
                 // **運動系統**
                 state.facialFragments.push({
@@ -673,6 +685,7 @@
             }
             
             state.facialFragments.sort((a, b) => a.zIndex - b.zIndex);
+            state.lastReshuffleTime = performance.now(); // 初始化時間戳
             addLog(`FRAGMENTS: ${state.facialFragments.length}`);
         }
 
@@ -833,8 +846,7 @@
                 }
                 
             } else if (state.currentMode === 3) {
-                // 階段3：鏡子碎片自由遊走
-                if (state.facialFragments.length === 0) return;
+                // 階段3：五官碎片自由遊走
                 
                 // 微弱背景
                 ctx.globalAlpha = 0.08;
@@ -844,7 +856,18 @@
                 ctx.restore();
                 ctx.globalAlpha = 1;
                 
-                // 即時臉部中心（作為吸引點）
+                // 如果沒有碎片，顯示訊息
+                if (state.facialFragments.length === 0) {
+                    ctx.fillStyle = 'rgba(212, 165, 116, 0.8)';
+                    ctx.font = '14px monospace';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('WAITING FOR FRAGMENTS...', w/2, h/2);
+                    ctx.fillText(`DB READY: ${state.databaseReady}`, w/2, h/2 + 20);
+                    ctx.fillText(`CANVAS: ${canvas.width}x${canvas.height}`, w/2, h/2 + 40);
+                    return;
+                }
+                
+                // 即時臉部中心（用於推離力計算）
                 const faceCenterX = state.faceCenter.x * w;
                 const faceCenterY = state.faceCenter.y * h;
                 
@@ -910,7 +933,7 @@
                     const displayWidth = frag.width * (w / captureCanvas.width);
                     const displayHeight = frag.height * (h / captureCanvas.height);
                     
-                    // 繪製鏡子碎片（顯示五官）
+                    // 繪製五官碎片
                     ctx.drawImage(frag.canvas, -displayWidth / 2, -displayHeight / 2, displayWidth, displayHeight);
                     
                     // 碎片邊框
