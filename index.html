@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>自我觀測儀 | 復古實體重構版</title>
+    <title>自我觀測儀 | 完整版</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap');
         
@@ -38,12 +38,13 @@
             box-shadow: 0 0 100px rgba(0, 255, 136, 0.1);
         }
 
+        /* 螢幕區域 - 微調對齊 */
         .screen-container {
             position: absolute;
-            top: 13.8%;
+            top: 12.5%;    /* 上移 */
             left: 24.8%;
             width: 50.4%;
-            height: 49.5%;
+            height: 50.8%; /* 增加高度 */
             background: var(--crt-bg);
             border-radius: 4px;
             overflow: hidden;
@@ -66,25 +67,53 @@
             z-index: 5;
         }
 
-        .knob-left { 
-            position: absolute; 
-            top: 10%; left: 7%; 
-            width: 14%; height: 23%; 
-            z-index: 10; 
-            cursor: ns-resize; 
-            background: transparent;
-            border-radius: 50%;
-        }
-        .knob-right { 
-            position: absolute; 
-            top: 10%; right: 7%; 
-            width: 14%; height: 23%; 
-            z-index: 10; 
-            cursor: ns-resize; 
-            background: transparent;
-            border-radius: 50%;
+        /* 旋鈕 + 數值顯示 */
+        .knob-container {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 10;
         }
 
+        .knob-left { 
+            top: 8%; left: 6.5%; 
+            width: 15%; height: 25%;
+        }
+        
+        .knob-right { 
+            top: 8%; right: 6.5%; 
+            width: 15%; height: 25%;
+        }
+
+        .knob-area {
+            width: 100%;
+            height: 85%;
+            cursor: ns-resize; 
+            background: transparent;
+            border-radius: 50%;
+            transition: background 0.3s;
+        }
+
+        .knob-area:hover {
+            background: rgba(0, 255, 136, 0.1);
+        }
+
+        .knob-area.active {
+            background: rgba(0, 255, 136, 0.2);
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
+        }
+
+        .knob-value {
+            margin-top: 5%;
+            font-size: clamp(9px, 1vw, 11px);
+            color: #0f8;
+            text-shadow: 0 0 5px #0f8;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        /* 模式選擇器 */
         .mode-selector {
             position: absolute;
             bottom: 16%; left: 28%;
@@ -93,39 +122,77 @@
             display: flex;
             background: transparent;
         }
-        .mode-target { flex: 1; cursor: pointer; }
+        
+        .mode-target { 
+            flex: 1; 
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .mode-target:hover {
+            background: rgba(0, 255, 136, 0.1);
+        }
+
+        .mode-target.active {
+            background: rgba(255, 0, 0, 0.2);
+        }
+
+        /* 按鈕 + 按下效果 */
+        .btn {
+            position: absolute;
+            cursor: pointer; 
+            z-index: 10; 
+            background: transparent;
+            border-radius: 50%;
+            transition: all 0.15s;
+        }
 
         .btn-cam { 
-            position: absolute; 
             bottom: 29.5%; left: 19.8%; 
-            width: 3.5%; height: 5.5%; 
-            cursor: pointer; 
-            z-index: 10; 
-            background: transparent;
-            border-radius: 50%; 
+            width: 3.5%; height: 5.5%;
         }
+        
         .btn-run { 
-            position: absolute; 
             bottom: 29.5%; right: 19.8%; 
-            width: 3.5%; height: 5.5%; 
-            cursor: pointer; 
-            z-index: 10; 
-            background: transparent;
-            border-radius: 50%; 
+            width: 3.5%; height: 5.5%;
         }
 
+        .btn:hover {
+            background: rgba(0, 255, 136, 0.15);
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+            background: rgba(0, 255, 136, 0.3);
+        }
+
+        /* 指示燈 */
         .light {
             position: absolute;
             width: 8px; height: 8px;
             border-radius: 50%;
             transition: all 0.3s;
             background: #200;
+            z-index: 10;
         }
         .light-left { bottom: 21.8%; left: 28.5%; }
         .light-right { bottom: 21.8%; right: 28.5%; }
-        .light.active-red { background: #f00; box-shadow: 0 0 12px #f00; }
-        .light.active-green { background: #0f8; box-shadow: 0 0 12px #0f8; }
+        .light.active-red { 
+            background: #f00; 
+            box-shadow: 0 0 12px #f00, 0 0 20px #f00;
+            animation: blink 1s infinite;
+        }
+        .light.active-green { 
+            background: #0f8; 
+            box-shadow: 0 0 12px #0f8;
+        }
 
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.3; }
+        }
+
+        /* 螢幕內文字 */
         .ui-text {
             position: absolute;
             padding: 12px;
@@ -142,20 +209,21 @@
 
         .tooltip {
             position: absolute;
-            background: rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.9);
             border: 1px solid var(--glow-color);
-            padding: 2px 6px;
+            padding: 4px 8px;
             font-size: 10px;
             pointer-events: none;
             opacity: 0;
             transition: opacity 0.2s;
             z-index: 20;
+            white-space: nowrap;
         }
     </style>
 </head>
 <body>
 
-    <div class="machine-wrapper" id="machine">
+    <div class="machine-wrapper">
         <div class="screen-container">
             <div class="ui-text ui-top-left">
                 <div id="disp-mode">MODE: MIRROR_STAGE</div>
@@ -168,18 +236,30 @@
             <div class="crt-overlay"></div>
         </div>
 
-        <div class="knob-left" id="knobDensity"></div>
-        <div class="knob-right" id="knobDistort"></div>
+        <!-- 左側旋鈕（碎片密度） -->
+        <div class="knob-container knob-left">
+            <div class="knob-area" id="knobDensity"></div>
+            <div class="knob-value" id="valDensity">20</div>
+        </div>
+
+        <!-- 右側旋鈕（變形強度） -->
+        <div class="knob-container knob-right">
+            <div class="knob-area" id="knobDistort"></div>
+            <div class="knob-value" id="valDistort">70%</div>
+        </div>
         
+        <!-- 模式選擇器 -->
         <div class="mode-selector">
             <div class="mode-target" onclick="setMode(1)"></div>
             <div class="mode-target" onclick="setMode(2)"></div>
             <div class="mode-target" onclick="setMode(3)"></div>
         </div>
 
-        <div class="btn-cam" id="btnCam"></div>
-        <div class="btn-run" id="btnRun"></div>
+        <!-- 按鈕 -->
+        <div class="btn btn-cam" id="btnCam"></div>
+        <div class="btn btn-run" id="btnRun"></div>
 
+        <!-- 指示燈 -->
         <div class="light light-left" id="indRed"></div>
         <div class="light light-right" id="indGreen"></div>
 
@@ -187,6 +267,11 @@
     </div>
 
     <video id="videoElement" autoplay playsinline></video>
+
+    <!-- 音效（需要上傳） -->
+    <audio id="sndClick" preload="auto"><source src="sounds/click.mp3"></audio>
+    <audio id="sndKnob" preload="auto"><source src="sounds/knob.mp3"></audio>
+    <audio id="sndMode" preload="auto"><source src="sounds/mode.mp3"></audio>
 
     <script>
         const canvas = document.getElementById('mainCanvas');
@@ -197,6 +282,13 @@
         const captureCanvas = document.createElement('canvas');
         const captureCtx = captureCanvas.getContext('2d');
         
+        // 音效
+        const sounds = {
+            click: document.getElementById('sndClick'),
+            knob: document.getElementById('sndKnob'),
+            mode: document.getElementById('sndMode')
+        };
+
         const state = {
             isRunning: false,
             cameraActive: false,
@@ -205,11 +297,23 @@
             distortion: 0.7,
             frameCount: 0,
             scanProgress: 0,
-            fragments: [],
+            facialFragments: [], // 五官碎片
             faceCenter: { x: 0.5, y: 0.45 },
             faceSize: { w: 0.35, h: 0.45 },
             lastReshuffleTime: 0,
-            reshuffleSpeed: 2.5
+            reshuffleSpeed: 3.0
+        };
+
+        // 五官位置定義（相對於臉部中心）
+        const FACIAL_POSITIONS = {
+            leftEye: { x: -0.25, y: -0.15 },
+            rightEye: { x: 0.25, y: -0.15 },
+            nose: { x: 0, y: 0.1 },
+            mouth: { x: 0, y: 0.35 },
+            leftCheek: { x: -0.35, y: 0.15 },
+            rightCheek: { x: 0.35, y: 0.15 },
+            forehead: { x: 0, y: -0.35 },
+            chin: { x: 0, y: 0.5 }
         };
 
         function init() {
@@ -222,27 +326,36 @@
         }
 
         function setupEvents() {
-            document.getElementById('btnCam').onclick = toggleCamera;
-            document.getElementById('btnRun').onclick = toggleSystem;
+            document.getElementById('btnCam').onclick = () => {
+                playSound('click');
+                toggleCamera();
+            };
+            
+            document.getElementById('btnRun').onclick = () => {
+                playSound('click');
+                toggleSystem();
+            };
             
             setupKnob('knobDensity', (val) => {
-                state.density = Math.floor(10 + val * 30);
-                showTip(`FRAG_DENSITY: ${state.density}`);
+                state.density = Math.floor(8 + val * 24); // 8-32 個碎片
+                document.getElementById('valDensity').textContent = state.density;
+                playSound('knob');
             });
             
             setupKnob('knobDistort', (val) => {
                 state.distortion = val;
-                showTip(`DISTORTION: ${Math.floor(val*100)}%`);
+                document.getElementById('valDistort').textContent = Math.floor(val*100) + '%';
+                playSound('knob');
             });
 
             window.addEventListener('resize', resize);
         }
 
-        function showTip(text) {
-            tip.innerText = text;
-            tip.style.opacity = 1;
-            clearTimeout(window.tipTimer);
-            window.tipTimer = setTimeout(() => tip.style.opacity = 0, 1500);
+        function playSound(name) {
+            if (sounds[name]) {
+                sounds[name].currentTime = 0;
+                sounds[name].play().catch(e => {});
+            }
         }
 
         function setupKnob(id, callback) {
@@ -254,8 +367,7 @@
             el.onmousedown = (e) => { 
                 isDragging = true; 
                 lastY = e.clientY;
-                tip.style.left = e.pageX + 10 + 'px';
-                tip.style.top = e.pageY + 'px';
+                el.classList.add('active');
             };
             
             window.onmousemove = (e) => {
@@ -263,12 +375,13 @@
                 let delta = (lastY - e.clientY) * 0.005;
                 currentVal = Math.min(1, Math.max(0, currentVal + delta));
                 lastY = e.clientY;
-                tip.style.left = e.pageX + 10 + 'px';
-                tip.style.top = e.pageY + 'px';
                 callback(currentVal);
             };
             
-            window.onmouseup = () => { isDragging = false; };
+            window.onmouseup = () => { 
+                isDragging = false;
+                el.classList.remove('active');
+            };
         }
 
         async function toggleCamera() {
@@ -299,7 +412,7 @@
             addLog(state.isRunning ? "INITIATING SCAN..." : "SCAN PAUSED.");
             
             if (state.isRunning && state.currentMode === 3) {
-                captureAndCreateFragments();
+                captureFacialFragments();
             }
         }
 
@@ -307,10 +420,16 @@
             state.currentMode = m;
             const names = ["", "1_MIRROR_STAGE", "2_DATA_DISCIPLINE", "3_HYPERREAL_SIM"];
             document.getElementById('disp-mode').textContent = `MODE: ${names[m]}`;
+            
+            document.querySelectorAll('.mode-target').forEach((el, i) => {
+                el.classList.toggle('active', i === m - 1);
+            });
+            
+            playSound('mode');
             addLog(`STAGE_${m} ACTIVATED.`);
             
             if (m === 3 && state.isRunning && state.cameraActive) {
-                captureAndCreateFragments();
+                captureFacialFragments();
             }
         }
 
@@ -352,8 +471,8 @@
             state.faceCenter.y = brightY / captureCanvas.height;
         }
 
-        // ==================== 碎片生成 ====================
-        function captureAndCreateFragments() {
+        // ==================== 五官碎片生成（錯位拼貼在臉上）====================
+        function captureFacialFragments() {
             if (!video.readyState || video.readyState < 2) return;
             
             detectFaceCenter();
@@ -363,27 +482,38 @@
             captureCtx.drawImage(video, -captureCanvas.width, 0, captureCanvas.width, captureCanvas.height);
             captureCtx.restore();
             
-            state.fragments = [];
+            state.facialFragments = [];
             
             const faceCenterX = state.faceCenter.x * captureCanvas.width;
             const faceCenterY = state.faceCenter.y * captureCanvas.height;
             const faceWidth = state.faceSize.w * captureCanvas.width;
             const faceHeight = state.faceSize.h * captureCanvas.height;
             
+            // 獲取所有五官位置名稱
+            const facialKeys = Object.keys(FACIAL_POSITIONS);
+            
+            // 為每個碎片分配來源和目標位置
             for (let i = 0; i < state.density; i++) {
-                const fragWidth = 30 + Math.random() * 120;
-                const fragHeight = 30 + Math.random() * 120;
+                // 隨機選擇來源五官位置
+                const sourceKey = facialKeys[Math.floor(Math.random() * facialKeys.length)];
+                const sourcePos = FACIAL_POSITIONS[sourceKey];
                 
-                const angle = Math.random() * Math.PI * 2;
-                const distance = Math.random() * Math.min(faceWidth, faceHeight) * 0.5;
+                // **關鍵改進：隨機錯位目標位置**
+                const targetKey = facialKeys[Math.floor(Math.random() * facialKeys.length)];
+                const targetPos = FACIAL_POSITIONS[targetKey];
                 
+                // 碎片大小
+                const fragWidth = 40 + Math.random() * 80;
+                const fragHeight = 40 + Math.random() * 80;
+                
+                // 從來源位置擷取
                 const sourceX = Math.max(0, Math.min(
                     captureCanvas.width - fragWidth,
-                    faceCenterX + Math.cos(angle) * distance - fragWidth / 2
+                    faceCenterX + sourcePos.x * faceWidth - fragWidth / 2 + (Math.random() - 0.5) * 30
                 ));
                 const sourceY = Math.max(0, Math.min(
                     captureCanvas.height - fragHeight,
-                    faceCenterY + Math.sin(angle) * distance - fragHeight / 2
+                    faceCenterY + sourcePos.y * faceHeight - fragHeight / 2 + (Math.random() - 0.5) * 30
                 ));
                 
                 const fragCanvas = document.createElement('canvas');
@@ -394,32 +524,29 @@
                 fragCtx.drawImage(captureCanvas, sourceX, sourceY, fragWidth, fragHeight, 0, 0, fragWidth, fragHeight);
                 
                 const transform = {
-                    flipH: Math.random() > 0.6,
-                    flipV: Math.random() > 0.8,
-                    rotate: (Math.random() - 0.5) * 45 * state.distortion,
-                    scaleX: 0.7 + Math.random() * 0.6,
-                    scaleY: 0.7 + Math.random() * 0.6,
-                    skewX: (Math.random() - 0.5) * 0.3 * state.distortion,
-                    skewY: (Math.random() - 0.5) * 0.3 * state.distortion
+                    flipH: Math.random() > 0.7,
+                    flipV: Math.random() > 0.85,
+                    rotate: (Math.random() - 0.5) * 30 * state.distortion,
+                    scaleX: 0.8 + Math.random() * 0.4,
+                    scaleY: 0.8 + Math.random() * 0.4
                 };
                 
-                const targetAngle = Math.random() * Math.PI * 2;
-                const targetDistance = Math.random() * faceWidth * 1.8;
-                
-                const targetX = (state.faceCenter.x * canvas.width) + Math.cos(targetAngle) * targetDistance;
-                const targetY = (state.faceCenter.y * canvas.height) + Math.sin(targetAngle) * targetDistance;
-                
-                state.fragments.push({
+                state.facialFragments.push({
                     canvas: fragCanvas,
-                    width: fragWidth, height: fragHeight,
-                    transform, targetX, targetY,
-                    alpha: 0.75 + Math.random() * 0.25,
+                    width: fragWidth,
+                    height: fragHeight,
+                    transform,
+                    targetPos, // 目標五官位置（會錯位）
+                    sourceKey,
+                    targetKey,
+                    alpha: 0.8 + Math.random() * 0.2,
                     zIndex: Math.random()
                 });
             }
             
-            state.fragments.sort((a, b) => a.zIndex - b.zIndex);
-            addLog(`FRAGMENTS: ${state.fragments.length}`);
+            state.facialFragments.sort((a, b) => a.zIndex - b.zIndex);
+            addLog(`FACIAL FRAG: ${state.facialFragments.length}`);
+            addLog(`MISALIGNMENT APPLIED`);
         }
 
         function addLog(msg) {
@@ -440,8 +567,14 @@
             if (state.isRunning && state.cameraActive && video.readyState >= 2) {
                 state.frameCount++;
                 
+                // 即時追蹤臉部
+                if (state.currentMode === 3) {
+                    detectFaceCenter();
+                }
+                
+                // 定期重新擷取碎片
                 if (state.currentMode === 3 && timestamp - state.lastReshuffleTime > state.reshuffleSpeed * 1000) {
-                    captureAndCreateFragments();
+                    captureFacialFragments();
                     state.lastReshuffleTime = timestamp;
                 }
                 
@@ -450,7 +583,6 @@
             requestAnimationFrame(loop);
         }
 
-        // ==================== RGB to HSL ====================
         function rgbToHsl(r, g, b) {
             r /= 255; g /= 255; b /= 255;
             const max = Math.max(r, g, b), min = Math.min(r, g, b);
@@ -468,7 +600,6 @@
             return { h: h * 360, s: s * 100, l: l * 100 };
         }
 
-        // ==================== 繪製 ====================
         function render() {
             const w = canvas.width;
             const h = canvas.height;
@@ -477,7 +608,7 @@
             ctx.fillRect(0, 0, w, h);
 
             if (state.currentMode === 1) {
-                // 階段1：掃描 + 臉部偵測
+                // 階段1：掃描
                 ctx.globalAlpha = 0.3;
                 ctx.save();
                 ctx.scale(-1, 1);
@@ -517,7 +648,7 @@
                 ctx.stroke();
                 
             } else if (state.currentMode === 2) {
-                // 階段2：動態色彩分析
+                // 階段2：色彩
                 captureCtx.save();
                 captureCtx.scale(-1, 1);
                 captureCtx.drawImage(video, -captureCanvas.width, 0, captureCanvas.width, captureCanvas.height);
@@ -569,26 +700,39 @@
                 }
                 
             } else if (state.currentMode === 3) {
-                // 階段3：碎片拼貼
-                if (state.fragments.length === 0) return;
+                // 階段3：五官錯位拼貼在臉上
+                if (state.facialFragments.length === 0) return;
                 
-                ctx.globalAlpha = 0.15;
+                // 微弱背景
+                ctx.globalAlpha = 0.12;
                 ctx.save();
                 ctx.scale(-1, 1);
                 ctx.drawImage(video, -w, 0, w, h);
                 ctx.restore();
                 ctx.globalAlpha = 1;
                 
-                state.fragments.forEach(frag => {
+                // 即時臉部中心
+                const faceCenterX = state.faceCenter.x * w;
+                const faceCenterY = state.faceCenter.y * h;
+                const faceWidth = state.faceSize.w * w;
+                const faceHeight = state.faceSize.h * h;
+                
+                // 繪製所有碎片（錯位貼在臉上）
+                state.facialFragments.forEach(frag => {
                     ctx.save();
-                    ctx.translate(frag.targetX, frag.targetY);
+                    
+                    // 目標位置（跟隨臉部移動）
+                    const targetX = faceCenterX + frag.targetPos.x * faceWidth;
+                    const targetY = faceCenterY + frag.targetPos.y * faceHeight;
+                    
+                    ctx.translate(targetX, targetY);
                     ctx.rotate(frag.transform.rotate * Math.PI / 180);
                     
-                    let scaleX = frag.transform.scaleX, scaleY = frag.transform.scaleY;
+                    let scaleX = frag.transform.scaleX;
+                    let scaleY = frag.transform.scaleY;
                     if (frag.transform.flipH) scaleX *= -1;
                     if (frag.transform.flipV) scaleY *= -1;
                     ctx.scale(scaleX, scaleY);
-                    ctx.transform(1, frag.transform.skewY, frag.transform.skewX, 1, 0, 0);
                     
                     ctx.globalAlpha = frag.alpha;
                     const displayWidth = frag.width * (w / captureCanvas.width);
@@ -596,10 +740,12 @@
                     
                     ctx.drawImage(frag.canvas, -displayWidth / 2, -displayHeight / 2, displayWidth, displayHeight);
                     
-                    ctx.globalAlpha = 0.5;
+                    // 碎片邊框
+                    ctx.globalAlpha = 0.4;
                     ctx.strokeStyle = '#0f8';
-                    ctx.lineWidth = 2;
+                    ctx.lineWidth = 1.5;
                     ctx.strokeRect(-displayWidth / 2, -displayHeight / 2, displayWidth, displayHeight);
+                    
                     ctx.restore();
                 });
             }
