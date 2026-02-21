@@ -8,7 +8,8 @@
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap');
         
         :root {
-            --glow-color: #0f8;
+            --glow-color: #d4a574;     /* 復古琥珀黃 */
+            --glow-bright: #e8c891;    /* 亮琥珀黃 */
             --crt-bg: #050805;
         }
 
@@ -35,16 +36,16 @@
             background-size: contain;
             background-position: center;
             background-repeat: no-repeat;
-            box-shadow: 0 0 100px rgba(0, 255, 136, 0.1);
+            box-shadow: 0 0 100px rgba(212, 165, 116, 0.1);
         }
 
-        /* 螢幕區域 - 精確對齊 */
+        /* 螢幕區域 - 完美對齊 */
         .screen-container {
             position: absolute;
-            top: 10%;      /* 大幅上移 */
+            top: 8.5%;     /* 再往上移 */
             left: 24.8%;
             width: 50.4%;
-            height: 52%;   /* 增加高度補償 */
+            height: 54%;   /* 增加高度填滿 */
             background: var(--crt-bg);
             border-radius: 4px;
             overflow: hidden;
@@ -96,19 +97,19 @@
         }
 
         .knob-area:hover {
-            background: rgba(0, 255, 136, 0.1);
+            background: rgba(212, 165, 116, 0.1);
         }
 
         .knob-area.active {
-            background: rgba(0, 255, 136, 0.2);
-            box-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
+            background: rgba(212, 165, 116, 0.2);
+            box-shadow: 0 0 15px rgba(212, 165, 116, 0.5);
         }
 
         .knob-value {
             margin-top: 5%;
             font-size: clamp(9px, 1vw, 11px);
-            color: #0f8;
-            text-shadow: 0 0 5px #0f8;
+            color: var(--glow-bright);
+            text-shadow: 0 0 8px var(--glow-color);
             text-align: center;
             font-weight: bold;
         }
@@ -130,7 +131,7 @@
         }
 
         .mode-target:hover {
-            background: rgba(0, 255, 136, 0.1);
+            background: rgba(212, 165, 116, 0.1);
         }
 
         .mode-target.active {
@@ -158,12 +159,12 @@
         }
 
         .btn:hover {
-            background: rgba(0, 255, 136, 0.15);
+            background: rgba(212, 165, 116, 0.15);
         }
 
         .btn:active {
             transform: scale(0.95);
-            background: rgba(0, 255, 136, 0.3);
+            background: rgba(212, 165, 116, 0.3);
         }
 
         /* 指示燈 */
@@ -218,6 +219,7 @@
             transition: opacity 0.2s;
             z-index: 20;
             white-space: nowrap;
+            color: var(--glow-bright);
         }
     </style>
 </head>
@@ -502,18 +504,18 @@
                 const targetKey = facialKeys[Math.floor(Math.random() * facialKeys.length)];
                 const targetPos = FACIAL_POSITIONS[targetKey];
                 
-                // 碎片大小
-                const fragWidth = 40 + Math.random() * 80;
-                const fragHeight = 40 + Math.random() * 80;
+                // 碎片大小（縮小 - 更自然）
+                const fragWidth = 25 + Math.random() * 50;   // 25-75px (之前40-120)
+                const fragHeight = 25 + Math.random() * 50;  // 25-75px (之前40-120)
                 
                 // 從來源位置擷取
                 const sourceX = Math.max(0, Math.min(
                     captureCanvas.width - fragWidth,
-                    faceCenterX + sourcePos.x * faceWidth - fragWidth / 2 + (Math.random() - 0.5) * 30
+                    faceCenterX + sourcePos.x * faceWidth - fragWidth / 2 + (Math.random() - 0.5) * 40
                 ));
                 const sourceY = Math.max(0, Math.min(
                     captureCanvas.height - fragHeight,
-                    faceCenterY + sourcePos.y * faceHeight - fragHeight / 2 + (Math.random() - 0.5) * 30
+                    faceCenterY + sourcePos.y * faceHeight - fragHeight / 2 + (Math.random() - 0.5) * 40
                 ));
                 
                 const fragCanvas = document.createElement('canvas');
@@ -524,11 +526,13 @@
                 fragCtx.drawImage(captureCanvas, sourceX, sourceY, fragWidth, fragHeight, 0, 0, fragWidth, fragHeight);
                 
                 const transform = {
-                    flipH: Math.random() > 0.7,
-                    flipV: Math.random() > 0.85,
-                    rotate: (Math.random() - 0.5) * 30 * state.distortion,
-                    scaleX: 0.8 + Math.random() * 0.4,
-                    scaleY: 0.8 + Math.random() * 0.4
+                    flipH: Math.random() > 0.75,  // 降低翻轉機率
+                    flipV: Math.random() > 0.9,
+                    rotate: (Math.random() - 0.5) * 20 * state.distortion,  // 減少旋轉角度
+                    scaleX: 0.85 + Math.random() * 0.3,  // 更溫和的縮放
+                    scaleY: 0.85 + Math.random() * 0.3,
+                    offsetX: (Math.random() - 0.5) * 30,  // 增加隨機偏移，更自然
+                    offsetY: (Math.random() - 0.5) * 30
                 };
                 
                 state.facialFragments.push({
@@ -539,7 +543,7 @@
                     targetPos, // 目標五官位置（會錯位）
                     sourceKey,
                     targetKey,
-                    alpha: 0.8 + Math.random() * 0.2,
+                    alpha: 0.75 + Math.random() * 0.25,
                     zIndex: Math.random()
                 });
             }
@@ -618,7 +622,7 @@
                 
                 state.scanProgress = (state.scanProgress + 2) % h;
                 
-                ctx.strokeStyle = 'rgba(0, 255, 136, 0.8)';
+                ctx.strokeStyle = 'rgba(212, 165, 116, 0.8)';
                 ctx.lineWidth = 3;
                 ctx.beginPath();
                 ctx.moveTo(0, state.scanProgress);
@@ -626,9 +630,9 @@
                 ctx.stroke();
                 
                 const gradient = ctx.createLinearGradient(0, state.scanProgress - 50, 0, state.scanProgress + 50);
-                gradient.addColorStop(0, 'rgba(0, 255, 136, 0)');
-                gradient.addColorStop(0.5, 'rgba(0, 255, 136, 0.2)');
-                gradient.addColorStop(1, 'rgba(0, 255, 136, 0)');
+                gradient.addColorStop(0, 'rgba(212, 165, 116, 0)');
+                gradient.addColorStop(0.5, 'rgba(212, 165, 116, 0.2)');
+                gradient.addColorStop(1, 'rgba(212, 165, 116, 0)');
                 ctx.fillStyle = gradient;
                 ctx.fillRect(0, state.scanProgress - 50, w, 100);
                 
@@ -637,7 +641,7 @@
                 const faceWidth = state.faceSize.w * w;
                 const faceHeight = state.faceSize.h * h;
                 
-                ctx.strokeStyle = '#0f8';
+                ctx.strokeStyle = 'rgba(212, 165, 116, 0.7)';
                 ctx.lineWidth = 3;
                 ctx.setLineDash([10, 5]);
                 ctx.strokeRect(faceCenterX - faceWidth/2, faceCenterY - faceHeight/2, faceWidth, faceHeight);
@@ -717,13 +721,13 @@
                 const faceWidth = state.faceSize.w * w;
                 const faceHeight = state.faceSize.h * h;
                 
-                // 繪製所有碎片（錯位貼在臉上）
+                // 繪製所有碎片（錯位貼在臉上，加入自然偏移）
                 state.facialFragments.forEach(frag => {
                     ctx.save();
                     
-                    // 目標位置（跟隨臉部移動）
-                    const targetX = faceCenterX + frag.targetPos.x * faceWidth;
-                    const targetY = faceCenterY + frag.targetPos.y * faceHeight;
+                    // 目標位置（跟隨臉部移動）+ 隨機偏移
+                    const targetX = faceCenterX + frag.targetPos.x * faceWidth + frag.transform.offsetX;
+                    const targetY = faceCenterY + frag.targetPos.y * faceHeight + frag.transform.offsetY;
                     
                     ctx.translate(targetX, targetY);
                     ctx.rotate(frag.transform.rotate * Math.PI / 180);
@@ -740,10 +744,10 @@
                     
                     ctx.drawImage(frag.canvas, -displayWidth / 2, -displayHeight / 2, displayWidth, displayHeight);
                     
-                    // 碎片邊框
-                    ctx.globalAlpha = 0.4;
-                    ctx.strokeStyle = '#0f8';
-                    ctx.lineWidth = 1.5;
+                    // 碎片邊框（改為琥珀色）
+                    ctx.globalAlpha = 0.35;
+                    ctx.strokeStyle = 'rgba(212, 165, 116, 0.6)';
+                    ctx.lineWidth = 1;
                     ctx.strokeRect(-displayWidth / 2, -displayHeight / 2, displayWidth, displayHeight);
                     
                     ctx.restore();
