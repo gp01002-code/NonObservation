@@ -25,6 +25,59 @@
             justify-content: center;
             align-items: center;
         }
+        
+        /* 手機直向提示 */
+        @media (max-width: 768px) and (orientation: portrait) {
+            body::before {
+                content: "請將手機橫向旋轉 ↻\A以獲得最佳體驗";
+                white-space: pre;
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: rgba(0,0,0,0.95);
+                color: var(--glow-bright);
+                padding: 30px 20px;
+                border: 3px solid var(--glow-color);
+                border-radius: 15px;
+                z-index: 9999;
+                font-size: 16px;
+                text-align: center;
+                max-width: 80%;
+                box-shadow: 0 0 30px var(--glow-color);
+                animation: pulse 2s infinite;
+            }
+            
+            @keyframes pulse {
+                0%, 100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+                50% { opacity: 0.8; transform: translate(-50%, -50%) scale(1.05); }
+            }
+            
+            .machine-wrapper {
+                opacity: 0.2;
+                pointer-events: none;
+                filter: blur(3px);
+            }
+        }
+        
+        /* 手機橫向優化 */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .machine-wrapper {
+                width: 98vw;
+                max-width: none;
+            }
+            
+            .knob-value {
+                font-size: clamp(8px, 2vw, 10px);
+            }
+        }
+        
+        /* 平板優化 */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .machine-wrapper {
+                width: 95vw;
+            }
+        }
 
         .machine-wrapper {
             position: relative;
@@ -176,8 +229,8 @@
             background: #200;
             z-index: 10;
         }
-        .light-left { bottom: 22%; left: 24%; }      /* 紅燈移到更靠近 MODE 文字 */
-        .light-right { bottom: 22%; right: 24%; }    /* 綠燈移到更靠近 LIVE EEG 文字 */
+        .light-left { bottom: 22%; left: 19.5%; }      /* 紅燈：更靠近 MODE */
+        .light-right { bottom: 22%; right: 19.5%; }    /* 綠燈：更靠近 LIVE EEG */
         .light.active-red { 
             background: #f00; 
             box-shadow: 0 0 12px #f00, 0 0 20px #f00;
@@ -385,6 +438,23 @@
             setupEvents();
             requestAnimationFrame(loop);
             addLog("CORE LINK READY.");
+            
+            // 監聽螢幕方向變化
+            window.addEventListener('orientationchange', handleOrientationChange);
+            handleOrientationChange();
+        }
+        
+        function handleOrientationChange() {
+            // 檢測是否為手機直向
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            const isPortrait = window.innerHeight > window.innerWidth;
+            
+            if (isMobile && isPortrait) {
+                addLog("ROTATE TO LANDSCAPE");
+            } else if (isMobile) {
+                addLog("LANDSCAPE MODE OK");
+                setTimeout(resize, 100);
+            }
         }
 
         function setupEvents() {
@@ -430,9 +500,19 @@
             let currentVal = (id === 'knobDensity') ? 0.5 : 0.7;
             const el = document.getElementById(id);
             
+            // 滑鼠事件
             el.onmousedown = (e) => { 
+                e.preventDefault();
                 isDragging = true; 
                 lastY = e.clientY;
+                el.classList.add('active');
+            };
+            
+            // 觸控事件
+            el.ontouchstart = (e) => {
+                e.preventDefault();
+                isDragging = true;
+                lastY = e.touches[0].clientY;
                 el.classList.add('active');
             };
             
@@ -444,7 +524,21 @@
                 callback(currentVal);
             };
             
+            window.ontouchmove = (e) => {
+                if (!isDragging) return;
+                e.preventDefault();
+                let delta = (lastY - e.touches[0].clientY) * 0.005;
+                currentVal = Math.min(1, Math.max(0, currentVal + delta));
+                lastY = e.touches[0].clientY;
+                callback(currentVal);
+            };
+            
             window.onmouseup = () => { 
+                isDragging = false;
+                el.classList.remove('active');
+            };
+            
+            window.ontouchend = () => {
                 isDragging = false;
                 el.classList.remove('active');
             };
@@ -764,7 +858,7 @@
             ctx.fillRect(0, 0, w, h);
 
             if (state.currentMode === 1) {
-                // 階段1：掃描
+                // 階段1：掃描 + 人臉鎖定
                 ctx.globalAlpha = 0.3;
                 ctx.save();
                 ctx.scale(-1, 1);
@@ -774,6 +868,7 @@
                 
                 state.scanProgress = (state.scanProgress + 2) % h;
                 
+                // 掃描線
                 ctx.strokeStyle = 'rgba(212, 165, 116, 0.8)';
                 ctx.lineWidth = 3;
                 ctx.beginPath();
@@ -788,19 +883,47 @@
                 ctx.fillStyle = gradient;
                 ctx.fillRect(0, state.scanProgress - 50, w, 100);
                 
+                // 簡潔的人臉鎖定框
                 const faceCenterX = state.faceCenter.x * w;
                 const faceCenterY = state.faceCenter.y * h;
                 const faceWidth = state.faceSize.w * w;
                 const faceHeight = state.faceSize.h * h;
                 
-                ctx.strokeStyle = 'rgba(212, 165, 116, 0.7)';
-                ctx.lineWidth = 3;
-                ctx.setLineDash([10, 5]);
+                // 主要鎖定框（實線）
+                ctx.strokeStyle = 'rgba(212, 165, 116, 0.9)';
+                ctx.lineWidth = 2;
                 ctx.strokeRect(faceCenterX - faceWidth/2, faceCenterY - faceHeight/2, faceWidth, faceHeight);
-                ctx.setLineDash([]);
                 
+                // 四角標記（加強鎖定感）
+                const cornerSize = 20;
+                ctx.lineWidth = 3;
+                
+                // 左上
                 ctx.beginPath();
-                ctx.arc(faceCenterX, faceCenterY, Math.min(faceWidth, faceHeight) * 0.6, 0, Math.PI * 2);
+                ctx.moveTo(faceCenterX - faceWidth/2, faceCenterY - faceHeight/2 + cornerSize);
+                ctx.lineTo(faceCenterX - faceWidth/2, faceCenterY - faceHeight/2);
+                ctx.lineTo(faceCenterX - faceWidth/2 + cornerSize, faceCenterY - faceHeight/2);
+                ctx.stroke();
+                
+                // 右上
+                ctx.beginPath();
+                ctx.moveTo(faceCenterX + faceWidth/2 - cornerSize, faceCenterY - faceHeight/2);
+                ctx.lineTo(faceCenterX + faceWidth/2, faceCenterY - faceHeight/2);
+                ctx.lineTo(faceCenterX + faceWidth/2, faceCenterY - faceHeight/2 + cornerSize);
+                ctx.stroke();
+                
+                // 左下
+                ctx.beginPath();
+                ctx.moveTo(faceCenterX - faceWidth/2, faceCenterY + faceHeight/2 - cornerSize);
+                ctx.lineTo(faceCenterX - faceWidth/2, faceCenterY + faceHeight/2);
+                ctx.lineTo(faceCenterX - faceWidth/2 + cornerSize, faceCenterY + faceHeight/2);
+                ctx.stroke();
+                
+                // 右下
+                ctx.beginPath();
+                ctx.moveTo(faceCenterX + faceWidth/2 - cornerSize, faceCenterY + faceHeight/2);
+                ctx.lineTo(faceCenterX + faceWidth/2, faceCenterY + faceHeight/2);
+                ctx.lineTo(faceCenterX + faceWidth/2, faceCenterY + faceHeight/2 - cornerSize);
                 ctx.stroke();
                 
             } else if (state.currentMode === 2) {
@@ -858,8 +981,8 @@
             } else if (state.currentMode === 3) {
                 // 階段3：五官碎片自由遊走
                 
-                // 清晰背景人像（提高透明度）
-                ctx.globalAlpha = 0.4;  // 從 0.08 提高到 0.4
+                // 清晰背景人像（提高到60%讓人臉更清楚）
+                ctx.globalAlpha = 0.6;  // 從 0.4 提高到 0.6
                 ctx.save();
                 ctx.scale(-1, 1);
                 ctx.drawImage(video, -w, 0, w, h);
