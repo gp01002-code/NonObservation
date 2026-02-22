@@ -28,7 +28,8 @@
         
         /* 手機直向提示 */
         @media (max-width: 768px) and (orientation: portrait) {
-            body::before {
+            /* 只在開場頁面隱藏後才顯示旋轉提示 */
+            body:not(:has(.intro-screen:not(.hidden)))::before {
                 content: "請將手機橫向旋轉 ↻\A以獲得最佳體驗";
                 white-space: pre;
                 position: fixed;
@@ -53,7 +54,12 @@
                 50% { opacity: 0.8; transform: translate(-50%, -50%) scale(1.05); }
             }
             
-            .machine-wrapper {
+            /* 開場頁面在直向時正常顯示 */
+            .intro-screen {
+                opacity: 1;
+            }
+            
+            .intro-screen.hidden + * .machine-wrapper {
                 opacity: 0.2;
                 pointer-events: none;
                 filter: blur(3px);
@@ -543,6 +549,240 @@
         }
 
         #videoElement { display: none; }
+        
+        /* 開場說明頁面 */
+        .intro-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(135deg, #000 0%, #1a1a1a 50%, #000 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            padding: 40px;
+            box-sizing: border-box;
+            opacity: 1;
+            transition: opacity 0.5s;
+        }
+        
+        .intro-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .intro-title {
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(28px, 5vw, 48px);
+            color: var(--glow-bright);
+            text-shadow: 0 0 20px var(--glow-color), 0 0 40px var(--glow-color);
+            margin-bottom: 40px;
+            text-align: center;
+            letter-spacing: 3px;
+            animation: titleGlow 3s ease-in-out infinite;
+        }
+        
+        @keyframes titleGlow {
+            0%, 100% { text-shadow: 0 0 20px var(--glow-color), 0 0 40px var(--glow-color); }
+            50% { text-shadow: 0 0 30px var(--glow-bright), 0 0 60px var(--glow-bright); }
+        }
+        
+        .intro-content {
+            max-width: 700px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid var(--glow-color);
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 0 30px rgba(212, 165, 116, 0.3);
+            margin-bottom: 40px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+        
+        /* 自定義滾動條 */
+        .intro-content::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .intro-content::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+        }
+        
+        .intro-content::-webkit-scrollbar-thumb {
+            background: var(--glow-color);
+            border-radius: 4px;
+        }
+        
+        .intro-content::-webkit-scrollbar-thumb:hover {
+            background: var(--glow-bright);
+        }
+        
+        /* 手機版優化 */
+        @media (max-width: 768px) {
+            .intro-screen {
+                padding: 20px;
+            }
+            
+            .intro-content {
+                padding: 20px;
+                max-height: 50vh;
+            }
+            
+            .intro-title {
+                margin-bottom: 25px;
+            }
+            
+            .intro-section {
+                margin-bottom: 20px;
+            }
+            
+            .start-button {
+                padding: 15px 40px;
+                font-size: 18px;
+            }
+        }
+        
+        .intro-section {
+            margin-bottom: 25px;
+        }
+        
+        .intro-section h3 {
+            color: var(--glow-bright);
+            font-size: clamp(16px, 2.5vw, 20px);
+            margin-bottom: 12px;
+            text-shadow: 0 0 8px var(--glow-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .intro-section h3::before {
+            content: '▸';
+            color: var(--glow-bright);
+        }
+        
+        .intro-section p, .intro-section ul {
+            color: rgba(212, 165, 116, 0.9);
+            font-size: clamp(13px, 2vw, 15px);
+            line-height: 1.6;
+            margin: 0;
+        }
+        
+        .intro-section ul {
+            list-style: none;
+            padding-left: 20px;
+        }
+        
+        .intro-section li {
+            margin-bottom: 8px;
+            position: relative;
+        }
+        
+        .intro-section li::before {
+            content: '•';
+            position: absolute;
+            left: -15px;
+            color: var(--glow-bright);
+        }
+        
+        .start-button {
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(18px, 3vw, 24px);
+            padding: 18px 50px;
+            background: linear-gradient(135deg, rgba(212, 165, 116, 0.2), rgba(232, 200, 145, 0.3));
+            border: 3px solid var(--glow-bright);
+            border-radius: 8px;
+            color: var(--glow-bright);
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 0 0 20px rgba(212, 165, 116, 0.5);
+            animation: buttonPulse 2s ease-in-out infinite;
+            -webkit-tap-highlight-color: transparent;  /* 移除手機點擊高亮 */
+            user-select: none;  /* 防止選取文字 */
+        }
+        
+        .start-button:hover {
+            background: linear-gradient(135deg, rgba(232, 200, 145, 0.4), rgba(255, 220, 145, 0.5));
+            box-shadow: 0 0 40px var(--glow-bright);
+            transform: scale(1.05);
+        }
+        
+        .start-button:active {
+            transform: scale(0.98);
+        }
+        
+        @keyframes buttonPulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(212, 165, 116, 0.5); }
+            50% { box-shadow: 0 0 35px rgba(232, 200, 145, 0.8); }
+        }
+        
+        /* 退出按鈕 */
+        .exit-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid var(--glow-color);
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            box-shadow: 0 0 15px rgba(212, 165, 116, 0.3);
+            -webkit-tap-highlight-color: transparent;  /* 移除手機點擊高亮 */
+        }
+        
+        .exit-button.visible {
+            display: flex;
+        }
+        
+        .exit-button:hover {
+            background: rgba(212, 165, 116, 0.3);
+            box-shadow: 0 0 25px var(--glow-bright);
+            transform: scale(1.1);
+        }
+        
+        .exit-button:active {
+            transform: scale(0.95);
+        }
+        
+        .exit-button::before,
+        .exit-button::after {
+            content: '';
+            position: absolute;
+            width: 60%;
+            height: 2px;
+            background: var(--glow-bright);
+            box-shadow: 0 0 5px var(--glow-bright);
+        }
+        
+        .exit-button::before {
+            transform: rotate(45deg);
+        }
+        
+        .exit-button::after {
+            transform: rotate(-45deg);
+        }
+        
+        /* 手機版退出按鈕調整 */
+        @media (max-width: 768px) {
+            .exit-button {
+                top: 15px;
+                right: 15px;
+                width: 45px;
+                height: 45px;
+            }
+        }
 
         .tooltip {
             position: absolute;
@@ -560,6 +800,47 @@
     </style>
 </head>
 <body>
+
+    <!-- 開場說明頁面 -->
+    <div class="intro-screen" id="introScreen">
+        <h1 class="intro-title">自我觀測儀 | NonObservation</h1>
+        
+        <div class="intro-content">
+            <div class="intro-section">
+                <h3>操作方式</h3>
+                <ul>
+                    <li><strong>CAM 按鈕</strong> - 左下角，開啟/關閉攝影機</li>
+                    <li><strong>RUN 按鈕</strong> - 右下角，啟動/暫停系統</li>
+                    <li><strong>MODE 選擇</strong> - 底部三個區域，切換觀測模式</li>
+                    <li><strong>旋鈕控制</strong> - 左右兩側，上下拖動調整參數</li>
+                    <li><strong>微調按鈕</strong> - 螢幕兩側 +/- 按鈕，精細調整</li>
+                </ul>
+            </div>
+            
+            <div class="intro-section">
+                <h3>三種觀測模式</h3>
+                <ul>
+                    <li><strong>階段 1 - 鏡像期</strong>：臉部掃描與五官偵測</li>
+                    <li><strong>階段 2 - 資料規訓</strong>：色彩解構與重組</li>
+                    <li><strong>階段 3 - 超真實擬像</strong>：五官碎片互動（搖頭、伸手可影響）</li>
+                </ul>
+            </div>
+            
+            <div class="intro-section">
+                <h3>互動技巧</h3>
+                <ul>
+                    <li>在階段 3 中，<strong>左右搖頭</strong>會推動碎片旋轉</li>
+                    <li><strong>伸手到畫面</strong>可以推開附近的碎片</li>
+                    <li>調整左側旋鈕改變碎片數量（8-32 個）</li>
+                </ul>
+            </div>
+        </div>
+        
+        <button class="start-button" onclick="startExperience()">開始體驗</button>
+    </div>
+    
+    <!-- 退出全螢幕按鈕 -->
+    <div class="exit-button" id="exitButton" onclick="exitFullscreen()"></div>
 
     <div class="machine-wrapper">
         <div class="screen-container">
@@ -652,6 +933,90 @@
     <audio id="sndMode" preload="auto"><source src="sounds/mode.mp3"></audio>
 
     <script>
+        // ==================== 全螢幕控制 ====================
+        function startExperience() {
+            const introScreen = document.getElementById('introScreen');
+            const exitButton = document.getElementById('exitButton');
+            
+            // 隱藏開場頁面
+            introScreen.classList.add('hidden');
+            
+            // 進入全螢幕
+            const elem = document.documentElement;
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen().then(() => {
+                    exitButton.classList.add('visible');
+                }).catch(err => {
+                    console.log('Fullscreen request failed:', err);
+                    exitButton.classList.add('visible');
+                });
+            } else if (elem.webkitRequestFullscreen) { // Safari
+                elem.webkitRequestFullscreen();
+                exitButton.classList.add('visible');
+            } else if (elem.msRequestFullscreen) { // IE11
+                elem.msRequestFullscreen();
+                exitButton.classList.add('visible');
+            } else {
+                // 不支援全螢幕，仍然顯示退出按鈕
+                exitButton.classList.add('visible');
+            }
+            
+            // 播放音效
+            playSound('mode');
+        }
+        
+        function exitFullscreen() {
+            const introScreen = document.getElementById('introScreen');
+            const exitButton = document.getElementById('exitButton');
+            
+            // 退出全螢幕
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            } else if (document.msExitFullscreen) {
+                document.msExitFullscreen();
+            }
+            
+            // 顯示開場頁面
+            introScreen.classList.remove('hidden');
+            exitButton.classList.remove('visible');
+            
+            // 停止系統
+            if (state.isRunning) {
+                toggleSystem();
+            }
+            
+            // 播放音效
+            playSound('click');
+        }
+        
+        // 監聽全螢幕狀態變化
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+        document.addEventListener('msfullscreenchange', handleFullscreenChange);
+        
+        // 監聽 ESC 鍵
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && document.fullscreenElement) {
+                exitFullscreen();
+            }
+        });
+        
+        function handleFullscreenChange() {
+            const isFullscreen = !!(document.fullscreenElement || 
+                                   document.webkitFullscreenElement || 
+                                   document.msFullscreenElement);
+            
+            const exitButton = document.getElementById('exitButton');
+            const introScreen = document.getElementById('introScreen');
+            
+            if (!isFullscreen && !introScreen.classList.contains('hidden')) {
+                // 如果退出全螢幕且不在開場頁面，返回開場頁面
+                exitButton.classList.remove('visible');
+            }
+        }
+        
         const canvas = document.getElementById('mainCanvas');
         const ctx = canvas.getContext('2d');
         const video = document.getElementById('videoElement');
