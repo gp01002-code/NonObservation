@@ -126,7 +126,7 @@
             box-shadow: 0 0 100px rgba(212, 165, 116, 0.1);
         }
         
-        /* 後方背景層 - Image.png（機器面板，完全不透明） */
+        /* 後方背景層（第一層/最底層）- Image2.png（電子結構，完全不透明） */
         .machine-wrapper::before {
             content: '';
             position: absolute;
@@ -134,7 +134,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-image: url('Image.png');
+            background-image: url('Image2.png');
             background-size: contain;
             background-position: center;
             background-repeat: no-repeat;
@@ -143,7 +143,7 @@
             animation: floatBackground 8s ease-in-out infinite;
         }
         
-        /* 前方背景層 - Image2.png（電子結構，完全不透明） */
+        /* 前方背景層（第二層/上層）- Image.png（機器面板，完全不透明） */
         .machine-wrapper::after {
             content: '';
             position: absolute;
@@ -151,7 +151,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-image: url('Image2.png');
+            background-image: url('Image.png');
             background-size: contain;
             background-position: center;
             background-repeat: no-repeat;
@@ -324,7 +324,7 @@
             box-shadow: none;  /* 取消外框發光 */
         }
         
-        /* 模式按鈕發光效果 - 只有中間發光 */
+        /* 模式按鈕發光效果 - 琥珀色 + 亮黃色中間發光 */
         .mode-target.active::before {
             content: '';
             position: absolute;
@@ -333,13 +333,25 @@
             transform: translate(-50%, -50%);
             width: 60%;  /* 縮小發光範圍 */
             height: 60%;
-            background: radial-gradient(circle, rgba(255, 80, 0, 0.6) 0%, rgba(255, 100, 0, 0.3) 40%, transparent 70%);
+            background: radial-gradient(circle, 
+                rgba(232, 200, 145, 0.8) 0%,      /* 亮琥珀黃中心 */
+                rgba(212, 165, 116, 0.5) 40%,     /* 琥珀色 */
+                rgba(255, 220, 100, 0.2) 60%,     /* 亮黃色邊緣 */
+                transparent 80%);
             animation: modePulse 2s ease-in-out infinite;
         }
         
         @keyframes modePulse {
-            0%, 100% { opacity: 0.7; transform: translate(-50%, -50%) scale(1); }
-            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.15); }
+            0%, 100% { 
+                opacity: 0.7; 
+                transform: translate(-50%, -50%) scale(1);
+                filter: brightness(1);
+            }
+            50% { 
+                opacity: 1; 
+                transform: translate(-50%, -50%) scale(1.15);
+                filter: brightness(1.3);  /* 脈衝時更亮 */
+            }
         }
         
         /* 螢幕兩側微調控制面板 */
