@@ -85,11 +85,69 @@
             max-width: 1000px;
             aspect-ratio: 1000 / 667; 
             background-color: #1a1a1a;
-            background-image: url('Image.png'); 
+            box-shadow: 0 0 100px rgba(212, 165, 116, 0.1);
+        }
+        
+        /* 後方背景層 - Image2.png（電子結構） */
+        .machine-wrapper::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('Image2.png');
             background-size: contain;
             background-position: center;
             background-repeat: no-repeat;
-            box-shadow: 0 0 100px rgba(212, 165, 116, 0.1);
+            z-index: 0;
+            animation: floatBackground 8s ease-in-out infinite;
+        }
+        
+        /* 前方背景層 - Image.png（原本的機器面板，透明度 40%） */
+        .machine-wrapper::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('Image.png');
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            opacity: 0.4;
+            z-index: 1;
+            animation: floatForeground 6s ease-in-out infinite;
+        }
+        
+        /* 浮動動畫 - 後方背景（慢速、大範圍） */
+        @keyframes floatBackground {
+            0%, 100% {
+                transform: translate(0, 0) scale(1);
+            }
+            25% {
+                transform: translate(8px, -6px) scale(1.01);
+            }
+            50% {
+                transform: translate(-5px, 8px) scale(0.99);
+            }
+            75% {
+                transform: translate(-8px, -5px) scale(1.01);
+            }
+        }
+        
+        /* 浮動動畫 - 前方背景（快速、小範圍） */
+        @keyframes floatForeground {
+            0%, 100% {
+                transform: translate(0, 0);
+            }
+            33% {
+                transform: translate(-3px, 4px);
+            }
+            66% {
+                transform: translate(4px, -3px);
+            }
         }
 
         /* 螢幕區域 - 完美對齊 */
@@ -220,7 +278,7 @@
             background: rgba(212, 165, 116, 0.3);
         }
 
-        /* 指示燈 - 可微調位置 */
+        /* 指示燈 */
         .light {
             position: absolute;
             width: 8px; height: 8px;
@@ -229,16 +287,8 @@
             background: #200;
             z-index: 10;
         }
-        /* 紅燈（MODE 旁）- 微調：調整 bottom 和 left 的 % 值 */
-        .light-left { 
-            bottom: 22%; 
-            left: 25%;
-        }
-        /* 綠燈（LIVE EEG 旁）- 微調：調整 bottom 和 right 的 % 值 */
-        .light-right { 
-            bottom: 22%; 
-            right: 25%;
-        }
+        .light-left { bottom: 22%; left: 15%; }      /* 紅燈：更靠近 MODE 字母 */
+        .light-right { bottom: 22%; right: 15%; }    /* 綠燈：更靠近 LIVE EEG 字母 */
         .light.active-red { 
             background: #f00; 
             box-shadow: 0 0 12px #f00, 0 0 20px #f00;
@@ -356,20 +406,20 @@
             isRunning: false,
             cameraActive: false,
             currentMode: 1,
-            density: 28,  // 增加預設碎片數量到28
+            density: 28,
             distortion: 0.7,
             frameCount: 0,
             scanProgress: 0,
-            facialFragments: [], // 五官拼貼碎片
-            facialDatabase: {    // 五官資料庫
-                eyes: [],        // 眼睛
-                ears: [],        // 耳朵
-                nose: [],        // 鼻子
-                mouth: [],       // 嘴巴
-                skin: []         // 皮膚
+            facialFragments: [],
+            facialDatabase: {
+                eyes: [],
+                ears: [],
+                nose: [],
+                mouth: [],
+                skin: []
             },
             databaseReady: false,
-            useExternalImages: false,  // 是否使用外部圖片
+            useExternalImages: false,
             faceCenter: { x: 0.5, y: 0.45 },
             faceSize: { w: 0.35, h: 0.45 },
             lastReshuffleTime: 0,
@@ -406,7 +456,7 @@
                                 state.facialDatabase[part].push(canvas);
                                 resolve();
                             };
-                            img.onerror = () => resolve(); // 忽略載入失敗的圖片
+                            img.onerror = () => resolve();
                             img.src = filename;
                         });
                     } catch (e) {
@@ -416,7 +466,6 @@
                 addLog(`${part.toUpperCase()}: ${state.facialDatabase[part].length}`);
             }
             
-            // 檢查是否有任何五官載入成功
             const totalLoaded = state.facialDatabase.eyes.length + 
                               state.facialDatabase.ears.length + 
                               state.facialDatabase.nose.length + 
@@ -428,7 +477,6 @@
                 state.useExternalImages = true;
                 addLog("EXTERNAL DB READY");
                 addLog(`TOTAL: ${totalLoaded} images`);
-                // 延遲生成碎片，確保 canvas 已正確初始化
                 setTimeout(() => {
                     captureFacialFragments();
                 }, 500);
@@ -447,13 +495,11 @@
             requestAnimationFrame(loop);
             addLog("CORE LINK READY.");
             
-            // 監聽螢幕方向變化
             window.addEventListener('orientationchange', handleOrientationChange);
             handleOrientationChange();
         }
         
         function handleOrientationChange() {
-            // 檢測是否為手機直向
             const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
             const isPortrait = window.innerHeight > window.innerWidth;
             
@@ -477,10 +523,9 @@
             };
             
             setupKnob('knobDensity', (val) => {
-                state.density = Math.floor(8 + val * 24); // 8-32 個碎片
+                state.density = Math.floor(8 + val * 24);
                 document.getElementById('valDensity').textContent = state.density;
                 playSound('knob');
-                // 立即重新生成碎片（如果資料庫已準備好）
                 if (state.currentMode === 3 && state.databaseReady && state.isRunning) {
                     captureFacialFragments();
                 }
@@ -505,10 +550,9 @@
         function setupKnob(id, callback) {
             let isDragging = false;
             let lastY = 0;
-            let currentVal = (id === 'knobDensity') ? 0.833 : 0.7;  // 28個碎片對應0.833
+            let currentVal = (id === 'knobDensity') ? 0.833 : 0.7;
             const el = document.getElementById(id);
             
-            // 滑鼠事件
             el.onmousedown = (e) => { 
                 e.preventDefault();
                 isDragging = true; 
@@ -516,7 +560,6 @@
                 el.classList.add('active');
             };
             
-            // 觸控事件
             el.ontouchstart = (e) => {
                 e.preventDefault();
                 isDragging = true;
@@ -581,7 +624,6 @@
             
             if (state.isRunning && state.currentMode === 3 && state.cameraActive) {
                 if (!state.databaseReady) {
-                    // 先嘗試載入外部圖片，失敗則自動建立
                     loadExternalImages();
                 } else {
                     captureFacialFragments();
@@ -603,7 +645,6 @@
             
             if (m === 3 && state.cameraActive && state.isRunning) {
                 if (!state.databaseReady) {
-                    // 先嘗試載入外部圖片，失敗則自動建立
                     loadExternalImages();
                 } else {
                     captureFacialFragments();
@@ -663,9 +704,8 @@
                 skin: []
             };
             
-            // 擷取20幀來建立資料庫
             for (let frame = 0; frame < 20; frame++) {
-                await new Promise(resolve => setTimeout(resolve, 100)); // 等待100ms
+                await new Promise(resolve => setTimeout(resolve, 100));
                 
                 detectFaceCenter();
                 
@@ -679,16 +719,14 @@
                 const faceWidth = state.faceSize.w * captureCanvas.width;
                 const faceHeight = state.faceSize.h * captureCanvas.height;
                 
-                // 定義五官位置（相對於臉部中心）- 縮小範圍
                 const positions = {
-                    eyes: { x: 0, y: -0.15, w: 0.5, h: 0.2 },    // 雙眼區域（縮小）
-                    ears: { x: 0, y: 0, w: 0.6, h: 0.4 },         // 耳朵區域（縮小）
-                    nose: { x: 0, y: 0.1, w: 0.25, h: 0.3 },      // 鼻子（縮小）
-                    mouth: { x: 0, y: 0.35, w: 0.4, h: 0.2 },    // 嘴巴（縮小）
-                    skin: { x: 0, y: 0, w: 0.6, h: 0.6 }          // 皮膚（縮小）
+                    eyes: { x: 0, y: -0.15, w: 0.5, h: 0.2 },
+                    ears: { x: 0, y: 0, w: 0.6, h: 0.4 },
+                    nose: { x: 0, y: 0.1, w: 0.25, h: 0.3 },
+                    mouth: { x: 0, y: 0.35, w: 0.4, h: 0.2 },
+                    skin: { x: 0, y: 0, w: 0.6, h: 0.6 }
                 };
                 
-                // 擷取每個五官
                 for (const [part, pos] of Object.entries(positions)) {
                     const partWidth = faceWidth * pos.w;
                     const partHeight = faceHeight * pos.h;
@@ -723,14 +761,12 @@
             addLog(`NOSE: ${state.facialDatabase.nose.length}`);
             addLog(`MOUTH: ${state.facialDatabase.mouth.length}`);
             
-            // 建立完成後，延遲生成碎片
             setTimeout(() => {
                 captureFacialFragments();
             }, 500);
         }
 
-        // ==================== 五官拼貼碎片生成 ====================
-        // ==================== 五官拼貼碎片生成 ====================
+        // ==================== 五官拼貼碎片生成（加入 3D 座標） ====================
         function captureFacialFragments() {
             if (!state.databaseReady) return;
             if (canvas.width === 0 || canvas.height === 0) {
@@ -740,7 +776,6 @@
             
             state.facialFragments = [];
             
-            // 只選擇有內容的五官類型
             const availableParts = [];
             if (state.facialDatabase.eyes.length > 0) availableParts.push('eyes');
             if (state.facialDatabase.ears.length > 0) availableParts.push('ears');
@@ -753,16 +788,11 @@
                 return;
             }
             
-            // 為每個碎片隨機選擇五官
             for (let i = 0; i < state.density; i++) {
-                // 隨機選擇五官類型（只從有內容的類型中選）
                 const partType = availableParts[Math.floor(Math.random() * availableParts.length)];
                 const partArray = state.facialDatabase[partType];
-                
-                // 隨機選擇該類型的一個五官
                 const partCanvas = partArray[Math.floor(Math.random() * partArray.length)];
                 
-                // 隨機變形
                 const transform = {
                     flipH: Math.random() > 0.7,
                     flipV: Math.random() > 0.85,
@@ -771,41 +801,47 @@
                     scaleY: 0.7 + Math.random() * 0.6
                 };
                 
-                // **初始位置：均勻環繞在臉部中心周圍**
-                // 使用均勻角度分布 + 隨機偏移
-                const baseAngle = (i / state.density) * Math.PI * 2; // 均勻分布
-                const angleOffset = (Math.random() - 0.5) * (Math.PI / state.density); // 小範圍隨機
+                const baseAngle = (i / state.density) * Math.PI * 2;
+                const angleOffset = (Math.random() - 0.5) * (Math.PI / state.density);
                 const angle = baseAngle + angleOffset;
-                const radius = 100 + Math.random() * 80;  // 距離臉部中心 100-180px
+                const radius = 100 + Math.random() * 80;
                 const startX = canvas.width/2 + Math.cos(angle) * radius;
                 const startY = canvas.height/2 + Math.sin(angle) * radius;
                 
-                // **運動系統**
+                // **新增：3D 座標系統**
                 state.facialFragments.push({
                     canvas: partCanvas,
                     width: partCanvas.width,
                     height: partCanvas.height,
                     partType,
                     transform,
-                    // 位置與運動
+                    // 2D 位置
                     x: startX,
                     y: startY,
-                    vx: (Math.random() - 0.5) * 1,  // 減少初始速度
+                    vx: (Math.random() - 0.5) * 1,
                     vy: (Math.random() - 0.5) * 1,
-                    rotationSpeed: (Math.random() - 0.5) * 0.3,  // 減少旋轉速度
+                    // **3D 深度座標（Z 軸）**
+                    z: Math.random() * 300 - 150,  // -150 到 +150（前後浮動）
+                    vz: (Math.random() - 0.5) * 0.5,  // Z 軸速度
+                    // 3D 旋轉角度
+                    rotateX: (Math.random() - 0.5) * 60,  // X 軸旋轉 -30° 到 +30°
+                    rotateY: (Math.random() - 0.5) * 60,  // Y 軸旋轉
+                    rotateZ: (Math.random() - 0.5) * 180, // Z 軸旋轉（原本的 rotate）
+                    rotationSpeedX: (Math.random() - 0.5) * 0.3,
+                    rotationSpeedY: (Math.random() - 0.5) * 0.3,
+                    rotationSpeedZ: (Math.random() - 0.5) * 0.3,
                     alpha: 0.8 + Math.random() * 0.2,
-                    zIndex: Math.random(),  // 初始深度
-                    depth: 0  // 動態深度（每幀更新）
+                    zIndex: Math.random(),
+                    depth: 0
                 });
             }
             
             state.facialFragments.sort((a, b) => a.zIndex - b.zIndex);
-            state.lastReshuffleTime = performance.now(); // 初始化時間戳
+            state.lastReshuffleTime = performance.now();
             addLog(`FRAGMENTS: ${state.facialFragments.length}`);
             addLog(`PARTS: ${availableParts.join(',')}`);
         }
 
-        // ==================== 更新鏡子內容（保持運動） ====================
         function addLog(msg) {
             const el = document.getElementById('log-stream');
             const lines = el.innerHTML.split('<br>');
@@ -824,16 +860,13 @@
             if (state.isRunning && state.cameraActive && video.readyState >= 2) {
                 state.frameCount++;
                 
-                // 階段1和2：即時追蹤臉部
                 if (state.currentMode === 1 || state.currentMode === 2) {
                     detectFaceCenter();
                 }
                 
-                // 階段3：持續追蹤臉部
                 if (state.currentMode === 3) {
                     detectFaceCenter();
                     
-                    // 每10秒重新組合五官（使用資料庫）
                     if (timestamp - state.lastReshuffleTime > 10000 && state.databaseReady) {
                         captureFacialFragments();
                         state.lastReshuffleTime = timestamp;
@@ -880,7 +913,6 @@
                 
                 state.scanProgress = (state.scanProgress + 2) % h;
                 
-                // 掃描線
                 ctx.strokeStyle = 'rgba(212, 165, 116, 0.8)';
                 ctx.lineWidth = 3;
                 ctx.beginPath();
@@ -895,43 +927,36 @@
                 ctx.fillStyle = gradient;
                 ctx.fillRect(0, state.scanProgress - 50, w, 100);
                 
-                // 簡潔的人臉鎖定框
                 const faceCenterX = state.faceCenter.x * w;
                 const faceCenterY = state.faceCenter.y * h;
                 const faceWidth = state.faceSize.w * w;
                 const faceHeight = state.faceSize.h * h;
                 
-                // 主要鎖定框（實線）
                 ctx.strokeStyle = 'rgba(212, 165, 116, 0.9)';
                 ctx.lineWidth = 2;
                 ctx.strokeRect(faceCenterX - faceWidth/2, faceCenterY - faceHeight/2, faceWidth, faceHeight);
                 
-                // 四角標記（加強鎖定感）
                 const cornerSize = 20;
                 ctx.lineWidth = 3;
                 
-                // 左上
                 ctx.beginPath();
                 ctx.moveTo(faceCenterX - faceWidth/2, faceCenterY - faceHeight/2 + cornerSize);
                 ctx.lineTo(faceCenterX - faceWidth/2, faceCenterY - faceHeight/2);
                 ctx.lineTo(faceCenterX - faceWidth/2 + cornerSize, faceCenterY - faceHeight/2);
                 ctx.stroke();
                 
-                // 右上
                 ctx.beginPath();
                 ctx.moveTo(faceCenterX + faceWidth/2 - cornerSize, faceCenterY - faceHeight/2);
                 ctx.lineTo(faceCenterX + faceWidth/2, faceCenterY - faceHeight/2);
                 ctx.lineTo(faceCenterX + faceWidth/2, faceCenterY - faceHeight/2 + cornerSize);
                 ctx.stroke();
                 
-                // 左下
                 ctx.beginPath();
                 ctx.moveTo(faceCenterX - faceWidth/2, faceCenterY + faceHeight/2 - cornerSize);
                 ctx.lineTo(faceCenterX - faceWidth/2, faceCenterY + faceHeight/2);
                 ctx.lineTo(faceCenterX - faceWidth/2 + cornerSize, faceCenterY + faceHeight/2);
                 ctx.stroke();
                 
-                // 右下
                 ctx.beginPath();
                 ctx.moveTo(faceCenterX + faceWidth/2 - cornerSize, faceCenterY + faceHeight/2);
                 ctx.lineTo(faceCenterX + faceWidth/2, faceCenterY + faceHeight/2);
@@ -991,17 +1016,16 @@
                 }
                 
             } else if (state.currentMode === 3) {
-                // 階段3：五官碎片自由遊走
+                // ==================== 階段3：3D 立體五官碎片 ====================
                 
-                // 清晰背景人像（提高到60%讓人臉更清楚）
-                ctx.globalAlpha = 0.6;  // 從 0.4 提高到 0.6
+                // 背景人像（保持原樣）
+                ctx.globalAlpha = 0.6;
                 ctx.save();
                 ctx.scale(-1, 1);
                 ctx.drawImage(video, -w, 0, w, h);
                 ctx.restore();
                 ctx.globalAlpha = 1;
                 
-                // 如果沒有碎片，顯示訊息
                 if (state.facialFragments.length === 0) {
                     ctx.fillStyle = 'rgba(212, 165, 116, 0.8)';
                     ctx.font = '14px monospace';
@@ -1012,59 +1036,61 @@
                     return;
                 }
                 
-                // 即時臉部中心（用於推離力計算）
                 const faceCenterX = state.faceCenter.x * w;
                 const faceCenterY = state.faceCenter.y * h;
                 
-                // 更新所有碎片的深度
+                // **更新所有碎片的 3D 運動**
                 state.facialFragments.forEach(frag => {
+                    // 計算 XY 平面距離（用於吸引/推離力）
                     const dx = faceCenterX - frag.x;
                     const dy = faceCenterY - frag.y;
-                    const distance = Math.sqrt(dx * dx + dy * dy);
-                    frag.depth = distance; // 更新深度
-                });
-                
-                // 根據深度排序（遠的先畫，近的後畫）
-                state.facialFragments.sort((a, b) => b.depth - a.depth);
-                
-                // 更新並繪製所有碎片
-                state.facialFragments.forEach(frag => {
-                    // **運動更新：磁性吸引效果**
+                    const xyDistance = Math.sqrt(dx * dx + dy * dy);
                     
-                    const dx = faceCenterX - frag.x;
-                    const dy = faceCenterY - frag.y;
-                    const distance = frag.depth; // 使用已計算的深度
+                    // **1. XY 平面磁性運動（保持原邏輯）**
+                    const targetDistance = 100;
                     
-                    // 1. 磁性吸引力（會被臉部吸引，但保持一定距離）
-                    const targetDistance = 100;  // 目標距離：100px（圍繞在臉部周圍）
-                    
-                    if (distance > targetDistance + 20) {
-                        // 距離太遠 → 被吸引靠近
-                        const attractionStrength = 0.05;  // 增強吸引力
-                        const pull = (distance - targetDistance) / 200;
-                        frag.vx += (dx / distance) * attractionStrength * pull;
-                        frag.vy += (dy / distance) * attractionStrength * pull;
-                    } else if (distance < targetDistance - 20) {
-                        // 太靠近 → 輕微推開
+                    if (xyDistance > targetDistance + 20) {
+                        const attractionStrength = 0.05;
+                        const pull = (xyDistance - targetDistance) / 200;
+                        frag.vx += (dx / xyDistance) * attractionStrength * pull;
+                        frag.vy += (dy / xyDistance) * attractionStrength * pull;
+                    } else if (xyDistance < targetDistance - 20) {
                         const repulsionStrength = 0.02;
-                        frag.vx -= (dx / distance) * repulsionStrength;
-                        frag.vy -= (dy / distance) * repulsionStrength;
+                        frag.vx -= (dx / xyDistance) * repulsionStrength;
+                        frag.vy -= (dy / xyDistance) * repulsionStrength;
                     } else {
-                        // 在理想範圍內 → 環繞運動
                         const orbitStrength = 0.01;
-                        frag.vx += -dy / distance * orbitStrength;  // 切線方向
-                        frag.vy += dx / distance * orbitStrength;
+                        frag.vx += -dy / xyDistance * orbitStrength;
+                        frag.vy += dx / xyDistance * orbitStrength;
                     }
                     
-                    // 2. 速度阻尼（讓運動更平滑）
+                    // **2. Z 軸深度運動（新增）**
+                    // Z 軸在 -150 到 +150 之間浮動
+                    if (frag.z > 150) {
+                        frag.vz -= 0.05;  // 太遠則往回拉
+                    } else if (frag.z < -150) {
+                        frag.vz += 0.05;  // 太近則往外推
+                    } else {
+                        // 在正常範圍內，隨機漂浮
+                        frag.vz += (Math.random() - 0.5) * 0.1;
+                    }
+                    
+                    // Z 軸速度阻尼
+                    frag.vz *= 0.95;
+                    
+                    // 限制 Z 軸速度
+                    frag.vz = Math.max(-2, Math.min(2, frag.vz));
+                    
+                    // 更新 Z 座標
+                    frag.z += frag.vz;
+                    
+                    // **3. XY 速度阻尼和擾動（保持原邏輯）**
                     frag.vx *= 0.95;
                     frag.vy *= 0.95;
                     
-                    // 3. 隨機擾動（保持自由感）
                     frag.vx += (Math.random() - 0.5) * 0.1;
                     frag.vy += (Math.random() - 0.5) * 0.1;
                     
-                    // 4. 限制速度
                     const maxSpeed = 2;
                     const speed = Math.sqrt(frag.vx * frag.vx + frag.vy * frag.vy);
                     if (speed > maxSpeed) {
@@ -1072,50 +1098,92 @@
                         frag.vy = (frag.vy / speed) * maxSpeed;
                     }
                     
-                    // 5. 更新位置
+                    // 更新 XY 位置
                     frag.x += frag.vx;
                     frag.y += frag.vy;
                     
-                    // 6. 邊界處理：軟反彈
+                    // 邊界處理
                     const margin = 30;
                     if (frag.x < margin) { frag.vx += 0.3; frag.x = margin; }
                     if (frag.x > w - margin) { frag.vx -= 0.3; frag.x = w - margin; }
                     if (frag.y < margin) { frag.vy += 0.3; frag.y = margin; }
                     if (frag.y > h - margin) { frag.vy -= 0.3; frag.y = h - margin; }
                     
-                    // 7. 旋轉更新
-                    frag.transform.rotate += frag.rotationSpeed;
+                    // **4. 3D 旋轉更新**
+                    frag.rotateX += frag.rotationSpeedX;
+                    frag.rotateY += frag.rotationSpeedY;
+                    frag.rotateZ += frag.rotationSpeedZ;
                     
-                    // **繪製碎片 - 3D立體玻璃效果**
+                    // **5. 計算總深度（用於排序和透視）**
+                    frag.depth = xyDistance + Math.abs(frag.z);
+                });
+                
+                // **根據深度排序（遠的先畫）**
+                state.facialFragments.sort((a, b) => (b.depth + b.z) - (a.depth + a.z));
+                
+                // **繪製所有碎片（3D 效果）**
+                state.facialFragments.forEach(frag => {
                     ctx.save();
                     
-                    ctx.translate(frag.x, frag.y);
-                    ctx.rotate(frag.transform.rotate * Math.PI / 180);
+                    // **透視投影參數**
+                    const focalLength = 500;  // 焦距（越小透視越強）
+                    const perspective = focalLength / (focalLength + frag.z);
                     
-                    let scaleX = frag.transform.scaleX;
-                    let scaleY = frag.transform.scaleY;
+                    // **投影後的位置**
+                    const projectedX = frag.x;
+                    const projectedY = frag.y;
+                    
+                    ctx.translate(projectedX, projectedY);
+                    
+                    // **3D 旋轉模擬（使用 skew 和 scale）**
+                    const radX = frag.rotateX * Math.PI / 180;
+                    const radY = frag.rotateY * Math.PI / 180;
+                    const radZ = frag.rotateZ * Math.PI / 180;
+                    
+                    // Y 軸旋轉效果（左右傾斜）
+                    const skewX = Math.tan(radY) * 0.5;
+                    const scaleXFromY = Math.abs(Math.cos(radY));
+                    
+                    // X 軸旋轉效果（上下傾斜）
+                    const skewY = Math.tan(radX) * 0.5;
+                    const scaleYFromX = Math.abs(Math.cos(radX));
+                    
+                    // Z 軸旋轉（平面旋轉）
+                    ctx.rotate(radZ);
+                    
+                    // 應用 3D 效果
+                    ctx.transform(
+                        scaleXFromY, skewY,
+                        skewX, scaleYFromX,
+                        0, 0
+                    );
+                    
+                    // **透視縮放**
+                    let scaleX = frag.transform.scaleX * perspective;
+                    let scaleY = frag.transform.scaleY * perspective;
                     if (frag.transform.flipH) scaleX *= -1;
                     if (frag.transform.flipV) scaleY *= -1;
                     
-                    // 根據深度調整大小（透視效果）
-                    const depthRatio = distance / 200; // 0-1
-                    const perspectiveScale = 1 - depthRatio * 0.15; // 遠的稍微小一點
-                    ctx.scale(scaleX * perspectiveScale, scaleY * perspectiveScale);
+                    ctx.scale(scaleX, scaleY);
                     
-                    // 縮小碎片到二分之一
+                    // **碎片大小（縮小到一半）**
                     const displayWidth = frag.width * (w / captureCanvas.width) * 0.5;
                     const displayHeight = frag.height * (h / captureCanvas.height) * 0.5;
                     
-                    // 1. 繪製深層陰影（立體感）
-                    const shadowOffset = 10 * (1 - depthRatio); // 前方碎片陰影更明顯
-                    const shadowBlur = 20 * (1 - depthRatio);
-                    ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
+                    // **深度比例（用於光影效果）**
+                    const depthRatio = Math.max(0, Math.min(1, (frag.z + 150) / 300));  // 0（近）到 1（遠）
+                    
+                    // **1. 深層陰影（3D 立體感）**
+                    const shadowOffset = 15 * (1 - depthRatio);
+                    const shadowBlur = 25 * (1 - depthRatio);
+                    ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
                     ctx.shadowBlur = shadowBlur;
                     ctx.shadowOffsetX = shadowOffset;
                     ctx.shadowOffsetY = shadowOffset;
                     
-                    // 2. 繪製五官碎片（玻璃感 - 半透明）
-                    ctx.globalAlpha = frag.alpha * (1 - depthRatio * 0.4); // 遠的更透明
+                    // **2. 繪製五官碎片（根據深度調整透明度）**
+                    const alphaByDepth = frag.alpha * (1 - depthRatio * 0.5);  // 遠的更透明
+                    ctx.globalAlpha = alphaByDepth;
                     ctx.drawImage(frag.canvas, -displayWidth / 2, -displayHeight / 2, displayWidth, displayHeight);
                     
                     // 重置陰影
@@ -1124,41 +1192,42 @@
                     ctx.shadowOffsetX = 0;
                     ctx.shadowOffsetY = 0;
                     
-                    // 3. 玻璃邊框（雙層效果）
-                    // 外框（深色）
-                    ctx.globalAlpha = 0.5;
-                    ctx.strokeStyle = 'rgba(150, 120, 80, 0.8)';
+                    // **3. 玻璃邊框（雙層）**
+                    ctx.globalAlpha = 0.6 * (1 - depthRatio * 0.3);
+                    ctx.strokeStyle = `rgba(${150 + depthRatio * 50}, ${120 + depthRatio * 30}, 80, 0.8)`;
                     ctx.lineWidth = 2.5;
                     ctx.strokeRect(-displayWidth / 2, -displayHeight / 2, displayWidth, displayHeight);
                     
-                    // 內框（亮色）
-                    ctx.globalAlpha = 0.3;
+                    ctx.globalAlpha = 0.4 * (1 - depthRatio * 0.3);
                     ctx.strokeStyle = 'rgba(255, 220, 180, 0.6)';
                     ctx.lineWidth = 1;
                     ctx.strokeRect(-displayWidth / 2 + 1, -displayHeight / 2 + 1, displayWidth - 2, displayHeight - 2);
                     
-                    // 4. 玻璃高光（左上角 - 強化）
+                    // **4. 玻璃高光（根據 3D 角度調整）**
+                    // 左上角主高光
+                    const glareIntensity = (1 - depthRatio * 0.6) * (0.5 + Math.abs(Math.sin(radY)) * 0.5);
                     const glareGradient = ctx.createLinearGradient(
                         -displayWidth / 2, -displayHeight / 2,
                         -displayWidth / 2 + displayWidth * 0.4, -displayHeight / 2 + displayHeight * 0.4
                     );
-                    glareGradient.addColorStop(0, 'rgba(255, 255, 255, 0.6)');
-                    glareGradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.2)');
+                    glareGradient.addColorStop(0, `rgba(255, 255, 255, ${0.7 * glareIntensity})`);
+                    glareGradient.addColorStop(0.5, `rgba(255, 255, 255, ${0.3 * glareIntensity})`);
                     glareGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
                     
-                    ctx.globalAlpha = 0.5 * (1 - depthRatio * 0.5);
+                    ctx.globalAlpha = 0.6 * glareIntensity;
                     ctx.fillStyle = glareGradient;
                     ctx.fillRect(-displayWidth / 2, -displayHeight / 2, displayWidth * 0.4, displayHeight * 0.4);
                     
-                    // 5. 右下角反光（次要高光）
+                    // 右下角次要高光
+                    const glare2Intensity = (1 - depthRatio * 0.6) * (0.3 + Math.abs(Math.sin(radX)) * 0.3);
                     const glare2Gradient = ctx.createLinearGradient(
                         displayWidth / 2, displayHeight / 2,
                         displayWidth / 2 - displayWidth * 0.2, displayHeight / 2 - displayHeight * 0.2
                     );
-                    glare2Gradient.addColorStop(0, 'rgba(255, 255, 255, 0.3)');
+                    glare2Gradient.addColorStop(0, `rgba(255, 255, 255, ${0.4 * glare2Intensity})`);
                     glare2Gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
                     
-                    ctx.globalAlpha = 0.3 * (1 - depthRatio * 0.5);
+                    ctx.globalAlpha = 0.4 * glare2Intensity;
                     ctx.fillStyle = glare2Gradient;
                     ctx.fillRect(displayWidth / 2 - displayWidth * 0.2, displayHeight / 2 - displayHeight * 0.2, displayWidth * 0.2, displayHeight * 0.2);
                     
