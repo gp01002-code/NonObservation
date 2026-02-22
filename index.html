@@ -143,7 +143,7 @@
             animation: floatBackground 8s ease-in-out infinite;
         }
         
-        /* 前方背景層 - Image2.png（電子結構，50% 透明） */
+        /* 前方背景層 - Image2.png（電子結構，完全不透明） */
         .machine-wrapper::after {
             content: '';
             position: absolute;
@@ -155,7 +155,7 @@
             background-size: contain;
             background-position: center;
             background-repeat: no-repeat;
-            opacity: 0.5;  /* 50% 透明度 */
+            opacity: 1.0;  /* 完全不透明 */
             z-index: 1;
             animation: floatForeground 6s ease-in-out infinite;
         }
@@ -239,7 +239,7 @@
         
         /* 左側旋鈕初始角度 */
         #knobDensity {
-            --rotation: 300deg;  /* 初始值 0.833 * 360 = 300度 */
+            --rotation: 60deg;  /* 初始值 0.167 * 360 = 60度 (12個碎片) */
         }
         
         /* 右側旋鈕初始角度 */
@@ -301,7 +301,7 @@
         /* 模式選擇器 */
         .mode-selector {
             position: absolute;
-            bottom: 10%; left: 28%;  /* 降低位置到 10% */
+            bottom: 7%; left: 28%;  /* 進一步降低位置到 7% */
             width: 44%; height: 10%;
             z-index: 10;
             display: flex;
@@ -316,30 +316,30 @@
         }
 
         .mode-target:hover {
-            background: rgba(212, 165, 116, 0.1);
+            background: rgba(212, 165, 116, 0.05);  /* 減弱 hover 效果 */
         }
 
         .mode-target.active {
-            background: rgba(255, 0, 0, 0.2);
-            box-shadow: 0 0 20px rgba(255, 0, 0, 0.5), inset 0 0 15px rgba(255, 100, 0, 0.3);
+            background: transparent;  /* 取消背景色 */
+            box-shadow: none;  /* 取消外框發光 */
         }
         
-        /* 模式按鈕發光效果 */
+        /* 模式按鈕發光效果 - 只有中間發光 */
         .mode-target.active::before {
             content: '';
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 80%;
-            height: 80%;
-            background: radial-gradient(circle, rgba(255, 80, 0, 0.4) 0%, transparent 70%);
+            width: 60%;  /* 縮小發光範圍 */
+            height: 60%;
+            background: radial-gradient(circle, rgba(255, 80, 0, 0.6) 0%, rgba(255, 100, 0, 0.3) 40%, transparent 70%);
             animation: modePulse 2s ease-in-out infinite;
         }
         
         @keyframes modePulse {
-            0%, 100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); }
-            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+            0%, 100% { opacity: 0.7; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.15); }
         }
         
         /* 螢幕兩側微調控制面板 */
@@ -482,6 +482,53 @@
         }
         .ui-top-left { top: 0; left: 0; }
         .ui-bottom-right { bottom: 0; right: 0; text-align: right; opacity: 0.8; }
+        
+        /* 階段1 五官偵測標記 */
+        .facial-marker {
+            position: absolute;
+            border: 2px solid var(--glow-bright);
+            pointer-events: none;
+            z-index: 4;
+            box-shadow: 0 0 10px var(--glow-color);
+            transition: all 0.3s;
+        }
+        
+        .facial-marker::before {
+            content: attr(data-label);
+            position: absolute;
+            top: -18px;
+            left: 0;
+            font-size: 8px;
+            color: var(--glow-bright);
+            text-shadow: 0 0 5px var(--glow-color);
+            white-space: nowrap;
+        }
+        
+        /* 手部偵測框 */
+        .hand-marker {
+            position: absolute;
+            border: 2px dashed rgba(100, 255, 100, 0.8);
+            pointer-events: none;
+            z-index: 4;
+            box-shadow: 0 0 15px rgba(100, 255, 100, 0.5);
+            animation: handPulse 1.5s ease-in-out infinite;
+        }
+        
+        .hand-marker::before {
+            content: attr(data-label);
+            position: absolute;
+            top: -18px;
+            left: 0;
+            font-size: 9px;
+            color: rgba(100, 255, 100, 1);
+            text-shadow: 0 0 8px rgba(100, 255, 100, 0.8);
+            font-weight: bold;
+        }
+        
+        @keyframes handPulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
 
         #videoElement { display: none; }
 
@@ -558,7 +605,7 @@
         <!-- 左側旋鈕（碎片密度） -->
         <div class="knob-container knob-left">
             <div class="knob-area" id="knobDensity"></div>
-            <div class="knob-value" id="valDensity">20</div>
+            <div class="knob-value" id="valDensity">12</div>
         </div>
 
         <!-- 右側旋鈕（變形強度） -->
@@ -612,7 +659,7 @@
             isRunning: false,
             cameraActive: false,
             currentMode: 1,
-            density: 28,
+            density: 12,  // 減少預設碎片數量從 28 到 12
             distortion: 0.7,
             frameCount: 0,
             scanProgress: 0,
@@ -636,8 +683,14 @@
             mode3Adjust: 0,    // 階段3碎片運動速度調整
             systemAdjust: 0,   // 系統整體亮度調整
             // 旋鈕旋轉角度
-            knobDensityRotation: 150,   // 初始角度 (28個碎片對應約150度)
-            knobDistortRotation: 252    // 初始角度 (70%對應約252度)
+            knobDensityRotation: 60,   // 初始角度 (12個碎片對應約60度)
+            knobDistortRotation: 252,    // 初始角度 (70%對應約252度)
+            // 頭部姿態偵測
+            headTiltX: 0,  // 左右擺頭 -1 到 1
+            headTiltY: 0,  // 上下點頭 -1 到 1
+            // 手部姿勢偵測
+            handDetected: false,
+            handPosition: { x: 0.5, y: 0.5 }  // 手部位置 (歸一化座標)
         };
         
         // 微調函數
@@ -804,7 +857,7 @@
         function setupKnob(id, callback) {
             let isDragging = false;
             let lastY = 0;
-            let currentVal = (id === 'knobDensity') ? 0.833 : 0.7;
+            let currentVal = (id === 'knobDensity') ? 0.167 : 0.7;  // 12個碎片對應 (12-8)/(32-8) = 0.167
             const el = document.getElementById(id);
             
             el.onmousedown = (e) => { 
@@ -971,6 +1024,56 @@
             
             state.faceCenter.x = brightX / captureCanvas.width;
             state.faceCenter.y = brightY / captureCanvas.height;
+            
+            // 簡易頭部姿態估計（基於臉部位置變化）
+            state.headTiltX = (state.faceCenter.x - 0.5) * 2;  // -1 到 1
+            state.headTiltY = (state.faceCenter.y - 0.45) * 2; // -1 到 1
+        }
+        
+        // 簡易手部偵測（基於顏色和位置）
+        function detectHand() {
+            if (!video.readyState || video.readyState < 2) return;
+            
+            captureCtx.drawImage(video, 0, 0, captureCanvas.width, captureCanvas.height);
+            const imageData = captureCtx.getImageData(0, 0, captureCanvas.width, captureCanvas.height);
+            const data = imageData.data;
+            
+            let handPixels = [];
+            const sampleSize = 15;
+            
+            // 尋找膚色區域（簡化版）
+            for (let y = 0; y < captureCanvas.height; y += sampleSize) {
+                for (let x = 0; x < captureCanvas.width; x += sampleSize) {
+                    const index = (y * captureCanvas.width + x) * 4;
+                    const r = data[index];
+                    const g = data[index + 1];
+                    const b = data[index + 2];
+                    
+                    // 簡單膚色檢測
+                    if (r > 95 && g > 40 && b > 20 && 
+                        r > g && r > b && 
+                        Math.abs(r - g) > 15) {
+                        handPixels.push({ x, y });
+                    }
+                }
+            }
+            
+            if (handPixels.length > 30) {  // 足夠的膚色像素
+                // 計算膚色區域中心
+                let avgX = 0, avgY = 0;
+                handPixels.forEach(p => {
+                    avgX += p.x;
+                    avgY += p.y;
+                });
+                avgX /= handPixels.length;
+                avgY /= handPixels.length;
+                
+                state.handDetected = true;
+                state.handPosition.x = avgX / captureCanvas.width;
+                state.handPosition.y = avgY / captureCanvas.height;
+            } else {
+                state.handDetected = false;
+            }
         }
 
         // ==================== 建立五官資料庫 ====================
@@ -1128,7 +1231,17 @@
         function addLog(msg) {
             const el = document.getElementById('log-stream');
             const lines = el.innerHTML.split('<br>');
-            el.innerHTML = msg + "<br>" + lines.slice(0, 2).join('<br>');
+            
+            // 在階段1和3添加偵測狀態
+            let statusLine = '';
+            if (state.currentMode === 1 || state.currentMode === 3) {
+                const handStatus = state.handDetected ? 'DETECTED' : 'NONE';
+                const tiltX = (state.headTiltX * 100).toFixed(0);
+                const tiltY = (state.headTiltY * 100).toFixed(0);
+                statusLine = `HAND:${handStatus} | TILT:${tiltX},${tiltY}<br>`;
+            }
+            
+            el.innerHTML = statusLine + msg + "<br>" + lines.slice(0, 1).join('<br>');
         }
 
         function resize() {
@@ -1251,6 +1364,84 @@
                 ctx.lineTo(faceCenterX + faceWidth/2, faceCenterY + faceHeight/2 - cornerSize);
                 ctx.stroke();
                 
+                // 五官偵測標記
+                const featureSize = faceWidth * 0.15;
+                
+                // 雙眼標記
+                ctx.strokeStyle = 'rgba(100, 255, 255, 0.8)';
+                ctx.lineWidth = 1.5;
+                const eyeY = faceCenterY - faceHeight * 0.15;
+                const eyeSpacing = faceWidth * 0.2;
+                
+                // 左眼
+                ctx.strokeRect(
+                    faceCenterX - eyeSpacing - featureSize/2,
+                    eyeY - featureSize/2,
+                    featureSize, featureSize * 0.7
+                );
+                ctx.fillStyle = 'rgba(100, 255, 255, 0.8)';
+                ctx.font = '8px monospace';
+                ctx.fillText('L_EYE', faceCenterX - eyeSpacing - featureSize/2, eyeY - featureSize/2 - 5);
+                
+                // 右眼
+                ctx.strokeRect(
+                    faceCenterX + eyeSpacing - featureSize/2,
+                    eyeY - featureSize/2,
+                    featureSize, featureSize * 0.7
+                );
+                ctx.fillText('R_EYE', faceCenterX + eyeSpacing - featureSize/2, eyeY - featureSize/2 - 5);
+                
+                // 鼻子標記
+                ctx.strokeStyle = 'rgba(255, 255, 100, 0.8)';
+                const noseY = faceCenterY + faceHeight * 0.05;
+                ctx.strokeRect(
+                    faceCenterX - featureSize * 0.3,
+                    noseY - featureSize * 0.4,
+                    featureSize * 0.6, featureSize * 0.8
+                );
+                ctx.fillStyle = 'rgba(255, 255, 100, 0.8)';
+                ctx.fillText('NOSE', faceCenterX - featureSize * 0.3, noseY - featureSize * 0.4 - 5);
+                
+                // 嘴巴標記
+                ctx.strokeStyle = 'rgba(255, 100, 255, 0.8)';
+                const mouthY = faceCenterY + faceHeight * 0.25;
+                ctx.strokeRect(
+                    faceCenterX - featureSize * 0.6,
+                    mouthY - featureSize * 0.3,
+                    featureSize * 1.2, featureSize * 0.6
+                );
+                ctx.fillStyle = 'rgba(255, 100, 255, 0.8)';
+                ctx.fillText('MOUTH', faceCenterX - featureSize * 0.6, mouthY - featureSize * 0.3 - 5);
+                
+                // 手部偵測
+                detectHand();
+                
+                if (state.handDetected) {
+                    const handX = state.handPosition.x * w;
+                    const handY = state.handPosition.y * h;
+                    const handSize = faceWidth * 0.25;
+                    
+                    ctx.strokeStyle = 'rgba(100, 255, 100, 0.9)';
+                    ctx.lineWidth = 2;
+                    ctx.setLineDash([5, 5]);
+                    ctx.strokeRect(
+                        handX - handSize/2,
+                        handY - handSize/2,
+                        handSize, handSize
+                    );
+                    ctx.setLineDash([]);
+                    
+                    ctx.fillStyle = 'rgba(100, 255, 100, 1)';
+                    ctx.font = 'bold 10px monospace';
+                    ctx.fillText('HAND', handX - handSize/2, handY - handSize/2 - 8);
+                    
+                    // 手部中心點
+                    ctx.fillStyle = 'rgba(100, 255, 100, 0.8)';
+                    ctx.beginPath();
+                    ctx.arc(handX, handY, 4, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                
             } else if (state.currentMode === 2) {
                 // 階段2：色彩
                 captureCtx.save();
@@ -1329,6 +1520,9 @@
                 const faceCenterX = state.faceCenter.x * w;
                 const faceCenterY = state.faceCenter.y * h;
                 
+                // 偵測手部（用於互動）
+                detectHand();
+                
                 // **更新所有碎片的 3D 運動**
                 state.facialFragments.forEach(frag => {
                     // 運動速度受 mode3Adjust 影響
@@ -1339,11 +1533,32 @@
                     const dy = faceCenterY - frag.y;
                     const xyDistance = Math.sqrt(dx * dx + dy * dy);
                     
-                    // **1. XY 平面磁性運動（保持原邏輯）**
-                    const targetDistance = 100;
+                    // **頭部姿態影響** - 擺頭會推動碎片
+                    const headInfluenceX = state.headTiltX * 15;  // 左右擺頭影響
+                    const headInfluenceY = state.headTiltY * 10;  // 上下點頭影響
+                    
+                    // **手部影響** - 手靠近會推開碎片
+                    let handInfluenceX = 0;
+                    let handInfluenceY = 0;
+                    if (state.handDetected) {
+                        const handX = state.handPosition.x * w;
+                        const handY = state.handPosition.y * h;
+                        const handDx = frag.x - handX;
+                        const handDy = frag.y - handY;
+                        const handDist = Math.sqrt(handDx * handDx + handDy * handDy);
+                        
+                        if (handDist < 150) {  // 手部影響範圍
+                            const handPower = (150 - handDist) / 150;
+                            handInfluenceX = (handDx / handDist) * handPower * 3;
+                            handInfluenceY = (handDy / handDist) * handPower * 3;
+                        }
+                    }
+                    
+                    // **1. XY 平面磁性運動 + 頭部和手部影響**
+                    const targetDistance = 80;  // 減小目標距離，讓碎片更靠近臉部
                     
                     if (xyDistance > targetDistance + 20) {
-                        const attractionStrength = 0.05 * motionMultiplier;
+                        const attractionStrength = 0.08 * motionMultiplier;  // 增強吸引力
                         const pull = (xyDistance - targetDistance) / 200;
                         frag.vx += (dx / xyDistance) * attractionStrength * pull;
                         frag.vy += (dy / xyDistance) * attractionStrength * pull;
@@ -1352,10 +1567,14 @@
                         frag.vx -= (dx / xyDistance) * repulsionStrength;
                         frag.vy -= (dy / xyDistance) * repulsionStrength;
                     } else {
-                        const orbitStrength = 0.01 * motionMultiplier;
+                        const orbitStrength = 0.015 * motionMultiplier;  // 增強環繞力
                         frag.vx += -dy / xyDistance * orbitStrength;
                         frag.vy += dx / xyDistance * orbitStrength;
                     }
+                    
+                    // 應用頭部和手部影響
+                    frag.vx += headInfluenceX * 0.1 + handInfluenceX;
+                    frag.vy += headInfluenceY * 0.1 + handInfluenceY;
                     
                     // **2. Z 軸深度運動（新增）**
                     // Z 軸在 -150 到 +150 之間浮動
@@ -1402,9 +1621,9 @@
                     if (frag.y < margin) { frag.vy += 0.3; frag.y = margin; }
                     if (frag.y > h - margin) { frag.vy -= 0.3; frag.y = h - margin; }
                     
-                    // **4. 3D 旋轉更新**
-                    frag.rotateX += frag.rotationSpeedX;
-                    frag.rotateY += frag.rotationSpeedY;
+                    // **4. 3D 旋轉更新 - 受頭部姿態影響**
+                    frag.rotateX += frag.rotationSpeedX + state.headTiltY * 2;  // 點頭影響X軸旋轉
+                    frag.rotateY += frag.rotationSpeedY + state.headTiltX * 2;  // 搖頭影響Y軸旋轉
                     frag.rotateZ += frag.rotationSpeedZ;
                     
                     // **5. 計算總深度（用於排序和透視）**
