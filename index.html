@@ -58,6 +58,12 @@
                 pointer-events: none;
                 filter: blur(3px);
             }
+            
+            /* 直向模式下縮小背景圖片 */
+            .machine-wrapper::before,
+            .machine-wrapper::after {
+                background-size: 90% auto;
+            }
         }
         
         /* 手機橫向優化 */
@@ -65,6 +71,12 @@
             .machine-wrapper {
                 width: 98vw;
                 max-width: none;
+            }
+            
+            /* 橫向模式下適當調整背景 */
+            .machine-wrapper::before,
+            .machine-wrapper::after {
+                background-size: 96% auto;
             }
             
             .knob-value {
@@ -77,6 +89,11 @@
             .machine-wrapper {
                 width: 95vw;
             }
+            
+            .machine-wrapper::before,
+            .machine-wrapper::after {
+                background-size: contain;
+            }
         }
 
         .machine-wrapper {
@@ -88,7 +105,7 @@
             box-shadow: 0 0 100px rgba(212, 165, 116, 0.1);
         }
         
-        /* 後方背景層 - Image2.png（電子結構） */
+        /* 後方背景層 - Image2.png（電子結構，微透明） */
         .machine-wrapper::before {
             content: '';
             position: absolute;
@@ -100,6 +117,7 @@
             background-size: contain;
             background-position: center;
             background-repeat: no-repeat;
+            opacity: 0.9;  /* 微透明（90%） */
             z-index: 0;
             animation: floatBackground 8s ease-in-out infinite;
         }
