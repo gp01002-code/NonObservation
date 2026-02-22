@@ -155,6 +155,7 @@
             background-repeat: no-repeat;
             opacity: 1.0;  /* 完全不透明 */
             z-index: 0;
+            pointer-events: none;  /* 不阻擋點擊事件 */
             animation: floatBackground 8s ease-in-out infinite;
         }
         
@@ -172,6 +173,7 @@
             background-repeat: no-repeat;
             opacity: 1.0;  /* 完全不透明 */
             z-index: 1;
+            pointer-events: none;  /* 不阻擋點擊事件 */
             animation: floatForeground 6s ease-in-out infinite;
         }
         
@@ -600,14 +602,14 @@
         }
         
         .intro-content {
-            max-width: 900px;  /* 增加寬度以容納圖示 */
-            background: rgba(0, 0, 0, 0.7);
-            border: 2px solid var(--glow-color);
-            border-radius: 10px;
-            padding: 30px;
-            box-shadow: 0 0 30px rgba(212, 165, 116, 0.3);
-            margin-bottom: 40px;
-            max-height: 70vh;
+            max-width: 900px;
+            background: transparent;  /* 移除背景 */
+            border: none;  /* 移除邊框 */
+            border-radius: 0;
+            padding: 20px;  /* 減少內邊距 */
+            box-shadow: none;  /* 移除陰影 */
+            margin-bottom: 30px;  /* 減少間距 */
+            max-height: 75vh;  /* 增加可視高度 */
             overflow-y: auto;
         }
         
@@ -735,50 +737,50 @@
         .mode-info {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 15px;
-            margin-top: 25px;
+            gap: 10px;  /* 減少間距 */
+            margin-top: 15px;  /* 減少上邊距 */
         }
         
         .mode-card {
-            background: rgba(212, 165, 116, 0.1);
-            border: 1px solid var(--glow-color);
-            border-radius: 8px;
-            padding: 15px;
+            background: transparent;  /* 移除背景 */
+            border: none;  /* 移除邊框 */
+            border-radius: 0;
+            padding: 10px 5px;  /* 減少內邊距 */
             transition: all 0.3s;
         }
         
         .mode-card:hover {
-            background: rgba(212, 165, 116, 0.2);
-            box-shadow: 0 0 15px rgba(212, 165, 116, 0.3);
+            background: rgba(212, 165, 116, 0.1);
+            box-shadow: none;
         }
         
         .mode-card h4 {
             color: var(--glow-bright);
-            font-size: clamp(14px, 2vw, 16px);
-            margin-bottom: 8px;
+            font-size: clamp(13px, 2vw, 15px);  /* 縮小字體 */
+            margin-bottom: 5px;  /* 減少間距 */
             text-shadow: 0 0 5px var(--glow-color);
         }
         
         .mode-card p {
-            color: rgba(212, 165, 116, 0.9);
-            font-size: clamp(12px, 1.8vw, 14px);
-            line-height: 1.5;
+            color: rgba(212, 165, 116, 0.85);
+            font-size: clamp(11px, 1.5vw, 13px);  /* 縮小字體 */
+            line-height: 1.4;  /* 減少行高 */
             margin: 0;
         }
         
         /* 互動提示 */
         .interaction-tip {
-            background: rgba(100, 255, 100, 0.1);
-            border: 1px solid rgba(100, 255, 100, 0.5);
-            border-radius: 8px;
-            padding: 15px;
-            margin-top: 20px;
+            background: transparent;  /* 移除背景 */
+            border: none;  /* 移除邊框 */
+            border-radius: 0;
+            padding: 10px 5px;  /* 減少內邊距 */
+            margin-top: 15px;  /* 減少上邊距 */
         }
         
         .interaction-tip h4 {
             color: rgba(100, 255, 100, 1);
-            font-size: clamp(14px, 2vw, 16px);
-            margin-bottom: 10px;
+            font-size: clamp(13px, 2vw, 15px);  /* 縮小字體 */
+            margin-bottom: 8px;  /* 減少間距 */
             text-shadow: 0 0 5px rgba(100, 255, 100, 0.5);
         }
         
@@ -789,11 +791,12 @@
         }
         
         .interaction-tip li {
-            color: rgba(100, 255, 100, 0.9);
-            font-size: clamp(12px, 1.8vw, 14px);
-            margin-bottom: 8px;
-            padding-left: 20px;
+            color: rgba(100, 255, 100, 0.85);
+            font-size: clamp(11px, 1.5vw, 13px);  /* 縮小字體 */
+            margin-bottom: 5px;  /* 減少間距 */
+            padding-left: 15px;  /* 減少縮排 */
             position: relative;
+            line-height: 1.4;  /* 減少行高 */
         }
         
         .interaction-tip li::before {
@@ -831,30 +834,33 @@
         /* 手機版優化 */
         @media (max-width: 768px) {
             .intro-screen {
-                padding: 20px;
+                padding: 15px;  /* 減少內邊距 */
             }
             
             .intro-content {
-                padding: 20px;
-                max-height: 65vh;
+                padding: 10px;  /* 減少內邊距 */
+                max-height: 60vh;  /* 限制高度確保按鈕可見 */
             }
             
             .intro-title {
-                margin-bottom: 25px;
+                margin-bottom: 15px;  /* 減少間距 */
+                font-size: clamp(20px, 5vw, 32px);  /* 縮小標題 */
             }
             
             .intro-section {
-                margin-bottom: 20px;
+                margin-bottom: 15px;
             }
             
             .start-button {
-                padding: 15px 40px;
-                font-size: 18px;
+                padding: 12px 35px;  /* 減少按鈕內邊距 */
+                font-size: 16px;  /* 縮小字體 */
+                margin-top: 15px;  /* 增加上邊距 */
             }
             
             /* 手機版控制圖示 */
             .control-diagram {
-                aspect-ratio: 1000 / 800;  /* 調整比例以適應手機 */
+                aspect-ratio: 1000 / 700;  /* 調整比例 */
+                margin: 10px auto;  /* 減少間距 */
             }
             
             .marker {
@@ -862,18 +868,18 @@
             }
             
             .marker-dot {
-                width: 10px;
-                height: 10px;
+                width: 8px;  /* 縮小標記點 */
+                height: 8px;
             }
             
             .marker-dot::before {
-                width: 4px;
-                height: 4px;
+                width: 3px;
+                height: 3px;
             }
             
             .marker-label {
-                padding: 6px 10px;
-                font-size: 10px;
+                padding: 4px 8px;  /* 減少內邊距 */
+                font-size: 9px;  /* 縮小字體 */
             }
             
             /* 手機版調整標記位置 */
@@ -896,8 +902,7 @@
             }
             
             .marker-fine-tune {
-                top: 30%;
-                left: 25%;
+                display: none;  /* 手機版隱藏微調標記以節省空間 */
             }
             
             .marker-mode {
@@ -906,15 +911,35 @@
             
             .mode-info {
                 grid-template-columns: 1fr;
-                gap: 12px;
+                gap: 8px;  /* 減少間距 */
             }
             
             .mode-card {
-                padding: 12px;
+                padding: 8px 5px;  /* 減少內邊距 */
+            }
+            
+            .mode-card h4 {
+                font-size: 12px;  /* 縮小字體 */
+                margin-bottom: 3px;
+            }
+            
+            .mode-card p {
+                font-size: 10px;  /* 縮小字體 */
             }
             
             .interaction-tip {
-                padding: 12px;
+                padding: 8px 5px;  /* 減少內邊距 */
+                margin-top: 10px;
+            }
+            
+            .interaction-tip h4 {
+                font-size: 12px;
+                margin-bottom: 5px;
+            }
+            
+            .interaction-tip li {
+                font-size: 10px;
+                margin-bottom: 3px;
             }
             
             /* 手機版減少動畫以提升性能 */
@@ -1099,7 +1124,7 @@
 
     <!-- 開場說明頁面 -->
     <div class="intro-screen" id="introScreen">
-        <h1 class="intro-title">自我觀測儀 | NonObservation</h1>
+        <h1 class="intro-title">Self-Observation Device</h1>
         
         <div class="intro-content">
             <!-- 圖形化控制說明 -->
@@ -1107,41 +1132,41 @@
                 <!-- 左側旋鈕標記 -->
                 <div class="marker marker-knob-left">
                     <div class="marker-dot"></div>
-                    <div class="marker-label">左旋鈕：碎片密度</div>
+                    <div class="marker-label">密度</div>
                 </div>
                 
                 <!-- 右側旋鈕標記 -->
                 <div class="marker marker-knob-right">
-                    <div class="marker-label">右旋鈕：變形強度</div>
+                    <div class="marker-label">變形</div>
                     <div class="marker-dot"></div>
                 </div>
                 
                 <!-- 螢幕標記 -->
                 <div class="marker marker-screen">
-                    <div class="marker-label">主螢幕：觀測畫面</div>
+                    <div class="marker-label">觀測螢幕</div>
                 </div>
                 
                 <!-- 微調按鈕標記 -->
                 <div class="marker marker-fine-tune">
                     <div class="marker-dot"></div>
-                    <div class="marker-label">螢幕兩側：微調 +/-</div>
+                    <div class="marker-label">微調 +/-</div>
                 </div>
                 
                 <!-- CAM 按鈕標記 -->
                 <div class="marker marker-cam">
                     <div class="marker-dot"></div>
-                    <div class="marker-label">CAM：開啟攝影機 🟢</div>
+                    <div class="marker-label">CAM 🟢</div>
                 </div>
                 
                 <!-- RUN 按鈕標記 -->
                 <div class="marker marker-run">
-                    <div class="marker-label">RUN：啟動系統 🔴</div>
+                    <div class="marker-label">RUN 🔴</div>
                     <div class="marker-dot"></div>
                 </div>
                 
                 <!-- MODE 標記 -->
                 <div class="marker marker-mode">
-                    <div class="marker-label">MODE：切換三階段模式</div>
+                    <div class="marker-label">三階段模式</div>
                 </div>
             </div>
             
@@ -1149,28 +1174,27 @@
             <div class="mode-info">
                 <div class="mode-card">
                     <h4>階段 1｜鏡像期</h4>
-                    <p>臉部掃描與 28 個特徵點偵測，包含眼、鼻、嘴及輪廓追蹤</p>
+                    <p>臉部掃描與特徵點追蹤</p>
                 </div>
                 
                 <div class="mode-card">
                     <h4>階段 2｜資料規訓</h4>
-                    <p>即時色彩解構與重組，像素化處理與動態色相轉換</p>
+                    <p>色彩解構與像素化處理</p>
                 </div>
                 
                 <div class="mode-card">
                     <h4>階段 3｜超真實擬像</h4>
-                    <p>五官碎片 3D 漂浮，支援頭部擺動與手勢互動控制</p>
+                    <p>五官碎片 3D 漂浮互動</p>
                 </div>
             </div>
             
             <!-- 互動技巧提示 -->
             <div class="interaction-tip">
-                <h4>💡 互動技巧（階段 3）</h4>
+                <h4>💡 互動提示（階段 3）</h4>
                 <ul>
-                    <li>左右搖頭 → 推動碎片旋轉與移動</li>
-                    <li>伸手到畫面 → 推開附近的碎片</li>
-                    <li>調整左側旋鈕 → 改變碎片數量（8-32 個）</li>
-                    <li>使用螢幕兩側 +/- 按鈕 → 精細調整各階段參數</li>
+                    <li>搖頭 → 推動碎片</li>
+                    <li>伸手 → 推開碎片</li>
+                    <li>旋鈕 → 調整密度/變形</li>
                 </ul>
             </div>
         </div>
@@ -1899,8 +1923,8 @@
                     flipH: Math.random() > 0.7,
                     flipV: Math.random() > 0.85,
                     rotate: (Math.random() - 0.5) * 30,
-                    scaleX: 0.7 + Math.random() * 0.6,
-                    scaleY: 0.7 + Math.random() * 0.6
+                    scaleX: 0.8 + Math.random() * 0.4,  // 縮小範圍：0.8-1.2（原本0.7-1.3）
+                    scaleY: 0.8 + Math.random() * 0.4   // 縮小範圍：0.8-1.2（原本0.7-1.3）
                 };
                 
                 const baseAngle = (i / state.density) * Math.PI * 2;
@@ -2053,132 +2077,128 @@
                 const faceWidth = state.faceSize.w * w;
                 const faceHeight = state.faceSize.h * h;
                 
-                ctx.strokeStyle = 'rgba(212, 165, 116, 0.9)';
-                ctx.lineWidth = 2;
-                ctx.strokeRect(faceCenterX - faceWidth/2, faceCenterY - faceHeight/2, faceWidth, faceHeight);
-                
-                const cornerSize = 20;
-                ctx.lineWidth = 3;
-                
-                ctx.beginPath();
-                ctx.moveTo(faceCenterX - faceWidth/2, faceCenterY - faceHeight/2 + cornerSize);
-                ctx.lineTo(faceCenterX - faceWidth/2, faceCenterY - faceHeight/2);
-                ctx.lineTo(faceCenterX - faceWidth/2 + cornerSize, faceCenterY - faceHeight/2);
-                ctx.stroke();
-                
-                ctx.beginPath();
-                ctx.moveTo(faceCenterX + faceWidth/2 - cornerSize, faceCenterY - faceHeight/2);
-                ctx.lineTo(faceCenterX + faceWidth/2, faceCenterY - faceHeight/2);
-                ctx.lineTo(faceCenterX + faceWidth/2, faceCenterY - faceHeight/2 + cornerSize);
-                ctx.stroke();
-                
-                ctx.beginPath();
-                ctx.moveTo(faceCenterX - faceWidth/2, faceCenterY + faceHeight/2 - cornerSize);
-                ctx.lineTo(faceCenterX - faceWidth/2, faceCenterY + faceHeight/2);
-                ctx.lineTo(faceCenterX - faceWidth/2 + cornerSize, faceCenterY + faceHeight/2);
-                ctx.stroke();
-                
-                ctx.beginPath();
-                ctx.moveTo(faceCenterX + faceWidth/2 - cornerSize, faceCenterY + faceHeight/2);
-                ctx.lineTo(faceCenterX + faceWidth/2, faceCenterY + faceHeight/2);
-                ctx.lineTo(faceCenterX + faceWidth/2, faceCenterY + faceHeight/2 - cornerSize);
-                ctx.stroke();
-                
-                // 專業臉部特徵點標記（點對點方式）
-                const drawFeaturePoint = (x, y, label, color) => {
-                    // 外圈
-                    ctx.strokeStyle = color;
-                    ctx.lineWidth = 1.5;
-                    ctx.beginPath();
-                    ctx.arc(x, y, 5, 0, Math.PI * 2);
-                    ctx.stroke();
-                    
-                    // 內圈
-                    ctx.beginPath();
-                    ctx.arc(x, y, 2, 0, Math.PI * 2);
-                    ctx.stroke();
-                    
-                    // 中心點
+                // 專業臉部特徵點標記（點對點方式 - 小點+線條輪廓）
+                const drawFeaturePoint = (x, y, label, color, size = 2) => {
+                    // 小圓點
                     ctx.fillStyle = color;
                     ctx.beginPath();
-                    ctx.arc(x, y, 1, 0, Math.PI * 2);
+                    ctx.arc(x, y, size, 0, Math.PI * 2);
                     ctx.fill();
                     
-                    // 標籤
-                    if (label) {
+                    // 標籤（僅顯示重要點的標籤）
+                    if (label && label.includes('1')) {  // 只標記第一個點
                         ctx.fillStyle = color;
-                        ctx.font = '7px monospace';
-                        ctx.fillText(label, x + 8, y + 3);
+                        ctx.font = '6px monospace';
+                        ctx.fillText(label, x + 6, y + 2);
                     }
+                };
+                
+                const drawLine = (x1, y1, x2, y2, color) => {
+                    ctx.strokeStyle = color;
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(x1, y1);
+                    ctx.lineTo(x2, y2);
+                    ctx.stroke();
                 };
                 
                 const pointColor = 'rgba(100, 255, 255, 0.9)';
                 const eyeY = faceCenterY - faceHeight * 0.15;
                 const eyeSpacing = faceWidth * 0.2;
                 
-                // 左眼特徵點（5個點）
-                drawFeaturePoint(faceCenterX - eyeSpacing - 15, eyeY, 'L1', pointColor);
-                drawFeaturePoint(faceCenterX - eyeSpacing - 7, eyeY - 5, 'L2', pointColor);
-                drawFeaturePoint(faceCenterX - eyeSpacing, eyeY, 'L3', pointColor);
-                drawFeaturePoint(faceCenterX - eyeSpacing + 7, eyeY - 5, 'L4', pointColor);
-                drawFeaturePoint(faceCenterX - eyeSpacing + 15, eyeY, 'L5', pointColor);
-                
-                // 右眼特徵點（5個點）
-                drawFeaturePoint(faceCenterX + eyeSpacing - 15, eyeY, 'R1', pointColor);
-                drawFeaturePoint(faceCenterX + eyeSpacing - 7, eyeY - 5, 'R2', pointColor);
-                drawFeaturePoint(faceCenterX + eyeSpacing, eyeY, 'R3', pointColor);
-                drawFeaturePoint(faceCenterX + eyeSpacing + 7, eyeY - 5, 'R4', pointColor);
-                drawFeaturePoint(faceCenterX + eyeSpacing + 15, eyeY, 'R5', pointColor);
-                
-                // 鼻子特徵點（4個點）
-                const noseColor = 'rgba(255, 255, 100, 0.9)';
-                const noseY = faceCenterY + faceHeight * 0.05;
-                drawFeaturePoint(faceCenterX, noseY - 15, 'N1', noseColor);
-                drawFeaturePoint(faceCenterX - 8, noseY + 5, 'N2', noseColor);
-                drawFeaturePoint(faceCenterX, noseY + 10, 'N3', noseColor);
-                drawFeaturePoint(faceCenterX + 8, noseY + 5, 'N4', noseColor);
-                
-                // 嘴巴特徵點（6個點）
-                const mouthColor = 'rgba(255, 100, 255, 0.9)';
-                const mouthY = faceCenterY + faceHeight * 0.25;
-                drawFeaturePoint(faceCenterX - 25, mouthY, 'M1', mouthColor);
-                drawFeaturePoint(faceCenterX - 12, mouthY - 3, 'M2', mouthColor);
-                drawFeaturePoint(faceCenterX, mouthY - 2, 'M3', mouthColor);
-                drawFeaturePoint(faceCenterX + 12, mouthY - 3, 'M4', mouthColor);
-                drawFeaturePoint(faceCenterX + 25, mouthY, 'M5', mouthColor);
-                drawFeaturePoint(faceCenterX, mouthY + 8, 'M6', mouthColor);
-                
-                // 臉部輪廓點（8個點）
-                const contourColor = 'rgba(212, 165, 116, 0.7)';
-                const contourPoints = [
-                    { x: faceCenterX - faceWidth * 0.45, y: faceCenterY - faceHeight * 0.3, label: 'C1' },
-                    { x: faceCenterX - faceWidth * 0.48, y: faceCenterY, label: 'C2' },
-                    { x: faceCenterX - faceWidth * 0.4, y: faceCenterY + faceHeight * 0.35, label: 'C3' },
-                    { x: faceCenterX - faceWidth * 0.2, y: faceCenterY + faceHeight * 0.45, label: 'C4' },
-                    { x: faceCenterX + faceWidth * 0.2, y: faceCenterY + faceHeight * 0.45, label: 'C5' },
-                    { x: faceCenterX + faceWidth * 0.4, y: faceCenterY + faceHeight * 0.35, label: 'C6' },
-                    { x: faceCenterX + faceWidth * 0.48, y: faceCenterY, label: 'C7' },
-                    { x: faceCenterX + faceWidth * 0.45, y: faceCenterY - faceHeight * 0.3, label: 'C8' }
+                // 左眼特徵點（5個點）+ 連線
+                const leftEyePoints = [
+                    { x: faceCenterX - eyeSpacing - 15, y: eyeY, label: 'L1' },
+                    { x: faceCenterX - eyeSpacing - 7, y: eyeY - 5, label: '' },
+                    { x: faceCenterX - eyeSpacing, y: eyeY, label: '' },
+                    { x: faceCenterX - eyeSpacing + 7, y: eyeY - 5, label: '' },
+                    { x: faceCenterX - eyeSpacing + 15, y: eyeY, label: '' }
                 ];
                 
-                contourPoints.forEach(p => {
-                    drawFeaturePoint(p.x, p.y, p.label, contourColor);
+                leftEyePoints.forEach((p, i) => {
+                    drawFeaturePoint(p.x, p.y, p.label, pointColor);
+                    if (i < leftEyePoints.length - 1) {
+                        drawLine(p.x, p.y, leftEyePoints[i + 1].x, leftEyePoints[i + 1].y, pointColor);
+                    }
                 });
+                // 閉合眼睛輪廓
+                drawLine(leftEyePoints[4].x, leftEyePoints[4].y, leftEyePoints[0].x, leftEyePoints[0].y, pointColor);
                 
-                // 連接線（虛線）
-                ctx.strokeStyle = 'rgba(212, 165, 116, 0.3)';
-                ctx.lineWidth = 1;
-                ctx.setLineDash([3, 3]);
+                // 右眼特徵點（5個點）+ 連線
+                const rightEyePoints = [
+                    { x: faceCenterX + eyeSpacing - 15, y: eyeY, label: 'R1' },
+                    { x: faceCenterX + eyeSpacing - 7, y: eyeY - 5, label: '' },
+                    { x: faceCenterX + eyeSpacing, y: eyeY, label: '' },
+                    { x: faceCenterX + eyeSpacing + 7, y: eyeY - 5, label: '' },
+                    { x: faceCenterX + eyeSpacing + 15, y: eyeY, label: '' }
+                ];
                 
-                // 連接輪廓點
-                ctx.beginPath();
+                rightEyePoints.forEach((p, i) => {
+                    drawFeaturePoint(p.x, p.y, p.label, pointColor);
+                    if (i < rightEyePoints.length - 1) {
+                        drawLine(p.x, p.y, rightEyePoints[i + 1].x, rightEyePoints[i + 1].y, pointColor);
+                    }
+                });
+                drawLine(rightEyePoints[4].x, rightEyePoints[4].y, rightEyePoints[0].x, rightEyePoints[0].y, pointColor);
+                
+                // 鼻子特徵點（4個點）+ 連線
+                const noseColor = 'rgba(255, 255, 100, 0.9)';
+                const noseY = faceCenterY + faceHeight * 0.05;
+                const nosePoints = [
+                    { x: faceCenterX, y: noseY - 15, label: 'N1' },
+                    { x: faceCenterX - 8, y: noseY + 5, label: '' },
+                    { x: faceCenterX, y: noseY + 10, label: '' },
+                    { x: faceCenterX + 8, y: noseY + 5, label: '' }
+                ];
+                
+                nosePoints.forEach((p, i) => {
+                    drawFeaturePoint(p.x, p.y, p.label, noseColor);
+                    if (i < nosePoints.length - 1) {
+                        drawLine(p.x, p.y, nosePoints[i + 1].x, nosePoints[i + 1].y, noseColor);
+                    }
+                });
+                drawLine(nosePoints[3].x, nosePoints[3].y, nosePoints[0].x, nosePoints[0].y, noseColor);
+                
+                // 嘴巴特徵點（6個點）+ 連線
+                const mouthColor = 'rgba(255, 100, 255, 0.9)';
+                const mouthY = faceCenterY + faceHeight * 0.25;
+                const mouthPoints = [
+                    { x: faceCenterX - 25, y: mouthY, label: 'M1' },
+                    { x: faceCenterX - 12, y: mouthY - 3, label: '' },
+                    { x: faceCenterX, y: mouthY - 2, label: '' },
+                    { x: faceCenterX + 12, y: mouthY - 3, label: '' },
+                    { x: faceCenterX + 25, y: mouthY, label: '' },
+                    { x: faceCenterX, y: mouthY + 8, label: '' }
+                ];
+                
+                mouthPoints.forEach((p, i) => {
+                    drawFeaturePoint(p.x, p.y, p.label, mouthColor);
+                    if (i < mouthPoints.length - 1) {
+                        drawLine(p.x, p.y, mouthPoints[i + 1].x, mouthPoints[i + 1].y, mouthColor);
+                    }
+                });
+                drawLine(mouthPoints[5].x, mouthPoints[5].y, mouthPoints[0].x, mouthPoints[0].y, mouthColor);
+                
+                // 臉部輪廓點（8個點）+ 連線
+                const contourColor = 'rgba(212, 165, 116, 0.6)';
+                const contourPoints = [
+                    { x: faceCenterX - faceWidth * 0.45, y: faceCenterY - faceHeight * 0.3, label: 'C1' },
+                    { x: faceCenterX - faceWidth * 0.48, y: faceCenterY, label: '' },
+                    { x: faceCenterX - faceWidth * 0.4, y: faceCenterY + faceHeight * 0.35, label: '' },
+                    { x: faceCenterX - faceWidth * 0.2, y: faceCenterY + faceHeight * 0.45, label: '' },
+                    { x: faceCenterX + faceWidth * 0.2, y: faceCenterY + faceHeight * 0.45, label: '' },
+                    { x: faceCenterX + faceWidth * 0.4, y: faceCenterY + faceHeight * 0.35, label: '' },
+                    { x: faceCenterX + faceWidth * 0.48, y: faceCenterY, label: '' },
+                    { x: faceCenterX + faceWidth * 0.45, y: faceCenterY - faceHeight * 0.3, label: '' }
+                ];
+                
                 contourPoints.forEach((p, i) => {
-                    if (i === 0) ctx.moveTo(p.x, p.y);
-                    else ctx.lineTo(p.x, p.y);
+                    drawFeaturePoint(p.x, p.y, p.label, contourColor, 1.5);
+                    if (i < contourPoints.length - 1) {
+                        drawLine(p.x, p.y, contourPoints[i + 1].x, contourPoints[i + 1].y, contourColor);
+                    }
                 });
-                ctx.closePath();
-                ctx.stroke();
-                ctx.setLineDash([]);
+                drawLine(contourPoints[7].x, contourPoints[7].y, contourPoints[0].x, contourPoints[0].y, contourColor);
                 
                 // 手部偵測
                 detectHand();
