@@ -229,8 +229,8 @@
             background: #200;
             z-index: 10;
         }
-        .light-left { bottom: 22%; left: 19.5%; }      /* 紅燈：更靠近 MODE */
-        .light-right { bottom: 22%; right: 19.5%; }    /* 綠燈：更靠近 LIVE EEG */
+        .light-left { bottom: 22%; left: 15%; }      /* 紅燈：更靠近 MODE 字母 */
+        .light-right { bottom: 22%; right: 15%; }    /* 綠燈：更靠近 LIVE EEG 字母 */
         .light.active-red { 
             background: #f00; 
             box-shadow: 0 0 12px #f00, 0 0 20px #f00;
@@ -348,7 +348,7 @@
             isRunning: false,
             cameraActive: false,
             currentMode: 1,
-            density: 20,
+            density: 28,  // 增加預設碎片數量到28
             distortion: 0.7,
             frameCount: 0,
             scanProgress: 0,
@@ -497,7 +497,7 @@
         function setupKnob(id, callback) {
             let isDragging = false;
             let lastY = 0;
-            let currentVal = (id === 'knobDensity') ? 0.5 : 0.7;
+            let currentVal = (id === 'knobDensity') ? 0.833 : 0.7;  // 28個碎片對應0.833
             const el = document.getElementById(id);
             
             // 滑鼠事件
@@ -763,9 +763,12 @@
                     scaleY: 0.7 + Math.random() * 0.6
                 };
                 
-                // **初始位置：圍繞在臉部中心周圍**
-                const angle = Math.random() * Math.PI * 2;
-                const radius = 80 + Math.random() * 100;  // 距離臉部中心 80-180px
+                // **初始位置：均勻環繞在臉部中心周圍**
+                // 使用均勻角度分布 + 隨機偏移
+                const baseAngle = (i / state.density) * Math.PI * 2; // 均勻分布
+                const angleOffset = (Math.random() - 0.5) * (Math.PI / state.density); // 小範圍隨機
+                const angle = baseAngle + angleOffset;
+                const radius = 100 + Math.random() * 80;  // 距離臉部中心 100-180px
                 const startX = canvas.width/2 + Math.cos(angle) * radius;
                 const startY = canvas.height/2 + Math.sin(angle) * radius;
                 
@@ -783,7 +786,8 @@
                     vy: (Math.random() - 0.5) * 1,
                     rotationSpeed: (Math.random() - 0.5) * 0.3,  // 減少旋轉速度
                     alpha: 0.8 + Math.random() * 0.2,
-                    zIndex: Math.random()
+                    zIndex: Math.random(),  // 初始深度
+                    depth: 0  // 動態深度（每幀更新）
                 });
             }
             
@@ -1004,13 +1008,24 @@
                 const faceCenterX = state.faceCenter.x * w;
                 const faceCenterY = state.faceCenter.y * h;
                 
+                // 更新所有碎片的深度
+                state.facialFragments.forEach(frag => {
+                    const dx = faceCenterX - frag.x;
+                    const dy = faceCenterY - frag.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    frag.depth = distance; // 更新深度
+                });
+                
+                // 根據深度排序（遠的先畫，近的後畫）
+                state.facialFragments.sort((a, b) => b.depth - a.depth);
+                
                 // 更新並繪製所有碎片
                 state.facialFragments.forEach(frag => {
                     // **運動更新：磁性吸引效果**
                     
                     const dx = faceCenterX - frag.x;
                     const dy = faceCenterY - frag.y;
-                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    const distance = frag.depth; // 使用已計算的深度
                     
                     // 1. 磁性吸引力（會被臉部吸引，但保持一定距離）
                     const targetDistance = 100;  // 目標距離：100px（圍繞在臉部周圍）
@@ -1063,7 +1078,7 @@
                     // 7. 旋轉更新
                     frag.transform.rotate += frag.rotationSpeed;
                     
-                    // **繪製碎片**
+                    // **繪製碎片 - 3D立體玻璃效果**
                     ctx.save();
                     
                     ctx.translate(frag.x, frag.y);
@@ -1073,22 +1088,71 @@
                     let scaleY = frag.transform.scaleY;
                     if (frag.transform.flipH) scaleX *= -1;
                     if (frag.transform.flipV) scaleY *= -1;
-                    ctx.scale(scaleX, scaleY);
                     
-                    ctx.globalAlpha = frag.alpha;
+                    // 根據深度調整大小（透視效果）
+                    const depthRatio = distance / 200; // 0-1
+                    const perspectiveScale = 1 - depthRatio * 0.15; // 遠的稍微小一點
+                    ctx.scale(scaleX * perspectiveScale, scaleY * perspectiveScale);
                     
                     // 縮小碎片到二分之一
                     const displayWidth = frag.width * (w / captureCanvas.width) * 0.5;
                     const displayHeight = frag.height * (h / captureCanvas.height) * 0.5;
                     
-                    // 繪製五官碎片
+                    // 1. 繪製深層陰影（立體感）
+                    const shadowOffset = 10 * (1 - depthRatio); // 前方碎片陰影更明顯
+                    const shadowBlur = 20 * (1 - depthRatio);
+                    ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
+                    ctx.shadowBlur = shadowBlur;
+                    ctx.shadowOffsetX = shadowOffset;
+                    ctx.shadowOffsetY = shadowOffset;
+                    
+                    // 2. 繪製五官碎片（玻璃感 - 半透明）
+                    ctx.globalAlpha = frag.alpha * (1 - depthRatio * 0.4); // 遠的更透明
                     ctx.drawImage(frag.canvas, -displayWidth / 2, -displayHeight / 2, displayWidth, displayHeight);
                     
-                    // 碎片邊框
-                    ctx.globalAlpha = 0.3;
-                    ctx.strokeStyle = 'rgba(212, 165, 116, 0.6)';
-                    ctx.lineWidth = 1;
+                    // 重置陰影
+                    ctx.shadowColor = 'transparent';
+                    ctx.shadowBlur = 0;
+                    ctx.shadowOffsetX = 0;
+                    ctx.shadowOffsetY = 0;
+                    
+                    // 3. 玻璃邊框（雙層效果）
+                    // 外框（深色）
+                    ctx.globalAlpha = 0.5;
+                    ctx.strokeStyle = 'rgba(150, 120, 80, 0.8)';
+                    ctx.lineWidth = 2.5;
                     ctx.strokeRect(-displayWidth / 2, -displayHeight / 2, displayWidth, displayHeight);
+                    
+                    // 內框（亮色）
+                    ctx.globalAlpha = 0.3;
+                    ctx.strokeStyle = 'rgba(255, 220, 180, 0.6)';
+                    ctx.lineWidth = 1;
+                    ctx.strokeRect(-displayWidth / 2 + 1, -displayHeight / 2 + 1, displayWidth - 2, displayHeight - 2);
+                    
+                    // 4. 玻璃高光（左上角 - 強化）
+                    const glareGradient = ctx.createLinearGradient(
+                        -displayWidth / 2, -displayHeight / 2,
+                        -displayWidth / 2 + displayWidth * 0.4, -displayHeight / 2 + displayHeight * 0.4
+                    );
+                    glareGradient.addColorStop(0, 'rgba(255, 255, 255, 0.6)');
+                    glareGradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.2)');
+                    glareGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+                    
+                    ctx.globalAlpha = 0.5 * (1 - depthRatio * 0.5);
+                    ctx.fillStyle = glareGradient;
+                    ctx.fillRect(-displayWidth / 2, -displayHeight / 2, displayWidth * 0.4, displayHeight * 0.4);
+                    
+                    // 5. 右下角反光（次要高光）
+                    const glare2Gradient = ctx.createLinearGradient(
+                        displayWidth / 2, displayHeight / 2,
+                        displayWidth / 2 - displayWidth * 0.2, displayHeight / 2 - displayHeight * 0.2
+                    );
+                    glare2Gradient.addColorStop(0, 'rgba(255, 255, 255, 0.3)');
+                    glare2Gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+                    
+                    ctx.globalAlpha = 0.3 * (1 - depthRatio * 0.5);
+                    ctx.fillStyle = glare2Gradient;
+                    ctx.fillRect(displayWidth / 2 - displayWidth * 0.2, displayHeight / 2 - displayHeight * 0.2, displayWidth * 0.2, displayHeight * 0.2);
                     
                     ctx.restore();
                 });
