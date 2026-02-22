@@ -75,8 +75,12 @@
         /* 手機橫向優化 */
         @media (max-width: 768px) and (orientation: landscape) {
             .machine-wrapper {
-                width: 98vw;
+                width: 96vw;
                 max-width: none;
+                margin: 0 auto;
+                /* 確保上下有空間顯示所有元素 */
+                transform: scale(0.92);
+                transform-origin: center center;
             }
             
             /* 橫向模式下適當調整背景 */
@@ -108,6 +112,11 @@
             
             .fine-tune-value {
                 font-size: 6px;
+            }
+            
+            /* 確保模式選擇器可見 */
+            .mode-selector {
+                bottom: 8%;
             }
         }
         
@@ -471,8 +480,8 @@
             background: #200;
             z-index: 10;
         }
-        .light-left { bottom: 22%; left: 15%; }      /* 紅燈：更靠近 MODE 字母 */
-        .light-right { bottom: 22%; right: 15%; }    /* 綠燈：更靠近 LIVE EEG 字母 */
+        .light-left { bottom: 22%; left: 15%; }      /* 綠燈：對應左下 CAM 按鈕 */
+        .light-right { bottom: 22%; right: 15%; }    /* 紅燈：對應右下 RUN 按鈕 */
         .light.active-red { 
             background: #f00; 
             box-shadow: 0 0 12px #f00, 0 0 20px #f00;
@@ -591,15 +600,207 @@
         }
         
         .intro-content {
-            max-width: 700px;
+            max-width: 900px;  /* 增加寬度以容納圖示 */
             background: rgba(0, 0, 0, 0.7);
             border: 2px solid var(--glow-color);
             border-radius: 10px;
             padding: 30px;
             box-shadow: 0 0 30px rgba(212, 165, 116, 0.3);
             margin-bottom: 40px;
-            max-height: 60vh;
+            max-height: 70vh;
             overflow-y: auto;
+        }
+        
+        /* 圖形化控制說明 */
+        .control-diagram {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            aspect-ratio: 1000 / 667;
+            margin: 20px auto;
+            background: rgba(26, 26, 26, 0.5);
+            background-image: url('Image.png');
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            border: 1px solid rgba(212, 165, 116, 0.3);
+            border-radius: 8px;
+        }
+        
+        /* 標記點 */
+        .marker {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 10;
+        }
+        
+        .marker-dot {
+            width: 12px;
+            height: 12px;
+            background: var(--glow-bright);
+            border-radius: 50%;
+            box-shadow: 0 0 15px var(--glow-bright), 0 0 25px var(--glow-color);
+            position: relative;
+            animation: dotPulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes dotPulse {
+            0%, 100% { 
+                transform: scale(1); 
+                box-shadow: 0 0 15px var(--glow-bright), 0 0 25px var(--glow-color);
+            }
+            50% { 
+                transform: scale(1.3); 
+                box-shadow: 0 0 25px var(--glow-bright), 0 0 40px var(--glow-color);
+            }
+        }
+        
+        .marker-dot::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 6px;
+            height: 6px;
+            background: #fff;
+            border-radius: 50%;
+            animation: innerPulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes innerPulse {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 1; }
+        }
+        
+        .marker-label {
+            background: rgba(0, 0, 0, 0.9);
+            color: var(--glow-bright);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: clamp(10px, 1.5vw, 13px);
+            border: 1px solid var(--glow-color);
+            box-shadow: 0 0 10px rgba(212, 165, 116, 0.5);
+            white-space: nowrap;
+            font-weight: bold;
+            animation: labelFloat 3s ease-in-out infinite;
+        }
+        
+        @keyframes labelFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-3px); }
+        }
+        
+        /* 標記位置 */
+        .marker-knob-left {
+            top: 15%;
+            left: 5%;
+        }
+        
+        .marker-knob-right {
+            top: 15%;
+            right: 5%;
+        }
+        
+        .marker-mode {
+            bottom: 12%;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .marker-cam {
+            bottom: 28%;
+            left: 15%;
+        }
+        
+        .marker-run {
+            bottom: 28%;
+            right: 15%;
+        }
+        
+        .marker-screen {
+            top: 8%;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .marker-fine-tune {
+            top: 35%;
+            left: 28%;
+        }
+        
+        /* 模式說明區 */
+        .mode-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 25px;
+        }
+        
+        .mode-card {
+            background: rgba(212, 165, 116, 0.1);
+            border: 1px solid var(--glow-color);
+            border-radius: 8px;
+            padding: 15px;
+            transition: all 0.3s;
+        }
+        
+        .mode-card:hover {
+            background: rgba(212, 165, 116, 0.2);
+            box-shadow: 0 0 15px rgba(212, 165, 116, 0.3);
+        }
+        
+        .mode-card h4 {
+            color: var(--glow-bright);
+            font-size: clamp(14px, 2vw, 16px);
+            margin-bottom: 8px;
+            text-shadow: 0 0 5px var(--glow-color);
+        }
+        
+        .mode-card p {
+            color: rgba(212, 165, 116, 0.9);
+            font-size: clamp(12px, 1.8vw, 14px);
+            line-height: 1.5;
+            margin: 0;
+        }
+        
+        /* 互動提示 */
+        .interaction-tip {
+            background: rgba(100, 255, 100, 0.1);
+            border: 1px solid rgba(100, 255, 100, 0.5);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        
+        .interaction-tip h4 {
+            color: rgba(100, 255, 100, 1);
+            font-size: clamp(14px, 2vw, 16px);
+            margin-bottom: 10px;
+            text-shadow: 0 0 5px rgba(100, 255, 100, 0.5);
+        }
+        
+        .interaction-tip ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .interaction-tip li {
+            color: rgba(100, 255, 100, 0.9);
+            font-size: clamp(12px, 1.8vw, 14px);
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
+        }
+        
+        .interaction-tip li::before {
+            content: '▸';
+            position: absolute;
+            left: 0;
+            color: rgba(100, 255, 100, 1);
         }
         
         /* 自定義滾動條 */
@@ -621,6 +822,12 @@
             background: var(--glow-bright);
         }
         
+        /* Firefox 滾動條 */
+        .intro-content {
+            scrollbar-width: thin;
+            scrollbar-color: var(--glow-color) rgba(0, 0, 0, 0.3);
+        }
+        
         /* 手機版優化 */
         @media (max-width: 768px) {
             .intro-screen {
@@ -629,7 +836,7 @@
             
             .intro-content {
                 padding: 20px;
-                max-height: 50vh;
+                max-height: 65vh;
             }
             
             .intro-title {
@@ -643,6 +850,95 @@
             .start-button {
                 padding: 15px 40px;
                 font-size: 18px;
+            }
+            
+            /* 手機版控制圖示 */
+            .control-diagram {
+                aspect-ratio: 1000 / 800;  /* 調整比例以適應手機 */
+            }
+            
+            .marker {
+                gap: 5px;
+            }
+            
+            .marker-dot {
+                width: 10px;
+                height: 10px;
+            }
+            
+            .marker-dot::before {
+                width: 4px;
+                height: 4px;
+            }
+            
+            .marker-label {
+                padding: 6px 10px;
+                font-size: 10px;
+            }
+            
+            /* 手機版調整標記位置 */
+            .marker-knob-left {
+                top: 12%;
+                left: 2%;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .marker-knob-right {
+                top: 12%;
+                right: 2%;
+                flex-direction: column;
+                align-items: flex-end;
+            }
+            
+            .marker-screen {
+                top: 5%;
+            }
+            
+            .marker-fine-tune {
+                top: 30%;
+                left: 25%;
+            }
+            
+            .marker-mode {
+                bottom: 8%;
+            }
+            
+            .mode-info {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            
+            .mode-card {
+                padding: 12px;
+            }
+            
+            .interaction-tip {
+                padding: 12px;
+            }
+            
+            /* 手機版減少動畫以提升性能 */
+            .marker-label {
+                animation: none;
+            }
+            
+            .marker-dot::before {
+                animation: none;
+            }
+        }
+        
+        /* 平板版優化 */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .intro-content {
+                max-width: 750px;
+            }
+            
+            .control-diagram {
+                max-width: 700px;
+            }
+            
+            .marker-label {
+                font-size: 12px;
             }
         }
         
@@ -806,32 +1102,75 @@
         <h1 class="intro-title">自我觀測儀 | NonObservation</h1>
         
         <div class="intro-content">
-            <div class="intro-section">
-                <h3>操作方式</h3>
-                <ul>
-                    <li><strong>CAM 按鈕</strong> - 左下角，開啟/關閉攝影機</li>
-                    <li><strong>RUN 按鈕</strong> - 右下角，啟動/暫停系統</li>
-                    <li><strong>MODE 選擇</strong> - 底部三個區域，切換觀測模式</li>
-                    <li><strong>旋鈕控制</strong> - 左右兩側，上下拖動調整參數</li>
-                    <li><strong>微調按鈕</strong> - 螢幕兩側 +/- 按鈕，精細調整</li>
-                </ul>
+            <!-- 圖形化控制說明 -->
+            <div class="control-diagram">
+                <!-- 左側旋鈕標記 -->
+                <div class="marker marker-knob-left">
+                    <div class="marker-dot"></div>
+                    <div class="marker-label">左旋鈕：碎片密度</div>
+                </div>
+                
+                <!-- 右側旋鈕標記 -->
+                <div class="marker marker-knob-right">
+                    <div class="marker-label">右旋鈕：變形強度</div>
+                    <div class="marker-dot"></div>
+                </div>
+                
+                <!-- 螢幕標記 -->
+                <div class="marker marker-screen">
+                    <div class="marker-label">主螢幕：觀測畫面</div>
+                </div>
+                
+                <!-- 微調按鈕標記 -->
+                <div class="marker marker-fine-tune">
+                    <div class="marker-dot"></div>
+                    <div class="marker-label">螢幕兩側：微調 +/-</div>
+                </div>
+                
+                <!-- CAM 按鈕標記 -->
+                <div class="marker marker-cam">
+                    <div class="marker-dot"></div>
+                    <div class="marker-label">CAM：開啟攝影機 🟢</div>
+                </div>
+                
+                <!-- RUN 按鈕標記 -->
+                <div class="marker marker-run">
+                    <div class="marker-label">RUN：啟動系統 🔴</div>
+                    <div class="marker-dot"></div>
+                </div>
+                
+                <!-- MODE 標記 -->
+                <div class="marker marker-mode">
+                    <div class="marker-label">MODE：切換三階段模式</div>
+                </div>
             </div>
             
-            <div class="intro-section">
-                <h3>三種觀測模式</h3>
-                <ul>
-                    <li><strong>階段 1 - 鏡像期</strong>：臉部掃描與五官偵測</li>
-                    <li><strong>階段 2 - 資料規訓</strong>：色彩解構與重組</li>
-                    <li><strong>階段 3 - 超真實擬像</strong>：五官碎片互動（搖頭、伸手可影響）</li>
-                </ul>
+            <!-- 三種觀測模式說明 -->
+            <div class="mode-info">
+                <div class="mode-card">
+                    <h4>階段 1｜鏡像期</h4>
+                    <p>臉部掃描與 28 個特徵點偵測，包含眼、鼻、嘴及輪廓追蹤</p>
+                </div>
+                
+                <div class="mode-card">
+                    <h4>階段 2｜資料規訓</h4>
+                    <p>即時色彩解構與重組，像素化處理與動態色相轉換</p>
+                </div>
+                
+                <div class="mode-card">
+                    <h4>階段 3｜超真實擬像</h4>
+                    <p>五官碎片 3D 漂浮，支援頭部擺動與手勢互動控制</p>
+                </div>
             </div>
             
-            <div class="intro-section">
-                <h3>互動技巧</h3>
+            <!-- 互動技巧提示 -->
+            <div class="interaction-tip">
+                <h4>💡 互動技巧（階段 3）</h4>
                 <ul>
-                    <li>在階段 3 中，<strong>左右搖頭</strong>會推動碎片旋轉</li>
-                    <li><strong>伸手到畫面</strong>可以推開附近的碎片</li>
-                    <li>調整左側旋鈕改變碎片數量（8-32 個）</li>
+                    <li>左右搖頭 → 推動碎片旋轉與移動</li>
+                    <li>伸手到畫面 → 推開附近的碎片</li>
+                    <li>調整左側旋鈕 → 改變碎片數量（8-32 個）</li>
+                    <li>使用螢幕兩側 +/- 按鈕 → 精細調整各階段參數</li>
                 </ul>
             </div>
         </div>
@@ -919,8 +1258,8 @@
         <div class="btn btn-run" id="btnRun"></div>
 
         <!-- 指示燈 -->
-        <div class="light light-left" id="indRed"></div>
-        <div class="light light-right" id="indGreen"></div>
+        <div class="light light-left" id="indGreen"></div>  <!-- 左邊：綠燈（CAM） -->
+        <div class="light light-right" id="indRed"></div>    <!-- 右邊：紅燈（RUN） -->
 
         <div id="valTip" class="tooltip"></div>
     </div>
@@ -1565,11 +1904,15 @@
                 };
                 
                 const baseAngle = (i / state.density) * Math.PI * 2;
-                const angleOffset = (Math.random() - 0.5) * (Math.PI / state.density);
+                const angleOffset = (Math.random() - 0.5) * (Math.PI / state.density * 0.5);
                 const angle = baseAngle + angleOffset;
-                const radius = 100 + Math.random() * 80;
+                const radius = 120 + Math.random() * 100;  // 增加距離：120-220px，更分散
                 const startX = canvas.width/2 + Math.cos(angle) * radius;
                 const startY = canvas.height/2 + Math.sin(angle) * radius;
+                
+                // **增加初始速度，避免聚集**
+                const initialSpeed = 1.5;
+                const velocityAngle = Math.random() * Math.PI * 2;
                 
                 // **新增：3D 座標系統**
                 state.facialFragments.push({
@@ -1581,11 +1924,11 @@
                     // 2D 位置
                     x: startX,
                     y: startY,
-                    vx: (Math.random() - 0.5) * 1,
-                    vy: (Math.random() - 0.5) * 1,
+                    vx: Math.cos(velocityAngle) * initialSpeed,  // 隨機方向的初始速度
+                    vy: Math.sin(velocityAngle) * initialSpeed,
                     // **3D 深度座標（Z 軸）**
                     z: Math.random() * 300 - 150,  // -150 到 +150（前後浮動）
-                    vz: (Math.random() - 0.5) * 0.5,  // Z 軸速度
+                    vz: (Math.random() - 0.5) * 1.0,  // 增加 Z 軸初始速度
                     // 3D 旋轉角度
                     rotateX: (Math.random() - 0.5) * 60,  // X 軸旋轉 -30° 到 +30°
                     rotateY: (Math.random() - 0.5) * 60,  // Y 軸旋轉
@@ -1741,54 +2084,101 @@
                 ctx.lineTo(faceCenterX + faceWidth/2, faceCenterY + faceHeight/2 - cornerSize);
                 ctx.stroke();
                 
-                // 五官偵測標記
-                const featureSize = faceWidth * 0.15;
+                // 專業臉部特徵點標記（點對點方式）
+                const drawFeaturePoint = (x, y, label, color) => {
+                    // 外圈
+                    ctx.strokeStyle = color;
+                    ctx.lineWidth = 1.5;
+                    ctx.beginPath();
+                    ctx.arc(x, y, 5, 0, Math.PI * 2);
+                    ctx.stroke();
+                    
+                    // 內圈
+                    ctx.beginPath();
+                    ctx.arc(x, y, 2, 0, Math.PI * 2);
+                    ctx.stroke();
+                    
+                    // 中心點
+                    ctx.fillStyle = color;
+                    ctx.beginPath();
+                    ctx.arc(x, y, 1, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // 標籤
+                    if (label) {
+                        ctx.fillStyle = color;
+                        ctx.font = '7px monospace';
+                        ctx.fillText(label, x + 8, y + 3);
+                    }
+                };
                 
-                // 雙眼標記
-                ctx.strokeStyle = 'rgba(100, 255, 255, 0.8)';
-                ctx.lineWidth = 1.5;
+                const pointColor = 'rgba(100, 255, 255, 0.9)';
                 const eyeY = faceCenterY - faceHeight * 0.15;
                 const eyeSpacing = faceWidth * 0.2;
                 
-                // 左眼
-                ctx.strokeRect(
-                    faceCenterX - eyeSpacing - featureSize/2,
-                    eyeY - featureSize/2,
-                    featureSize, featureSize * 0.7
-                );
-                ctx.fillStyle = 'rgba(100, 255, 255, 0.8)';
-                ctx.font = '8px monospace';
-                ctx.fillText('L_EYE', faceCenterX - eyeSpacing - featureSize/2, eyeY - featureSize/2 - 5);
+                // 左眼特徵點（5個點）
+                drawFeaturePoint(faceCenterX - eyeSpacing - 15, eyeY, 'L1', pointColor);
+                drawFeaturePoint(faceCenterX - eyeSpacing - 7, eyeY - 5, 'L2', pointColor);
+                drawFeaturePoint(faceCenterX - eyeSpacing, eyeY, 'L3', pointColor);
+                drawFeaturePoint(faceCenterX - eyeSpacing + 7, eyeY - 5, 'L4', pointColor);
+                drawFeaturePoint(faceCenterX - eyeSpacing + 15, eyeY, 'L5', pointColor);
                 
-                // 右眼
-                ctx.strokeRect(
-                    faceCenterX + eyeSpacing - featureSize/2,
-                    eyeY - featureSize/2,
-                    featureSize, featureSize * 0.7
-                );
-                ctx.fillText('R_EYE', faceCenterX + eyeSpacing - featureSize/2, eyeY - featureSize/2 - 5);
+                // 右眼特徵點（5個點）
+                drawFeaturePoint(faceCenterX + eyeSpacing - 15, eyeY, 'R1', pointColor);
+                drawFeaturePoint(faceCenterX + eyeSpacing - 7, eyeY - 5, 'R2', pointColor);
+                drawFeaturePoint(faceCenterX + eyeSpacing, eyeY, 'R3', pointColor);
+                drawFeaturePoint(faceCenterX + eyeSpacing + 7, eyeY - 5, 'R4', pointColor);
+                drawFeaturePoint(faceCenterX + eyeSpacing + 15, eyeY, 'R5', pointColor);
                 
-                // 鼻子標記
-                ctx.strokeStyle = 'rgba(255, 255, 100, 0.8)';
+                // 鼻子特徵點（4個點）
+                const noseColor = 'rgba(255, 255, 100, 0.9)';
                 const noseY = faceCenterY + faceHeight * 0.05;
-                ctx.strokeRect(
-                    faceCenterX - featureSize * 0.3,
-                    noseY - featureSize * 0.4,
-                    featureSize * 0.6, featureSize * 0.8
-                );
-                ctx.fillStyle = 'rgba(255, 255, 100, 0.8)';
-                ctx.fillText('NOSE', faceCenterX - featureSize * 0.3, noseY - featureSize * 0.4 - 5);
+                drawFeaturePoint(faceCenterX, noseY - 15, 'N1', noseColor);
+                drawFeaturePoint(faceCenterX - 8, noseY + 5, 'N2', noseColor);
+                drawFeaturePoint(faceCenterX, noseY + 10, 'N3', noseColor);
+                drawFeaturePoint(faceCenterX + 8, noseY + 5, 'N4', noseColor);
                 
-                // 嘴巴標記
-                ctx.strokeStyle = 'rgba(255, 100, 255, 0.8)';
+                // 嘴巴特徵點（6個點）
+                const mouthColor = 'rgba(255, 100, 255, 0.9)';
                 const mouthY = faceCenterY + faceHeight * 0.25;
-                ctx.strokeRect(
-                    faceCenterX - featureSize * 0.6,
-                    mouthY - featureSize * 0.3,
-                    featureSize * 1.2, featureSize * 0.6
-                );
-                ctx.fillStyle = 'rgba(255, 100, 255, 0.8)';
-                ctx.fillText('MOUTH', faceCenterX - featureSize * 0.6, mouthY - featureSize * 0.3 - 5);
+                drawFeaturePoint(faceCenterX - 25, mouthY, 'M1', mouthColor);
+                drawFeaturePoint(faceCenterX - 12, mouthY - 3, 'M2', mouthColor);
+                drawFeaturePoint(faceCenterX, mouthY - 2, 'M3', mouthColor);
+                drawFeaturePoint(faceCenterX + 12, mouthY - 3, 'M4', mouthColor);
+                drawFeaturePoint(faceCenterX + 25, mouthY, 'M5', mouthColor);
+                drawFeaturePoint(faceCenterX, mouthY + 8, 'M6', mouthColor);
+                
+                // 臉部輪廓點（8個點）
+                const contourColor = 'rgba(212, 165, 116, 0.7)';
+                const contourPoints = [
+                    { x: faceCenterX - faceWidth * 0.45, y: faceCenterY - faceHeight * 0.3, label: 'C1' },
+                    { x: faceCenterX - faceWidth * 0.48, y: faceCenterY, label: 'C2' },
+                    { x: faceCenterX - faceWidth * 0.4, y: faceCenterY + faceHeight * 0.35, label: 'C3' },
+                    { x: faceCenterX - faceWidth * 0.2, y: faceCenterY + faceHeight * 0.45, label: 'C4' },
+                    { x: faceCenterX + faceWidth * 0.2, y: faceCenterY + faceHeight * 0.45, label: 'C5' },
+                    { x: faceCenterX + faceWidth * 0.4, y: faceCenterY + faceHeight * 0.35, label: 'C6' },
+                    { x: faceCenterX + faceWidth * 0.48, y: faceCenterY, label: 'C7' },
+                    { x: faceCenterX + faceWidth * 0.45, y: faceCenterY - faceHeight * 0.3, label: 'C8' }
+                ];
+                
+                contourPoints.forEach(p => {
+                    drawFeaturePoint(p.x, p.y, p.label, contourColor);
+                });
+                
+                // 連接線（虛線）
+                ctx.strokeStyle = 'rgba(212, 165, 116, 0.3)';
+                ctx.lineWidth = 1;
+                ctx.setLineDash([3, 3]);
+                
+                // 連接輪廓點
+                ctx.beginPath();
+                contourPoints.forEach((p, i) => {
+                    if (i === 0) ctx.moveTo(p.x, p.y);
+                    else ctx.lineTo(p.x, p.y);
+                });
+                ctx.closePath();
+                ctx.stroke();
+                ctx.setLineDash([]);
                 
                 // 手部偵測
                 detectHand();
@@ -1796,27 +2186,36 @@
                 if (state.handDetected) {
                     const handX = state.handPosition.x * w;
                     const handY = state.handPosition.y * h;
-                    const handSize = faceWidth * 0.25;
                     
-                    ctx.strokeStyle = 'rgba(100, 255, 100, 0.9)';
+                    // 手部中心點（較大）
+                    ctx.strokeStyle = 'rgba(100, 255, 100, 1)';
                     ctx.lineWidth = 2;
-                    ctx.setLineDash([5, 5]);
-                    ctx.strokeRect(
-                        handX - handSize/2,
-                        handY - handSize/2,
-                        handSize, handSize
-                    );
-                    ctx.setLineDash([]);
+                    ctx.beginPath();
+                    ctx.arc(handX, handY, 8, 0, Math.PI * 2);
+                    ctx.stroke();
                     
-                    ctx.fillStyle = 'rgba(100, 255, 100, 1)';
-                    ctx.font = 'bold 10px monospace';
-                    ctx.fillText('HAND', handX - handSize/2, handY - handSize/2 - 8);
-                    
-                    // 手部中心點
-                    ctx.fillStyle = 'rgba(100, 255, 100, 0.8)';
                     ctx.beginPath();
                     ctx.arc(handX, handY, 4, 0, Math.PI * 2);
+                    ctx.stroke();
+                    
+                    ctx.fillStyle = 'rgba(100, 255, 100, 0.8)';
+                    ctx.beginPath();
+                    ctx.arc(handX, handY, 2, 0, Math.PI * 2);
                     ctx.fill();
+                    
+                    // 手部標籤
+                    ctx.fillStyle = 'rgba(100, 255, 100, 1)';
+                    ctx.font = 'bold 9px monospace';
+                    ctx.fillText('HAND', handX + 12, handY - 10);
+                    
+                    // 手部影響範圍圈（虛線）
+                    ctx.strokeStyle = 'rgba(100, 255, 100, 0.3)';
+                    ctx.lineWidth = 1;
+                    ctx.setLineDash([5, 5]);
+                    ctx.beginPath();
+                    ctx.arc(handX, handY, 60, 0, Math.PI * 2);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
                 }
                 
             } else if (state.currentMode === 2) {
@@ -1932,19 +2331,19 @@
                     }
                     
                     // **1. XY 平面磁性運動 + 頭部和手部影響**
-                    const targetDistance = 80;  // 減小目標距離，讓碎片更靠近臉部
+                    const targetDistance = 100;  // 保持合適的目標距離
                     
-                    if (xyDistance > targetDistance + 20) {
-                        const attractionStrength = 0.08 * motionMultiplier;  // 增強吸引力
+                    if (xyDistance > targetDistance + 30) {  // 增加吸引閾值
+                        const attractionStrength = 0.06 * motionMultiplier;  // 適度吸引力
                         const pull = (xyDistance - targetDistance) / 200;
                         frag.vx += (dx / xyDistance) * attractionStrength * pull;
                         frag.vy += (dy / xyDistance) * attractionStrength * pull;
-                    } else if (xyDistance < targetDistance - 20) {
-                        const repulsionStrength = 0.02 * motionMultiplier;
+                    } else if (xyDistance < targetDistance - 30) {  // 增加推離閾值
+                        const repulsionStrength = 0.03 * motionMultiplier;  // 增強推離力
                         frag.vx -= (dx / xyDistance) * repulsionStrength;
                         frag.vy -= (dy / xyDistance) * repulsionStrength;
                     } else {
-                        const orbitStrength = 0.015 * motionMultiplier;  // 增強環繞力
+                        const orbitStrength = 0.02 * motionMultiplier;  // 適度環繞力
                         frag.vx += -dy / xyDistance * orbitStrength;
                         frag.vy += dx / xyDistance * orbitStrength;
                     }
@@ -1952,6 +2351,23 @@
                     // 應用頭部和手部影響
                     frag.vx += headInfluenceX * 0.1 + handInfluenceX;
                     frag.vy += headInfluenceY * 0.1 + handInfluenceY;
+                    
+                    // **碎片之間的排斥力（防止聚集）**
+                    state.facialFragments.forEach(otherFrag => {
+                        if (otherFrag === frag) return;
+                        
+                        const fragDx = frag.x - otherFrag.x;
+                        const fragDy = frag.y - otherFrag.y;
+                        const fragDist = Math.sqrt(fragDx * fragDx + fragDy * fragDy);
+                        
+                        // 當碎片太近時互相推開（增加影響範圍）
+                        if (fragDist < 80 && fragDist > 0) {  // 從60增加到80
+                            const repelPower = (80 - fragDist) / 80;
+                            const repelStrength = 0.8 * repelPower;  // 增強排斥力
+                            frag.vx += (fragDx / fragDist) * repelStrength;
+                            frag.vy += (fragDy / fragDist) * repelStrength;
+                        }
+                    });
                     
                     // **2. Z 軸深度運動（新增）**
                     // Z 軸在 -150 到 +150 之間浮動
@@ -1991,12 +2407,41 @@
                     frag.x += frag.vx;
                     frag.y += frag.vy;
                     
-                    // 邊界處理
-                    const margin = 30;
-                    if (frag.x < margin) { frag.vx += 0.3; frag.x = margin; }
-                    if (frag.x > w - margin) { frag.vx -= 0.3; frag.x = w - margin; }
-                    if (frag.y < margin) { frag.vy += 0.3; frag.y = margin; }
-                    if (frag.y > h - margin) { frag.vy -= 0.3; frag.y = h - margin; }
+                    // 邊界處理：軟反彈 + 角落推力
+                    const margin = 40;  // 增加邊界範圍
+                    
+                    if (frag.x < margin) { 
+                        frag.vx += 0.5; 
+                        frag.x = margin;
+                        // 角落額外推力
+                        if (frag.y < margin || frag.y > h - margin) {
+                            frag.vy += (frag.y < h/2) ? 0.5 : -0.5;
+                        }
+                    }
+                    if (frag.x > w - margin) { 
+                        frag.vx -= 0.5; 
+                        frag.x = w - margin;
+                        // 角落額外推力
+                        if (frag.y < margin || frag.y > h - margin) {
+                            frag.vy += (frag.y < h/2) ? 0.5 : -0.5;
+                        }
+                    }
+                    if (frag.y < margin) { 
+                        frag.vy += 0.5; 
+                        frag.y = margin;
+                        // 角落額外推力
+                        if (frag.x < margin || frag.x > w - margin) {
+                            frag.vx += (frag.x < w/2) ? 0.5 : -0.5;
+                        }
+                    }
+                    if (frag.y > h - margin) { 
+                        frag.vy -= 0.5; 
+                        frag.y = h - margin;
+                        // 角落額外推力
+                        if (frag.x < margin || frag.x > w - margin) {
+                            frag.vx += (frag.x < w/2) ? 0.5 : -0.5;
+                        }
+                    }
                     
                     // **4. 3D 旋轉更新 - 受頭部姿態影響**
                     frag.rotateX += frag.rotationSpeedX + state.headTiltY * 2;  // 點頭影響X軸旋轉
