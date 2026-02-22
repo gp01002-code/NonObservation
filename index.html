@@ -1126,6 +1126,13 @@
     <div class="intro-screen" id="introScreen">
         <h1 class="intro-title">Self-Observation Device</h1>
         
+        <!-- 實現階段標示 -->
+        <div style="text-align: center; margin: -15px 0 20px 0; opacity: 0.8;">
+            <span style="display: inline-block; padding: 6px 16px; background: rgba(212, 165, 116, 0.2); border: 1px solid var(--glow-color); border-radius: 20px; font-size: clamp(11px, 1.8vw, 13px); color: var(--glow-bright);">
+                📍 概念原型 v1.0 | Conceptual Prototype
+            </span>
+        </div>
+        
         <div class="intro-content">
             <!-- 圖形化控制說明 -->
             <div class="control-diagram">
@@ -1184,18 +1191,39 @@
                 
                 <div class="mode-card">
                     <h4>階段 3｜超真實擬像</h4>
-                    <p>五官碎片 3D 漂浮互動</p>
+                    <p>五官碎片 3D 漂浮互動 <span style="opacity: 0.7; font-size: 0.9em;">（視覺模擬版）</span></p>
                 </div>
             </div>
             
             <!-- 互動技巧提示 -->
             <div class="interaction-tip">
-                <h4>💡 互動提示（階段 3）</h4>
+                <h4>💡 互動方式（階段 3）</h4>
                 <ul>
-                    <li>搖頭 → 推動碎片</li>
+                    <li>搖頭 → 影響碎片移動</li>
                     <li>伸手 → 推開碎片</li>
                     <li>旋鈕 → 調整密度/變形</li>
                 </ul>
+                <p style="margin-top: 10px; font-size: 0.85em; opacity: 0.7; line-height: 1.3;">
+                    ⚙️ 當前版本使用視覺輸入。完整版將整合腦波感測與AI生成。
+                </p>
+            </div>
+            
+            <!-- 技術發展路線圖 -->
+            <div style="margin-top: 20px; padding: 15px; background: rgba(212, 165, 116, 0.05); border-left: 3px solid var(--glow-color); border-radius: 4px;">
+                <h4 style="color: var(--glow-color); font-size: clamp(12px, 1.8vw, 14px); margin-bottom: 10px;">
+                    🔬 技術發展路線
+                </h4>
+                <div style="font-size: clamp(10px, 1.5vw, 12px); color: rgba(212, 165, 116, 0.8); line-height: 1.6;">
+                    <div style="margin-bottom: 6px;">
+                        <span style="color: #0f8;">✓</span> <strong>階段 1（完成）</strong>：視覺系統 + 互動機制
+                    </div>
+                    <div style="margin-bottom: 6px;">
+                        <span style="color: #fa0;">⚙️</span> <strong>階段 2（進行中）</strong>：整合 EEG 腦波感測
+                    </div>
+                    <div>
+                        <span style="color: #888;">○</span> <strong>階段 3（規劃中）</strong>：整合 AI 即時生成
+                    </div>
+                </div>
             </div>
         </div>
         
@@ -1210,6 +1238,9 @@
             <div class="ui-text ui-top-left">
                 <div id="disp-mode">MODE: MIRROR_STAGE</div>
                 <div id="disp-status">SYS: STANDBY</div>
+                <div style="opacity: 0.5; font-size: 8px; margin-top: 4px; letter-spacing: 1px;">
+                    PROTO v1.0 | VISUAL SIM
+                </div>
             </div>
             <div class="ui-text ui-bottom-right" id="log-stream">
                 AWAITING DATA...
@@ -1535,6 +1566,8 @@
             setupEvents();
             requestAnimationFrame(loop);
             addLog("CORE LINK READY.");
+            addLog("MODE: VISUAL SIMULATION");
+            addLog("v1.0 PROTOTYPE BUILD");
             
             // 初始化微調值顯示
             document.getElementById('m1-val').textContent = state.mode1Adjust;
@@ -1706,7 +1739,13 @@
             });
             
             playSound('mode');
-            addLog(`STAGE_${m} ACTIVATED.`);
+            
+            if (m === 3) {
+                addLog(`STAGE_${m} ACTIVATED.`);
+                addLog(`VISUAL SIM MODE`); // 標示為視覺模擬
+            } else {
+                addLog(`STAGE_${m} ACTIVATED.`);
+            }
             
             if (m === 3 && state.cameraActive && state.isRunning) {
                 if (!state.databaseReady) {
