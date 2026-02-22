@@ -143,7 +143,7 @@
             animation: floatBackground 8s ease-in-out infinite;
         }
         
-        /* 前方背景層 - Image2.png（電子結構，20% 透明） */
+        /* 前方背景層 - Image2.png（電子結構，50% 透明） */
         .machine-wrapper::after {
             content: '';
             position: absolute;
@@ -155,37 +155,37 @@
             background-size: contain;
             background-position: center;
             background-repeat: no-repeat;
-            opacity: 0.2;  /* 20% 透明度 */
+            opacity: 0.5;  /* 50% 透明度 */
             z-index: 1;
             animation: floatForeground 6s ease-in-out infinite;
         }
         
-        /* 浮動動畫 - 後方背景（慢速、大範圍） */
+        /* 浮動動畫 - 後方背景（左右搖晃，慢速） */
         @keyframes floatBackground {
             0%, 100% {
-                transform: translate(0, 0) scale(1);
+                transform: translateX(0) scale(1);
             }
             25% {
-                transform: translate(8px, -6px) scale(1.01);
+                transform: translateX(10px) scale(1.005);
             }
             50% {
-                transform: translate(-5px, 8px) scale(0.99);
+                transform: translateX(-8px) scale(0.995);
             }
             75% {
-                transform: translate(-8px, -5px) scale(1.01);
+                transform: translateX(-10px) scale(1.005);
             }
         }
         
-        /* 浮動動畫 - 前方背景（快速、小範圍） */
+        /* 浮動動畫 - 前方背景（左右搖晃，快速，反向） */
         @keyframes floatForeground {
             0%, 100% {
-                transform: translate(0, 0);
+                transform: translateX(0);
             }
             33% {
-                transform: translate(-3px, 4px);
+                transform: translateX(-6px);
             }
             66% {
-                transform: translate(4px, -3px);
+                transform: translateX(5px);
             }
         }
 
@@ -236,6 +236,16 @@
             top: 8%; right: 6.5%; 
             width: 15%; height: 25%;
         }
+        
+        /* 左側旋鈕初始角度 */
+        #knobDensity {
+            --rotation: 300deg;  /* 初始值 0.833 * 360 = 300度 */
+        }
+        
+        /* 右側旋鈕初始角度 */
+        #knobDistort {
+            --rotation: 252deg;  /* 初始值 0.7 * 360 = 252度 */
+        }
 
         .knob-area {
             width: 100%;
@@ -243,22 +253,25 @@
             cursor: ns-resize; 
             background: transparent;
             border-radius: 50%;
-            transition: background 0.3s, transform 0.1s;
+            transition: background 0.3s;
             position: relative;
+            --rotation: 0deg;  /* CSS 變數控制旋轉角度 */
         }
         
         /* 旋鈕視覺指示線 */
         .knob-area::after {
             content: '';
             position: absolute;
-            top: 10%;
+            top: 5%;  /* 從更上方開始 */
             left: 50%;
-            width: 3px;
-            height: 35%;
-            background: linear-gradient(to bottom, var(--glow-bright), transparent);
-            transform: translateX(-50%);
-            border-radius: 2px;
-            box-shadow: 0 0 8px var(--glow-color);
+            width: 4px;  /* 增加寬度 */
+            height: 40%;  /* 增加長度 */
+            background: linear-gradient(to bottom, var(--glow-bright) 0%, var(--glow-color) 50%, transparent 100%);
+            transform-origin: center bottom;  /* 旋轉軸心在底部中心 */
+            transform: translateX(-50%) rotate(var(--rotation));  /* 使用 CSS 變數 */
+            border-radius: 3px;
+            box-shadow: 0 0 12px var(--glow-bright), 0 0 6px var(--glow-color);  /* 強化發光 */
+            transition: transform 0.1s ease-out;
         }
 
         .knob-area:hover {
@@ -268,6 +281,12 @@
         .knob-area.active {
             background: rgba(212, 165, 116, 0.2);
             box-shadow: 0 0 15px rgba(212, 165, 116, 0.5);
+        }
+        
+        /* active 狀態時指示線更亮 */
+        .knob-area.active::after {
+            box-shadow: 0 0 20px var(--glow-bright), 0 0 10px var(--glow-color), 0 0 5px #fff;
+            width: 5px;
         }
 
         .knob-value {
@@ -282,7 +301,7 @@
         /* 模式選擇器 */
         .mode-selector {
             position: absolute;
-            bottom: 14%; left: 28%;  /* 降低位置 */
+            bottom: 10%; left: 28%;  /* 降低位置到 10% */
             width: 44%; height: 10%;
             z-index: 10;
             display: flex;
@@ -650,7 +669,8 @@
         function updateKnobRotation(knobId, rotation) {
             const knob = document.getElementById(knobId);
             if (knob) {
-                knob.style.transform = `rotate(${rotation}deg)`;
+                // 通過 CSS 變數控制 ::after 偽元素的旋轉
+                knob.style.setProperty('--rotation', `${rotation}deg`);
             }
         }
 
