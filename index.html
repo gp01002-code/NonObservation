@@ -82,6 +82,27 @@
             .knob-value {
                 font-size: clamp(8px, 2vw, 10px);
             }
+            
+            /* 手機模式下縮小微調按鈕 */
+            .fine-tune-panel {
+                width: 6%;
+                gap: 5%;
+            }
+            
+            .fine-tune-btn {
+                width: 12px;
+                height: 12px;
+                font-size: 8px;
+                line-height: 10px;
+            }
+            
+            .fine-tune-label {
+                font-size: 6px;
+            }
+            
+            .fine-tune-value {
+                font-size: 6px;
+            }
         }
         
         /* 平板優化 */
@@ -105,7 +126,7 @@
             box-shadow: 0 0 100px rgba(212, 165, 116, 0.1);
         }
         
-        /* 後方背景層 - Image2.png（電子結構，微透明） */
+        /* 後方背景層 - Image2.png（電子結構，完全不透明） */
         .machine-wrapper::before {
             content: '';
             position: absolute;
@@ -117,7 +138,7 @@
             background-size: contain;
             background-position: center;
             background-repeat: no-repeat;
-            opacity: 0.9;  /* 微透明（90%） */
+            opacity: 1.0;  /* 完全不透明 */
             z-index: 0;
             animation: floatBackground 8s ease-in-out infinite;
         }
@@ -222,7 +243,22 @@
             cursor: ns-resize; 
             background: transparent;
             border-radius: 50%;
-            transition: background 0.3s;
+            transition: background 0.3s, transform 0.1s;
+            position: relative;
+        }
+        
+        /* 旋鈕視覺指示線 */
+        .knob-area::after {
+            content: '';
+            position: absolute;
+            top: 10%;
+            left: 50%;
+            width: 3px;
+            height: 35%;
+            background: linear-gradient(to bottom, var(--glow-bright), transparent);
+            transform: translateX(-50%);
+            border-radius: 2px;
+            box-shadow: 0 0 8px var(--glow-color);
         }
 
         .knob-area:hover {
@@ -246,7 +282,7 @@
         /* 模式選擇器 */
         .mode-selector {
             position: absolute;
-            bottom: 16%; left: 28%;
+            bottom: 14%; left: 28%;  /* 降低位置 */
             width: 44%; height: 10%;
             z-index: 10;
             display: flex;
@@ -257,6 +293,7 @@
             flex: 1; 
             cursor: pointer;
             transition: all 0.2s;
+            position: relative;
         }
 
         .mode-target:hover {
@@ -265,6 +302,98 @@
 
         .mode-target.active {
             background: rgba(255, 0, 0, 0.2);
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.5), inset 0 0 15px rgba(255, 100, 0, 0.3);
+        }
+        
+        /* 模式按鈕發光效果 */
+        .mode-target.active::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            height: 80%;
+            background: radial-gradient(circle, rgba(255, 80, 0, 0.4) 0%, transparent 70%);
+            animation: modePulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes modePulse {
+            0%, 100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+        }
+        
+        /* 螢幕兩側微調控制面板 */
+        .fine-tune-panel {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            width: 8%;
+            z-index: 3;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 8%;
+            padding: 5% 0;
+        }
+        
+        .fine-tune-left { left: 0; align-items: flex-start; padding-left: 2%; }
+        .fine-tune-right { right: 0; align-items: flex-end; padding-right: 2%; }
+        
+        .fine-tune-control {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            align-items: center;
+        }
+        
+        .fine-tune-label {
+            font-size: 7px;
+            color: var(--glow-color);
+            text-shadow: 0 0 3px var(--glow-color);
+            opacity: 0.7;
+            text-align: center;
+            white-space: nowrap;
+        }
+        
+        .fine-tune-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        
+        .fine-tune-btn {
+            width: 16px;
+            height: 16px;
+            background: rgba(212, 165, 116, 0.1);
+            border: 1px solid var(--glow-color);
+            color: var(--glow-bright);
+            font-size: 10px;
+            line-height: 14px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.15s;
+            box-shadow: 0 0 5px rgba(212, 165, 116, 0.3);
+        }
+        
+        .fine-tune-btn:hover {
+            background: rgba(212, 165, 116, 0.3);
+            box-shadow: 0 0 10px var(--glow-color);
+            transform: scale(1.1);
+        }
+        
+        .fine-tune-btn:active {
+            background: rgba(212, 165, 116, 0.5);
+            transform: scale(0.95);
+        }
+        
+        .fine-tune-value {
+            font-size: 8px;
+            color: var(--glow-bright);
+            text-shadow: 0 0 5px var(--glow-color);
+            margin-top: 2px;
+            text-align: center;
+            min-width: 20px;
         }
 
         /* 按鈕 + 按下效果 */
@@ -365,6 +494,46 @@
             </div>
             <canvas id="mainCanvas"></canvas>
             <div class="crt-overlay"></div>
+            
+            <!-- 左側微調面板 -->
+            <div class="fine-tune-panel fine-tune-left">
+                <div class="fine-tune-control">
+                    <div class="fine-tune-label">M1</div>
+                    <div class="fine-tune-buttons">
+                        <div class="fine-tune-btn" onclick="adjustMode1(1)">+</div>
+                        <div class="fine-tune-btn" onclick="adjustMode1(-1)">-</div>
+                    </div>
+                    <div class="fine-tune-value" id="m1-val">0</div>
+                </div>
+                <div class="fine-tune-control">
+                    <div class="fine-tune-label">M2</div>
+                    <div class="fine-tune-buttons">
+                        <div class="fine-tune-btn" onclick="adjustMode2(1)">+</div>
+                        <div class="fine-tune-btn" onclick="adjustMode2(-1)">-</div>
+                    </div>
+                    <div class="fine-tune-value" id="m2-val">0</div>
+                </div>
+            </div>
+            
+            <!-- 右側微調面板 -->
+            <div class="fine-tune-panel fine-tune-right">
+                <div class="fine-tune-control">
+                    <div class="fine-tune-label">M3</div>
+                    <div class="fine-tune-buttons">
+                        <div class="fine-tune-btn" onclick="adjustMode3(1)">+</div>
+                        <div class="fine-tune-btn" onclick="adjustMode3(-1)">-</div>
+                    </div>
+                    <div class="fine-tune-value" id="m3-val">0</div>
+                </div>
+                <div class="fine-tune-control">
+                    <div class="fine-tune-label">SYS</div>
+                    <div class="fine-tune-buttons">
+                        <div class="fine-tune-btn" onclick="adjustSystem(1)">+</div>
+                        <div class="fine-tune-btn" onclick="adjustSystem(-1)">-</div>
+                    </div>
+                    <div class="fine-tune-value" id="sys-val">0</div>
+                </div>
+            </div>
         </div>
 
         <!-- 左側旋鈕（碎片密度） -->
@@ -441,8 +610,49 @@
             faceCenter: { x: 0.5, y: 0.45 },
             faceSize: { w: 0.35, h: 0.45 },
             lastReshuffleTime: 0,
-            reshuffleSpeed: 3.0
+            reshuffleSpeed: 3.0,
+            // 微調參數
+            mode1Adjust: 0,    // 階段1掃描速度調整
+            mode2Adjust: 0,    // 階段2色彩強度調整
+            mode3Adjust: 0,    // 階段3碎片運動速度調整
+            systemAdjust: 0,   // 系統整體亮度調整
+            // 旋鈕旋轉角度
+            knobDensityRotation: 150,   // 初始角度 (28個碎片對應約150度)
+            knobDistortRotation: 252    // 初始角度 (70%對應約252度)
         };
+        
+        // 微調函數
+        function adjustMode1(delta) {
+            state.mode1Adjust = Math.max(-10, Math.min(10, state.mode1Adjust + delta));
+            document.getElementById('m1-val').textContent = state.mode1Adjust;
+            playSound('click');
+        }
+        
+        function adjustMode2(delta) {
+            state.mode2Adjust = Math.max(-10, Math.min(10, state.mode2Adjust + delta));
+            document.getElementById('m2-val').textContent = state.mode2Adjust;
+            playSound('click');
+        }
+        
+        function adjustMode3(delta) {
+            state.mode3Adjust = Math.max(-10, Math.min(10, state.mode3Adjust + delta));
+            document.getElementById('m3-val').textContent = state.mode3Adjust;
+            playSound('click');
+        }
+        
+        function adjustSystem(delta) {
+            state.systemAdjust = Math.max(-10, Math.min(10, state.systemAdjust + delta));
+            document.getElementById('sys-val').textContent = state.systemAdjust;
+            playSound('click');
+        }
+        
+        // 更新旋鈕視覺旋轉
+        function updateKnobRotation(knobId, rotation) {
+            const knob = document.getElementById(knobId);
+            if (knob) {
+                knob.style.transform = `rotate(${rotation}deg)`;
+            }
+        }
 
         // ==================== 外部圖片載入（可選） ====================
         async function loadExternalImages() {
@@ -512,6 +722,12 @@
             setupEvents();
             requestAnimationFrame(loop);
             addLog("CORE LINK READY.");
+            
+            // 初始化微調值顯示
+            document.getElementById('m1-val').textContent = state.mode1Adjust;
+            document.getElementById('m2-val').textContent = state.mode2Adjust;
+            document.getElementById('m3-val').textContent = state.mode3Adjust;
+            document.getElementById('sys-val').textContent = state.systemAdjust;
             
             window.addEventListener('orientationchange', handleOrientationChange);
             handleOrientationChange();
@@ -591,6 +807,16 @@
                 currentVal = Math.min(1, Math.max(0, currentVal + delta));
                 lastY = e.clientY;
                 callback(currentVal);
+                
+                // 更新旋鈕視覺旋轉 (0-1 映射到 0-360度)
+                const rotation = currentVal * 360;
+                if (id === 'knobDensity') {
+                    state.knobDensityRotation = rotation;
+                    updateKnobRotation(id, rotation);
+                } else if (id === 'knobDistort') {
+                    state.knobDistortRotation = rotation;
+                    updateKnobRotation(id, rotation);
+                }
             };
             
             window.ontouchmove = (e) => {
@@ -600,6 +826,16 @@
                 currentVal = Math.min(1, Math.max(0, currentVal + delta));
                 lastY = e.touches[0].clientY;
                 callback(currentVal);
+                
+                // 更新旋鈕視覺旋轉
+                const rotation = currentVal * 360;
+                if (id === 'knobDensity') {
+                    state.knobDensityRotation = rotation;
+                    updateKnobRotation(id, rotation);
+                } else if (id === 'knobDistort') {
+                    state.knobDistortRotation = rotation;
+                    updateKnobRotation(id, rotation);
+                }
             };
             
             window.onmouseup = () => { 
@@ -611,6 +847,15 @@
                 isDragging = false;
                 el.classList.remove('active');
             };
+            
+            // 初始化旋轉角度
+            const initialRotation = currentVal * 360;
+            if (id === 'knobDensity') {
+                state.knobDensityRotation = initialRotation;
+            } else if (id === 'knobDistort') {
+                state.knobDistortRotation = initialRotation;
+            }
+            updateKnobRotation(id, initialRotation);
         }
 
         async function toggleCamera() {
@@ -919,17 +1164,22 @@
             
             ctx.fillStyle = '#000';
             ctx.fillRect(0, 0, w, h);
+            
+            // 系統整體亮度調整（通過 globalAlpha 微調）
+            const baseBrightness = 1.0 + state.systemAdjust * 0.05;
 
             if (state.currentMode === 1) {
                 // 階段1：掃描 + 人臉鎖定
-                ctx.globalAlpha = 0.3;
+                ctx.globalAlpha = 0.3 * baseBrightness;
                 ctx.save();
                 ctx.scale(-1, 1);
                 ctx.drawImage(video, -w, 0, w, h);
                 ctx.restore();
-                ctx.globalAlpha = 1;
+                ctx.globalAlpha = baseBrightness;
                 
-                state.scanProgress = (state.scanProgress + 2) % h;
+                // 掃描速度受 mode1Adjust 影響 (-10到+10 影響速度)
+                const scanSpeed = 2 + state.mode1Adjust * 0.3;
+                state.scanProgress = (state.scanProgress + scanSpeed) % h;
                 
                 ctx.strokeStyle = 'rgba(212, 165, 116, 0.8)';
                 ctx.lineWidth = 3;
@@ -1019,9 +1269,11 @@
                             b = Math.floor(b / count);
                             
                             const hsl = rgbToHsl(r, g, b);
-                            hsl.h = (hsl.h + time * 50 + x * 10 + y * 10) % 360;
-                            hsl.s = Math.max(0, Math.min(100, hsl.s + Math.sin(time + x * 0.1) * 30));
-                            hsl.l = Math.max(0, Math.min(100, hsl.l + Math.cos(time + y * 0.1) * 20));
+                            // 色彩強度受 mode2Adjust 影響
+                            const colorIntensity = 1 + state.mode2Adjust * 0.05;
+                            hsl.h = (hsl.h + time * 50 * colorIntensity + x * 10 + y * 10) % 360;
+                            hsl.s = Math.max(0, Math.min(100, hsl.s + Math.sin(time + x * 0.1) * 30 * colorIntensity));
+                            hsl.l = Math.max(0, Math.min(100, hsl.l + Math.cos(time + y * 0.1) * 20 * colorIntensity));
                             
                             const drawX = (x * pixelSize) * (w / captureCanvas.width);
                             const drawY = (y * pixelSize) * (h / captureCanvas.height);
@@ -1037,12 +1289,12 @@
                 // ==================== 階段3：3D 立體五官碎片 ====================
                 
                 // 背景人像（保持原樣）
-                ctx.globalAlpha = 0.6;
+                ctx.globalAlpha = 0.6 * baseBrightness;
                 ctx.save();
                 ctx.scale(-1, 1);
                 ctx.drawImage(video, -w, 0, w, h);
                 ctx.restore();
-                ctx.globalAlpha = 1;
+                ctx.globalAlpha = baseBrightness;
                 
                 if (state.facialFragments.length === 0) {
                     ctx.fillStyle = 'rgba(212, 165, 116, 0.8)';
@@ -1059,6 +1311,9 @@
                 
                 // **更新所有碎片的 3D 運動**
                 state.facialFragments.forEach(frag => {
+                    // 運動速度受 mode3Adjust 影響
+                    const motionMultiplier = 1 + state.mode3Adjust * 0.1;
+                    
                     // 計算 XY 平面距離（用於吸引/推離力）
                     const dx = faceCenterX - frag.x;
                     const dy = faceCenterY - frag.y;
@@ -1068,16 +1323,16 @@
                     const targetDistance = 100;
                     
                     if (xyDistance > targetDistance + 20) {
-                        const attractionStrength = 0.05;
+                        const attractionStrength = 0.05 * motionMultiplier;
                         const pull = (xyDistance - targetDistance) / 200;
                         frag.vx += (dx / xyDistance) * attractionStrength * pull;
                         frag.vy += (dy / xyDistance) * attractionStrength * pull;
                     } else if (xyDistance < targetDistance - 20) {
-                        const repulsionStrength = 0.02;
+                        const repulsionStrength = 0.02 * motionMultiplier;
                         frag.vx -= (dx / xyDistance) * repulsionStrength;
                         frag.vy -= (dy / xyDistance) * repulsionStrength;
                     } else {
-                        const orbitStrength = 0.01;
+                        const orbitStrength = 0.01 * motionMultiplier;
                         frag.vx += -dy / xyDistance * orbitStrength;
                         frag.vy += dx / xyDistance * orbitStrength;
                     }
@@ -1085,12 +1340,12 @@
                     // **2. Z 軸深度運動（新增）**
                     // Z 軸在 -150 到 +150 之間浮動
                     if (frag.z > 150) {
-                        frag.vz -= 0.05;  // 太遠則往回拉
+                        frag.vz -= 0.05 * motionMultiplier;  // 太遠則往回拉
                     } else if (frag.z < -150) {
-                        frag.vz += 0.05;  // 太近則往外推
+                        frag.vz += 0.05 * motionMultiplier;  // 太近則往外推
                     } else {
                         // 在正常範圍內，隨機漂浮
-                        frag.vz += (Math.random() - 0.5) * 0.1;
+                        frag.vz += (Math.random() - 0.5) * 0.1 * motionMultiplier;
                     }
                     
                     // Z 軸速度阻尼
@@ -1106,8 +1361,8 @@
                     frag.vx *= 0.95;
                     frag.vy *= 0.95;
                     
-                    frag.vx += (Math.random() - 0.5) * 0.1;
-                    frag.vy += (Math.random() - 0.5) * 0.1;
+                    frag.vx += (Math.random() - 0.5) * 0.1 * motionMultiplier;
+                    frag.vy += (Math.random() - 0.5) * 0.1 * motionMultiplier;
                     
                     const maxSpeed = 2;
                     const speed = Math.sqrt(frag.vx * frag.vx + frag.vy * frag.vy);
