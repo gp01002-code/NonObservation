@@ -210,12 +210,12 @@ TYPES.forEach(t=>{
 //  sw/sh: 相對臉寬的顯示尺寸 ← 縮小到符合真實臉部
 // ═══════════════════════════════════════════
 const ANCHORS={
-    eyes_L: {ox:-.265,oy:-.160,sw:.195,sh:.095,type:'eyes' },
-    eyes_R: {ox: .265,oy:-.160,sw:.195,sh:.095,type:'eyes' },
-    nose:   {ox:  .00,oy: .085,sw:.175,sh:.200,type:'nose' },
-    mouth:  {ox:  .00,oy: .285,sw:.265,sh:.110,type:'mouth'},
-    ears_L: {ox:-.520,oy: .010,sw:.130,sh:.260,type:'ears' },
-    ears_R: {ox: .520,oy: .010,sw:.130,sh:.260,type:'ears' },
+    eyes_L: {ox:-.220,oy:-.150,sw:.190,sh:.090,type:'eyes' },
+    eyes_R: {ox: .220,oy:-.150,sw:.190,sh:.090,type:'eyes' },
+    nose:   {ox:  .00,oy: .075,sw:.165,sh:.185,type:'nose' },
+    mouth:  {ox:  .00,oy: .265,sw:.250,sh:.105,type:'mouth'},
+    ears_L: {ox:-.440,oy: .010,sw:.115,sh:.235,type:'ears' },
+    ears_R: {ox: .440,oy: .010,sw:.115,sh:.235,type:'ears' },
 };
 // 繪製順序：耳→鼻→眼→嘴
 const ANCHOR_ORDER=['ears_L','ears_R','nose','eyes_L','eyes_R','mouth'];
@@ -421,21 +421,102 @@ function loop(){
     requestAnimationFrame(loop);
 }
 
+// ─ 全螢幕異化效果 canvas（右旋鈕用）─
+const distCvs=document.createElement('canvas');
+const distCtx=distCvs.getContext('2d');
+
 // ═══ RENDER ═══
 function render(){
     const W=canvas.width,H=canvas.height;
+
+    // 確保 distCvs 同步大小
+    if(distCvs.width!==W||distCvs.height!==H){distCvs.width=W;distCvs.height=H;}
+
     ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);
     const fx=S.fx*W,fy=S.fy*H,fw=S.fw*W,fh=S.fh*H;
-    if(S.mode===1)renderMirror(W,H,fx,fy,fw,fh);
-    else if(S.mode===2)renderDepth(W,H,fx,fy,fw,fh);
+    const dist=S.dist,t=S.frame*.016;
+
+    if(S.mode===1) renderMirror(W,H,fx,fy,fw,fh);
+    else if(S.mode===2) renderDepth(W,H,fx,fy,fw,fh);
     else renderRewrite(W,H,fx,fy,fw,fh);
+
+    // ══ 右旋鈕全螢幕異化特效 ══
+    if(dist>0.08){
+        // 1. 色差（Chromatic Aberration）：RGB三通道水平偏移
+        const caAmp=Math.floor(dist*dist*18); // 最大18px
+        if(caAmp>=1){
+            // 把目前畫面存到 distCvs
+            distCtx.clearRect(0,0,W,H);
+            distCtx.drawImage(canvas,0,0);
+            // 紅通道左移
+            ctx.save();
+            ctx.globalCompositeOperation='screen';
+            ctx.globalAlpha=0.28*dist;
+            // 紅
+            distCtx.save();
+            distCtx.globalCompositeOperation='multiply';
+            distCtx.fillStyle='rgba(0,255,255,1)';
+            distCtx.fillRect(0,0,W,H);
+            distCtx.restore();
+            // 用偏移畫原圖的色差版
+            ctx.drawImage(canvas,-caAmp,0,W,H); // 紅往左
+            ctx.restore();
+            ctx.save();
+            ctx.globalCompositeOperation='screen';
+            ctx.globalAlpha=0.20*dist;
+            ctx.drawImage(canvas,caAmp,0,W,H);  // 藍往右
+            ctx.restore();
+        }
+
+        // 2. 橫向掃描干擾線（dist>0.3 才出現）
+        if(dist>0.3&&Math.random()>0.7){
+            const lineCount=Math.floor(dist*dist*8);
+            ctx.save();ctx.globalAlpha=0.12*dist;
+            for(let i=0;i<lineCount;i++){
+                const ly=Math.random()*H;
+                const lh=1+Math.random()*3;
+                const shift=(Math.random()-.5)*dist*30;
+                ctx.drawImage(canvas,shift,ly,W,lh,shift,ly,W,lh);
+                // 白色干擾線
+                ctx.fillStyle=`rgba(255,255,255,${0.06+Math.random()*.1})`;
+                ctx.fillRect(0,ly,W,lh);
+            }
+            ctx.restore();
+        }
+
+        // 3. 全畫面波浪扭曲（dist>0.5 才出現，逐行偏移）
+        if(dist>0.5){
+            const waveAmp=dist*dist*8;
+            distCtx.clearRect(0,0,W,H);
+            distCtx.drawImage(canvas,0,0);
+            ctx.save();ctx.globalAlpha=.85;
+            const strip=4;
+            for(let y=0;y<H;y+=strip){
+                const offsetX=Math.sin(y*.04+t*3)*waveAmp*(dist-.5)*2;
+                ctx.drawImage(distCvs,0,y,W,strip,offsetX,y,W,strip);
+            }
+            ctx.restore();
+        }
+
+        // 4. 高異化：紅色閃爍邊緣暈染
+        if(dist>0.75&&Math.random()>0.92){
+            ctx.save();ctx.globalAlpha=0.08*(dist-.75)*4;
+            const vg=ctx.createRadialGradient(W/2,H/2,H*.2,W/2,H/2,H*.7);
+            vg.addColorStop(0,'rgba(255,0,0,0)');vg.addColorStop(1,'rgba(255,0,50,.4)');
+            ctx.fillStyle=vg;ctx.fillRect(0,0,W,H);
+            ctx.restore();
+        }
+    }
 }
 
 // ═══════════════════════════════════════════
 //  STAGE 1 — MIRROR STAGE
+//  臉部鎖定後有呼吸動畫、彩色五官特徵點
 // ═══════════════════════════════════════════
 function renderMirror(W,H,fx,fy,fw,fh){
+    const t=S.frame*.016;
     ctx.save();ctx.globalAlpha=.5;ctx.scale(-1,1);ctx.drawImage(video,-W,0,W,H);ctx.restore();ctx.globalAlpha=1;
+
     // 掃描線
     S.scanY=(S.scanY+3)%H;
     const tr=ctx.createLinearGradient(0,S.scanY-70,0,S.scanY);
@@ -443,16 +524,29 @@ function renderMirror(W,H,fx,fy,fw,fh){
     ctx.fillStyle=tr;ctx.fillRect(0,S.scanY-70,W,70);
     ctx.save();ctx.shadowBlur=18;ctx.shadowColor='#fff';ctx.strokeStyle='rgba(255,255,255,.9)';ctx.lineWidth=1.5;
     ctx.beginPath();ctx.moveTo(0,S.scanY);ctx.lineTo(W,S.scanY);ctx.stroke();ctx.restore();
-    // 信心HUD
+
+    // 信心HUD + 進度條
     const c=S.conf,clr=c>.6?'#0f8':c>.2?'#ff0':'#f55';
-    ctx.save();ctx.fillStyle=clr;ctx.font='8px Share Tech Mono';ctx.shadowBlur=8;ctx.shadowColor=clr;
-    ctx.fillText(`FACE ${c>.5?'LOCKED':'SEARCH'} ${~~(c*100)}%`,8,H-10);ctx.restore();
+    ctx.save();
+    ctx.fillStyle=clr;ctx.font='8px Share Tech Mono';ctx.shadowBlur=8;ctx.shadowColor=clr;
+    ctx.fillText(`FACE ${c>.5?'LOCKED':'SEARCH'} ${~~(c*100)}%`,8,H-18);
+    // 進度條
+    ctx.strokeStyle=clr;ctx.lineWidth=.8;ctx.strokeRect(8,H-11,80,.1);
+    ctx.fillStyle=clr;ctx.fillRect(8,H-12,80*c,3);
+    ctx.restore();
+
     if(c<0.12)return;
-    // 追蹤框（動態大小）
-    const bx=fx-fw*.58,by=fy-fh*.55,bw=fw*1.16,bh=fh*1.1,cs=14;
+
+    // 呼吸脈衝（鎖定後才有）
+    const pulse=c>.5 ? 1+Math.sin(t*2.2)*.06 : 1;
+    const locked=c>.5;
+
+    // ─ 追蹤框（動態大小 + 呼吸）─
+    const bx=fx-fw*.58*pulse,by=fy-fh*.55*pulse;
+    const bw=fw*1.16*pulse,bh=fh*1.1*pulse,cs=14;
     ctx.save();ctx.globalAlpha=.4+c*.5;
-    ctx.strokeStyle=c>.5?'rgba(0,255,136,.9)':'rgba(255,255,80,.7)';
-    ctx.shadowBlur=18;ctx.shadowColor=c>.5?'#0f8':'#ff0';ctx.lineWidth=1;
+    ctx.strokeStyle=locked?'rgba(0,255,136,.9)':'rgba(255,255,80,.7)';
+    ctx.shadowBlur=locked?22:14;ctx.shadowColor=locked?'#0f8':'#ff0';ctx.lineWidth=1;
     ctx.beginPath();
     ctx.moveTo(bx+cs,by);ctx.lineTo(bx+bw-cs,by);
     ctx.moveTo(bx+bw,by+cs);ctx.lineTo(bx+bw,by+bh-cs);
@@ -462,102 +556,143 @@ function renderMirror(W,H,fx,fy,fw,fh){
     [[bx,by,cs,cs],[bx+bw,by,-cs,cs],[bx+bw,by+bh,-cs,-cs],[bx,by+bh,cs,-cs]].forEach(([px,py,ax,ay])=>{
         ctx.beginPath();ctx.moveTo(px+ax,py);ctx.lineTo(px,py);ctx.lineTo(px,py+ay);ctx.stroke();
     });
-    // 五官骨架
-    const pts={
-        eL:{x:fx-fw*.25,y:fy-fh*.15},eR:{x:fx+fw*.25,y:fy-fh*.15},
-        nT:{x:fx,y:fy+fh*.06},
-        mL:{x:fx-fw*.18,y:fy+fh*.24},mR:{x:fx+fw*.18,y:fy+fh*.24},
-    };
-    ctx.strokeStyle='rgba(255,255,255,.5)';ctx.lineWidth=.8;ctx.shadowBlur=8;ctx.shadowColor='#fff';
-    ctx.beginPath();
-    ctx.moveTo(pts.eL.x,pts.eL.y);ctx.lineTo(pts.eR.x,pts.eR.y);
-    ctx.moveTo(pts.eL.x,pts.eL.y);ctx.lineTo(pts.nT.x,pts.nT.y);
-    ctx.moveTo(pts.eR.x,pts.eR.y);ctx.lineTo(pts.nT.x,pts.nT.y);
-    ctx.moveTo(pts.nT.x,pts.nT.y);ctx.lineTo(pts.mL.x,pts.mL.y);
-    ctx.moveTo(pts.mL.x,pts.mL.y);ctx.lineTo(pts.mR.x,pts.mR.y);
-    ctx.moveTo(pts.mR.x,pts.mR.y);ctx.lineTo(pts.nT.x,pts.nT.y);ctx.stroke();
-    ctx.fillStyle='rgba(255,255,255,.85)';
-    Object.values(pts).forEach(p=>{ctx.beginPath();ctx.arc(p.x,p.y,2.5,0,Math.PI*2);ctx.fill();});
+
+    // ─ 五官特徵點（鎖定後彩色 + 呼吸）─
+    const eyeY=fy-fh*.15;
+    const eyeR=locked?Math.max(1.5,2.5+Math.sin(t*2.2)*1):2;
+
+    // 眼部輪廓點（5點各眼）
+    const eyeColor='rgba(0,238,255,0.92)';
+    [[fx-fw*.25,fx-fw*.10],[fx+fw*.10,fx+fw*.25]].forEach(([ex1,ex2])=>{
+        const midX=(ex1+ex2)/2;
+        const pts=[[ex1,eyeY],[ex1+fw*.04,eyeY-fh*.02],[midX,eyeY-fh*.025],[ex2-fw*.04,eyeY-fh*.02],[ex2,eyeY]];
+        ctx.save();ctx.strokeStyle=eyeColor;ctx.lineWidth=.9;ctx.shadowBlur=8;ctx.shadowColor=eyeColor;
+        ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.closePath();ctx.stroke();
+        pts.forEach(p=>{ctx.fillStyle=eyeColor;ctx.beginPath();ctx.arc(p[0],p[1],eyeR*.7,0,Math.PI*2);ctx.fill();});
+        ctx.restore();
+    });
+
+    // 鼻子點（4點菱形）
+    const noseColor='rgba(255,68,204,0.88)';
+    const nX=fx,nY=fy+fh*.075;
+    const nosePts=[[nX,nY-fh*.06],[nX-fw*.07,nY+fh*.04],[nX,nY+fh*.08],[nX+fw*.07,nY+fh*.04]];
+    ctx.save();ctx.strokeStyle=noseColor;ctx.lineWidth=.9;ctx.shadowBlur=8;ctx.shadowColor=noseColor;
+    ctx.beginPath();nosePts.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.closePath();ctx.stroke();
+    nosePts.forEach(p=>{ctx.fillStyle=noseColor;ctx.beginPath();ctx.arc(p[0],p[1],eyeR*.7,0,Math.PI*2);ctx.fill();});
+    ctx.restore();
+
+    // 嘴巴點（6點輪廓）
+    const mouthColor='rgba(255,204,0,0.92)';
+    const mY=fy+fh*.265;
+    const mouthPts=[[fx-fw*.18,mY],[fx-fw*.09,mY-fh*.015],[fx,mY-fh*.018],[fx+fw*.09,mY-fh*.015],[fx+fw*.18,mY],[fx,mY+fh*.04]];
+    ctx.save();ctx.strokeStyle=mouthColor;ctx.lineWidth=.9;ctx.shadowBlur=8;ctx.shadowColor=mouthColor;
+    ctx.beginPath();mouthPts.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.closePath();ctx.stroke();
+    mouthPts.forEach(p=>{ctx.fillStyle=mouthColor;ctx.beginPath();ctx.arc(p[0],p[1],eyeR*.7,0,Math.PI*2);ctx.fill();});
+    ctx.restore();
+
+    // 臉部輪廓橢圓（鎖定後細虛線）
+    if(locked){
+        ctx.save();ctx.globalAlpha=.18+Math.sin(t*2.2)*.08;
+        ctx.strokeStyle='rgba(0,255,136,.6)';ctx.lineWidth=.7;ctx.shadowBlur=6;ctx.shadowColor='#0f8';
+        ctx.setLineDash([6,10]);
+        ctx.beginPath();ctx.ellipse(fx,fy,fw*.52*pulse,fh*.5*pulse,0,0,Math.PI*2);ctx.stroke();
+        ctx.setLineDash([]);ctx.restore();
+        // 鎖定後：中心十字
+        ctx.save();ctx.globalAlpha=.4;ctx.strokeStyle='#0f8';ctx.lineWidth=.8;
+        ctx.shadowBlur=8;ctx.shadowColor='#0f8';
+        ctx.beginPath();ctx.moveTo(fx-8,fy);ctx.lineTo(fx+8,fy);ctx.moveTo(fx,fy-8);ctx.lineTo(fx,fy+8);ctx.stroke();
+        ctx.restore();
+    }
     ctx.restore();
 }
 
 // ═══════════════════════════════════════════
 //  STAGE 2 — DATA DISCIPLINE
-//  三層景深色彩：
-//    臉部（暖橙黃）→ 身體（藍青）→ 背景（深藍紫）
+//  直接從攝影機像素分類三層景深：
+//    膚色像素(臉) → 暖橙黃
+//    非膚色但有亮度(身體/衣服) → 藍青
+//    暗區(背景) → 深藍紫
 // ═══════════════════════════════════════════
+// 小採樣 canvas（供 Stage 2 像素分類用）
+const s2Cvs=document.createElement('canvas');s2Cvs.width=80;s2Cvs.height=60;
+const s2Ctx=s2Cvs.getContext('2d');
+
 function renderDepth(W,H,fx,fy,fw,fh){
-    // 底層影片（暗）
+    // 每幀取樣一次影片
+    s2Ctx.drawImage(video,0,0,80,60);
+    const px=s2Ctx.getImageData(0,0,80,60).data;
+
+    // 底層影片（暗底）
     ctx.save();ctx.globalAlpha=.22;ctx.scale(-1,1);ctx.drawImage(video,-W,0,W,H);ctx.restore();ctx.globalAlpha=1;
-    ctx.fillStyle='rgba(0,0,0,.72)';ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='rgba(0,0,0,.74)';ctx.fillRect(0,0,W,H);
 
     const GS=20;
-    // 人體橢圓（臉寬*1.1 × 臉高*2.8，中心在臉下方）
-    const bodyW=fw*1.1, bodyH=fh*2.8;
-    const bodyCy=fy+fh*0.8; // 身體中心
-
+    // 臉部橢圓距離（仍用來判斷臉部中心區域補強）
     for(let gx=0;gx<W;gx+=GS){
         for(let gy=0;gy<H;gy+=GS){
             const cx=gx+GS/2,cy=gy+GS/2;
 
-            // ─ 臉部橢圓距離（歸一化，<1=臉內）
-            const fex=(cx-fx)/(fw*.62),fey=(cy-fy)/(fh*.56);
-            const faceDist=Math.sqrt(fex*fex+fey*fey);
+            // ─ 映射到採樣 canvas（注意攝影機是鏡像的，X要翻轉）
+            const sx=Math.floor((1-(cx/W))*80);
+            const sy=Math.floor((cy/H)*60);
+            const si=Math.min(79,Math.max(0,sx))+Math.min(59,Math.max(0,sy))*80;
+            const r=px[si*4],g=px[si*4+1],b=px[si*4+2];
 
-            // ─ 身體橢圓距離（<1=身體內）
-            const bex=(cx-fx)/(bodyW*.5),bey=(cy-bodyCy)/(bodyH*.5);
-            const bodyDist=Math.sqrt(bex*bex+bey*bey);
+            // YCbCr 膚色判斷
+            const Y=.299*r+.587*g+.114*b;
+            const Cb=-.169*r-.331*g+.5*b+128;
+            const Cr=.5*r-.419*g-.081*b+128;
+            const isSkin=Y>35&&Cb>=75&&Cb<=148&&Cr>=126&&Cr<=190;
+
+            // 亮度（判斷前景/背景）
+            const bright=Y/255;
 
             let hue,sat,lum,al,lw;
 
-            if(faceDist<0.92){
-                // ── 前景：臉部 ── 暖橙黃，高亮
-                const dep=Math.max(0,1-faceDist);
-                hue=22+dep*30;       // 22(橙)~52(黃橙)
-                sat=80+dep*16;
-                lum=38+dep*36;       // 中心最亮
-                al=.50+dep*.44;
+            if(isSkin){
+                // ── 膚色：臉/皮膚 ── 暖橙黃
+                const dep=Math.min(1,bright*1.2);
+                hue=20+dep*32;
+                sat=82+dep*14;
+                lum=35+dep*38;
+                al=.52+dep*.42;
                 lw=1.1;
-            } else if(bodyDist<0.92){
-                // ── 中景：身體 ── 藍青
-                const dep=Math.max(0,(0.92-faceDist+0.92-bodyDist)/1.5);
-                hue=175+dep*20;     // 175~195 藍青
-                sat=55+dep*18;
-                lum=22+dep*20;
-                al=.18+dep*.25;
+            } else if(bright>0.18){
+                // ── 有亮度的非膚色：衣服/身體 ── 藍青
+                const dep=Math.min(1,(bright-.18)/.6);
+                hue=172+dep*22;
+                sat=52+dep*20;
+                lum=20+dep*22;
+                al=.18+dep*.26;
                 lw=.55;
             } else {
-                // ── 遠景：背景 ── 深藍紫
-                const bg=Math.min((bodyDist-.92)/2,1);
-                hue=230+bg*30;      // 230~260 藍→紫
-                sat=35-bg*15;
-                lum=10+bg*7;
-                al=.08+(1-bg)*.1;
-                lw=.35;
+                // ── 暗背景 ── 深藍紫
+                const bg=Math.max(0,1-bright/0.18);
+                hue=228+bg*32;
+                sat=32-bg*14;
+                lum=8+bg*7;
+                al=.07+(1-bg)*.09;
+                lw=.32;
             }
 
             ctx.strokeStyle=`hsla(${hue},${sat}%,${lum}%,${al})`;
             ctx.lineWidth=lw;
             ctx.strokeRect(gx,gy,GS,GS);
 
-            // 十六進位字元
-            const spT=faceDist<0.92?.88:bodyDist<0.92?.955:.985;
+            // 十六進位字元（膚色區最密）
+            const spT=isSkin?.87:bright>0.18?.955:.985;
             if(Math.random()>spT){
-                ctx.fillStyle=`hsla(${hue},${sat}%,${lum+25}%,${al+.4})`;
-                ctx.font=`${faceDist<0.92?9:7}px Share Tech Mono`;
+                ctx.fillStyle=`hsla(${hue},${sat}%,${lum+25}%,${al+.38})`;
+                ctx.font=`${isSkin?9:7}px Share Tech Mono`;
                 ctx.fillText(Math.random().toString(16).slice(2,4).toUpperCase(),gx+4,gy+14);
             }
         }
     }
 
-    // 臉部光暈
-    const rg=ctx.createRadialGradient(fx,fy,4,fx,fy,fw*.82);
-    rg.addColorStop(0,'rgba(255,180,60,.15)');rg.addColorStop(1,'rgba(0,0,0,0)');
+    // 臉部光暈（以偵測座標為中心）
+    const rg=ctx.createRadialGradient(fx,fy,4,fx,fy,fw*.85);
+    rg.addColorStop(0,'rgba(255,178,55,.13)');rg.addColorStop(1,'rgba(0,0,0,0)');
     ctx.fillStyle=rg;ctx.fillRect(0,0,W,H);
-    // 身體光暈
-    const bg=ctx.createRadialGradient(fx,bodyCy,fw*.3,fx,bodyCy,bodyW*.7);
-    bg.addColorStop(0,'rgba(0,190,210,.05)');bg.addColorStop(1,'rgba(0,0,0,0)');
-    ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
 }
 
 // ═══════════════════════════════════════════
@@ -623,16 +758,20 @@ function renderRewrite(W,H,fx,fy,fw,fh){
             }
         });
 
-        // 異化波動（右旋鈕）
-        const wAmp=dist*fw*.04;
-        fr.vx+=Math.sin(t*.8+fr.rZ*.1)*wAmp*.15;
-        fr.vy+=Math.cos(t*.6+fr.rX*.1)*wAmp*.12;
+        // 異化波動（右旋鈕：波幅隨 dist 急劇增大）
+        // dist 0→0.3：輕微飄動
+        // dist 0.5→0.8：強烈搖擺
+        // dist 0.8→1.0：混亂擠壓
+        const wAmp=dist*dist*fw*.12; // 二次方曲線，高dist急劇放大
+        fr.vx+=Math.sin(t*.9+fr.rZ*.08)*wAmp*.2;
+        fr.vy+=Math.cos(t*.7+fr.rX*.08)*wAmp*.16;
 
-        // 阻尼
-        fr.vx*=.82;fr.vy*=.82;
-        // 速度上限
+        // 阻尼（高異化阻尼降低，碎片更飄）
+        const damp=0.85-dist*.12; // dist=0: 0.85, dist=1: 0.73
+        fr.vx*=damp;fr.vy*=damp;
+        // 速度上限（高異化時允許更快）
         const spd=Math.sqrt(fr.vx*fr.vx+fr.vy*fr.vy);
-        const maxSpd=3+dist*4;
+        const maxSpd=2+dist*dist*8; // dist=0: 2, dist=1: 10
         if(spd>maxSpd){fr.vx=fr.vx/spd*maxSpd;fr.vy=fr.vy/spd*maxSpd;}
 
         fr.px+=fr.vx;fr.py+=fr.vy;
@@ -642,19 +781,21 @@ function renderRewrite(W,H,fx,fy,fw,fh){
         fr.vz=Math.max(-1.5,Math.min(1.5,fr.vz));
         fr.z+=fr.vz;fr.z=Math.max(-120,Math.min(120,fr.z));
 
-        // 3D旋轉（速度受異化強度影響）
-        fr.rX+=fr.rsX*(1+dist*1.2);
-        fr.rY+=fr.rsY*(1+dist*1.2);
-        fr.rZ+=fr.rsZ*(1+dist*.8);
+        // 3D旋轉（dist越高轉越快，高dist幾乎不停翻滾）
+        const rotMult=1+dist*dist*4; // dist=0: 1x, dist=1: 5x
+        fr.rX+=fr.rsX*rotMult;
+        fr.rY+=fr.rsY*rotMult;
+        fr.rZ+=fr.rsZ*(1+dist*2.5);
 
-        // Glitch
+        // Glitch（高dist觸發更頻繁，位移更大）
         fr.gt--;
         if(fr.gt<=0){
-            fr.gt=60+~~(Math.random()*150);
-            fr.gox=(Math.random()-.5)*dist*fw*.16;
-            fr.goy=(Math.random()-.5)*dist*fh*.10;
-            fr.gs=1+(Math.random()-.5)*dist*.32;
-            fr.gd=3+~~(Math.random()*5);
+            const glitchFreq=Math.max(8, 60-dist*55); // dist=0: 60幀, dist=1: 5幀
+            fr.gt=glitchFreq+~~(Math.random()*glitchFreq);
+            fr.gox=(Math.random()-.5)*dist*dist*fw*.3;
+            fr.goy=(Math.random()-.5)*dist*dist*fh*.2;
+            fr.gs=1+(Math.random()-.5)*dist*.5;
+            fr.gd=3+~~(Math.random()*(3+dist*8)); // 高dist持續時間更長
         }
         const gl=fr.gd>0;if(gl)fr.gd--;
         fr._gl=gl;
