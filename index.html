@@ -3,14 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>自我觀測儀 | 完整版</title>
+    <title>自我觀測儀 | 黑白高亮 3D 重構版</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap');
         
         :root {
-            --glow-color: #d4a574;     /* 復古琥珀黃 */
-            --glow-bright: #e8c891;    /* 亮琥珀黃 */
-            --crt-bg: #050805;
+            /* 切換為黑白高亮主題 */
+            --glow-color: #ffffff;     
+            --glow-bright: #ffffff;    
+            --text-dim: rgba(255, 255, 255, 0.4);
+            --crt-bg: #050505;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -26,216 +28,69 @@
             align-items: center;
         }
         
-        /* 手機直向提示 */
-        @media (max-width: 768px) and (orientation: portrait) {
-            /* 只在開場頁面隱藏後才顯示旋轉提示 */
-            body:not(:has(.intro-screen:not(.hidden)))::before {
-                content: "請將手機橫向旋轉 ↻\A以獲得最佳體驗";
-                white-space: pre;
-                position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                background: rgba(0,0,0,0.95);
-                color: var(--glow-bright);
-                padding: 30px 20px;
-                border: 3px solid var(--glow-color);
-                border-radius: 15px;
-                z-index: 9999;
-                font-size: 16px;
-                text-align: center;
-                max-width: 80%;
-                box-shadow: 0 0 30px var(--glow-color);
-                animation: pulse 2s infinite;
-            }
-            
-            @keyframes pulse {
-                0%, 100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-                50% { opacity: 0.8; transform: translate(-50%, -50%) scale(1.05); }
-            }
-            
-            /* 開場頁面在直向時正常顯示 */
-            .intro-screen {
-                opacity: 1;
-            }
-            
-            .intro-screen.hidden + * .machine-wrapper {
-                opacity: 0.2;
-                pointer-events: none;
-                filter: blur(3px);
-            }
-            
-            /* 直向模式下縮小背景圖片 */
-            .machine-wrapper::before,
-            .machine-wrapper::after {
-                background-size: 90% auto;
-            }
-        }
-        
-        /* 手機橫向優化 */
-        @media (max-width: 768px) and (orientation: landscape) {
-            .machine-wrapper {
-                width: 96vw;
-                max-width: none;
-                margin: 0 auto;
-                /* 確保上下有空間顯示所有元素 */
-                transform: scale(0.92);
-                transform-origin: center center;
-            }
-            
-            /* 橫向模式下適當調整背景 */
-            .machine-wrapper::before,
-            .machine-wrapper::after {
-                background-size: 96% auto;
-            }
-            
-            .knob-value {
-                font-size: clamp(8px, 2vw, 10px);
-            }
-            
-            /* 手機模式下縮小微調按鈕 */
-            .fine-tune-panel {
-                width: 6%;
-                gap: 5%;
-            }
-            
-            .fine-tune-btn {
-                width: 12px;
-                height: 12px;
-                font-size: 8px;
-                line-height: 10px;
-            }
-            
-            .fine-tune-label {
-                font-size: 6px;
-            }
-            
-            .fine-tune-value {
-                font-size: 6px;
-            }
-            
-            /* 確保模式選擇器可見 */
-            .mode-selector {
-                bottom: 8%;
-            }
-        }
-        
-        /* 平板優化 */
-        @media (min-width: 769px) and (max-width: 1024px) {
-            .machine-wrapper {
-                width: 95vw;
-            }
-            
-            .machine-wrapper::before,
-            .machine-wrapper::after {
-                background-size: contain;
-            }
-        }
-
         .machine-wrapper {
             position: relative;
             width: 95vw;
             max-width: 1000px;
             aspect-ratio: 1000 / 667; 
-            background-color: #1a1a1a;
-            box-shadow: 0 0 100px rgba(212, 165, 116, 0.1);
+            background-color: #111;
+            box-shadow: 0 0 80px rgba(255, 255, 255, 0.05);
         }
         
-        /* 後方背景層（第一層/最底層）- Image2.png（電子結構，完全不透明） */
+        /* 雙層背景動態： Image2 為底層電路，Image 為上層面板 */
         .machine-wrapper::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0; width: 100%; height: 100%;
             background-image: url('Image2.png');
             background-size: contain;
             background-position: center;
             background-repeat: no-repeat;
-            opacity: 1.0;  /* 完全不透明 */
             z-index: 0;
-            pointer-events: none;  /* 不阻擋點擊事件 */
-            animation: floatBackground 8s ease-in-out infinite;
+            pointer-events: none;
+            animation: floatBackground 15s ease-in-out infinite;
         }
         
-        /* 前方背景層（第二層/上層）- Image.png（機器面板，完全不透明） */
         .machine-wrapper::after {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0; width: 100%; height: 100%;
             background-image: url('Image.png');
             background-size: contain;
             background-position: center;
             background-repeat: no-repeat;
-            opacity: 1.0;  /* 完全不透明 */
             z-index: 1;
-            pointer-events: none;  /* 不阻擋點擊事件 */
-            animation: floatForeground 6s ease-in-out infinite;
+            pointer-events: none;
+            animation: floatForeground 10s ease-in-out infinite;
         }
         
-        /* 浮動動畫 - 後方背景（左右搖晃，慢速） */
-        @keyframes floatBackground {
-            0%, 100% {
-                transform: translateX(0) scale(1);
-            }
-            25% {
-                transform: translateX(10px) scale(1.005);
-            }
-            50% {
-                transform: translateX(-8px) scale(0.995);
-            }
-            75% {
-                transform: translateX(-10px) scale(1.005);
-            }
-        }
-        
-        /* 浮動動畫 - 前方背景（左右搖晃，快速，反向） */
-        @keyframes floatForeground {
-            0%, 100% {
-                transform: translateX(0);
-            }
-            33% {
-                transform: translateX(-6px);
-            }
-            66% {
-                transform: translateX(5px);
-            }
-        }
+        @keyframes floatBackground { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(-8px, 4px); } }
+        @keyframes floatForeground { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(4px, -3px); } }
 
-        /* 螢幕區域 - 完美對齊 */
+        /* 螢幕視窗 */
         .screen-container {
             position: absolute;
-            top: 8.5%;
-            left: 25.5%;    /* 往右移（內縮左邊） */
-            width: 49%;     /* 縮小寬度（內縮左右） */
-            height: 54%;
+            top: 8.5%; left: 25.5%; width: 49%; height: 54%;
             background: var(--crt-bg);
             border-radius: 4px;
             overflow: hidden;
             z-index: 2;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        #mainCanvas {
-            width: 100%;
-            height: 100%;
-            display: block;
-        }
+        #mainCanvas { width: 100%; height: 100%; display: block; }
 
         .crt-overlay {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.2) 50%), 
-                        linear-gradient(90deg, rgba(255, 0, 0, 0.05), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.05));
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+                        linear-gradient(90deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01), rgba(255, 255, 255, 0.03));
             background-size: 100% 3px, 3px 100%;
             pointer-events: none;
             z-index: 5;
         }
 
-        /* 旋鈕 + 數值顯示 */
+        /* 旋鈕 */
         .knob-container {
             position: absolute;
             display: flex;
@@ -243,1321 +98,203 @@
             align-items: center;
             z-index: 10;
         }
-
-        .knob-left { 
-            top: 8%; left: 6.5%; 
-            width: 15%; height: 25%;
-        }
-        
-        .knob-right { 
-            top: 8%; right: 6.5%; 
-            width: 15%; height: 25%;
-        }
-        
-        /* 左側旋鈕初始角度 */
-        #knobDensity {
-            --rotation: 60deg;  /* 初始值 0.167 * 360 = 60度 (12個碎片) */
-        }
-        
-        /* 右側旋鈕初始角度 */
-        #knobDistort {
-            --rotation: 252deg;  /* 初始值 0.7 * 360 = 252度 */
-        }
+        .knob-left { top: 8%; left: 6.5%; width: 15%; height: 25%; }
+        .knob-right { top: 8%; right: 6.5%; width: 15%; height: 25%; }
 
         .knob-area {
-            width: 100%;
-            height: 85%;
+            width: 100%; height: 85%;
             cursor: ns-resize; 
-            background: transparent;
-            border-radius: 50%;
-            transition: background 0.3s;
             position: relative;
-            --rotation: 0deg;  /* CSS 變數控制旋轉角度 */
+            --rotation: 0deg;
         }
-        
-        /* 旋鈕視覺指示線 */
         .knob-area::after {
             content: '';
             position: absolute;
-            top: 5%;  /* 從更上方開始 */
-            left: 50%;
-            width: 4px;  /* 增加寬度 */
-            height: 40%;  /* 增加長度 */
-            background: linear-gradient(to bottom, var(--glow-bright) 0%, var(--glow-color) 50%, transparent 100%);
-            transform-origin: center bottom;  /* 旋轉軸心在底部中心 */
-            transform: translateX(-50%) rotate(var(--rotation));  /* 使用 CSS 變數 */
-            border-radius: 3px;
-            box-shadow: 0 0 12px var(--glow-bright), 0 0 6px var(--glow-color);  /* 強化發光 */
-            transition: transform 0.1s ease-out;
+            top: 5%; left: 50%; width: 3px; height: 40%;
+            background: linear-gradient(to bottom, #fff, #888, transparent);
+            transform-origin: center bottom;
+            transform: translateX(-50%) rotate(var(--rotation));
+            border-radius: 2px;
+            box-shadow: 0 0 15px #fff;
         }
 
-        .knob-area:hover {
-            background: rgba(212, 165, 116, 0.1);
-        }
-
-        .knob-area.active {
-            background: rgba(212, 165, 116, 0.2);
-            box-shadow: 0 0 15px rgba(212, 165, 116, 0.5);
-        }
-        
-        /* active 狀態時指示線更亮 */
-        .knob-area.active::after {
-            box-shadow: 0 0 20px var(--glow-bright), 0 0 10px var(--glow-color), 0 0 5px #fff;
-            width: 5px;
-        }
-
-        .knob-value {
-            margin-top: 5%;
-            font-size: clamp(9px, 1vw, 11px);
-            color: var(--glow-bright);
-            text-shadow: 0 0 8px var(--glow-color);
-            text-align: center;
+        .knob-value { 
+            font-size: 10px; 
+            color: #fff; 
+            text-shadow: 0 0 10px #fff; 
+            margin-top: 5px; 
             font-weight: bold;
         }
 
-        /* 模式選擇器 */
+        /* 模式切換：黑白明亮版 */
         .mode-selector {
             position: absolute;
-            bottom: 7%; left: 28%;  /* 進一步降低位置到 7% */
-            width: 44%; height: 10%;
+            bottom: 4.5%; left: 26%;
+            width: 48%; height: 11%;
             z-index: 10;
             display: flex;
-            background: transparent;
+            justify-content: space-around;
+            align-items: center;
         }
         
         .mode-target { 
             flex: 1; 
-            cursor: pointer;
-            transition: all 0.2s;
+            height: 100%;
+            cursor: pointer; 
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-dim);
+            font-size: 17px; 
+            font-weight: bold;
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 2px;
+            transition: all 0.4s ease;
             position: relative;
         }
 
-        .mode-target:hover {
-            background: rgba(212, 165, 116, 0.05);  /* 減弱 hover 效果 */
+        /* 模擬指示燈 */
+        .mode-target::before {
+            content: '';
+            width: 6px; height: 6px;
+            background: #222;
+            border-radius: 50%;
+            margin-bottom: 6px;
+            transition: all 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .mode-target.active {
-            background: transparent;  /* 取消背景色 */
-            box-shadow: none;  /* 取消外框發光 */
+            color: #ffffff;
+            text-shadow: 0 0 15px #fff, 0 0 30px rgba(255, 255, 255, 0.5);
+            transform: scale(1.05);
         }
-        
-        /* 模式按鈕發光效果 - 琥珀色 + 亮黃色中間發光 */
+
         .mode-target.active::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 60%;  /* 縮小發光範圍 */
-            height: 60%;
-            background: radial-gradient(circle, 
-                rgba(232, 200, 145, 0.8) 0%,      /* 亮琥珀黃中心 */
-                rgba(212, 165, 116, 0.5) 40%,     /* 琥珀色 */
-                rgba(255, 220, 100, 0.2) 60%,     /* 亮黃色邊緣 */
-                transparent 80%);
-            animation: modePulse 2s ease-in-out infinite;
-        }
-        
-        @keyframes modePulse {
-            0%, 100% { 
-                opacity: 0.7; 
-                transform: translate(-50%, -50%) scale(1);
-                filter: brightness(1);
-            }
-            50% { 
-                opacity: 1; 
-                transform: translate(-50%, -50%) scale(1.15);
-                filter: brightness(1.3);  /* 脈衝時更亮 */
-            }
-        }
-        
-        /* 螢幕兩側微調控制面板 */
-        .fine-tune-panel {
-            position: absolute;
-            top: 0;
-            height: 100%;
-            width: 8%;
-            z-index: 3;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            gap: 8%;
-            padding: 5% 0;
-        }
-        
-        .fine-tune-left { left: 0; align-items: flex-start; padding-left: 2%; }
-        .fine-tune-right { right: 0; align-items: flex-end; padding-right: 2%; }
-        
-        .fine-tune-control {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-            align-items: center;
-        }
-        
-        .fine-tune-label {
-            font-size: 7px;
-            color: var(--glow-color);
-            text-shadow: 0 0 3px var(--glow-color);
-            opacity: 0.7;
-            text-align: center;
-            white-space: nowrap;
-        }
-        
-        .fine-tune-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-        
-        .fine-tune-btn {
-            width: 16px;
-            height: 16px;
-            background: rgba(212, 165, 116, 0.1);
-            border: 1px solid var(--glow-color);
-            color: var(--glow-bright);
-            font-size: 10px;
-            line-height: 14px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.15s;
-            box-shadow: 0 0 5px rgba(212, 165, 116, 0.3);
-        }
-        
-        .fine-tune-btn:hover {
-            background: rgba(212, 165, 116, 0.3);
-            box-shadow: 0 0 10px var(--glow-color);
-            transform: scale(1.1);
-        }
-        
-        .fine-tune-btn:active {
-            background: rgba(212, 165, 116, 0.5);
-            transform: scale(0.95);
-        }
-        
-        .fine-tune-value {
-            font-size: 8px;
-            color: var(--glow-bright);
-            text-shadow: 0 0 5px var(--glow-color);
-            margin-top: 2px;
-            text-align: center;
-            min-width: 20px;
+            background: #ffffff;
+            box-shadow: 0 0 15px #fff, 0 0 30px #fff;
         }
 
-        /* 按鈕 + 按下效果 */
-        .btn {
-            position: absolute;
-            cursor: pointer; 
+        /* 按鈕 hitboxes */
+        .btn { position: absolute; cursor: pointer; z-index: 10; border-radius: 50%; }
+        .btn-cam { bottom: 29.5%; left: 19.8%; width: 3.5%; height: 5.5%; }
+        .btn-run { bottom: 29.5%; right: 19.8%; width: 3.5%; height: 5.5%; }
+
+        /* 指示燈：保持原色 */
+        .light { 
+            position: absolute; 
+            width: 10px; height: 10px; 
+            border-radius: 50%; 
             z-index: 10; 
-            background: transparent;
-            border-radius: 50%;
-            transition: all 0.15s;
-        }
-
-        .btn-cam { 
-            bottom: 29.5%; left: 19.8%; 
-            width: 3.5%; height: 5.5%;
+            background: #100;
         }
         
-        .btn-run { 
-            bottom: 29.5%; right: 19.8%; 
-            width: 3.5%; height: 5.5%;
-        }
-
-        .btn:hover {
-            background: rgba(212, 165, 116, 0.15);
-        }
-
-        .btn:active {
-            transform: scale(0.95);
-            background: rgba(212, 165, 116, 0.3);
-        }
-
-        /* 指示燈 */
-        .light {
+        .light::after {
+            content: attr(data-label);
             position: absolute;
-            width: 8px; height: 8px;
-            border-radius: 50%;
-            transition: all 0.3s;
-            background: #200;
-            z-index: 10;
-        }
-        .light-left { bottom: 22%; left: 15%; }      /* 綠燈：對應左下 CAM 按鈕 */
-        .light-right { bottom: 22%; right: 15%; }    /* 紅燈：對應右下 RUN 按鈕 */
-        .light.active-red { 
-            background: #f00; 
-            box-shadow: 0 0 12px #f00, 0 0 20px #f00;
-            animation: blink 1s infinite;
-        }
-        .light.active-green { 
-            background: #0f8; 
-            box-shadow: 0 0 12px #0f8;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 8px;
+            color: rgba(255, 255, 255, 0.3);
+            white-space: nowrap;
+            letter-spacing: 1px;
+            font-weight: bold;
         }
 
-        @keyframes blink {
-            0%, 50% { opacity: 1; }
-            51%, 100% { opacity: 0.3; }
-        }
+        .light-left { bottom: 22%; left: 15%; }
+        .light-right { bottom: 22%; right: 15%; }
+        
+        .light.active-red { background: #f00; box-shadow: 0 0 15px #f00, 0 0 30px #f00; animation: blink 1s infinite; }
+        .light.active-red::after { color: #f88; text-shadow: 0 0 5px #f00; }
+        
+        .light.active-green { background: #0f8; box-shadow: 0 0 15px #0f8, 0 0 25px #0f8; }
+        .light.active-green::after { color: #8ff; text-shadow: 0 0 5px #0f8; }
 
-        /* 螢幕內文字 */
-        .ui-text {
-            position: absolute;
-            padding: 12px;
-            font-size: 10px;
-            pointer-events: none;
-            z-index: 4;
-            text-transform: uppercase;
-            text-shadow: 0 0 5px var(--glow-color);
+        @keyframes blink { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0.2; } }
+
+        /* UI 文字光暈 */
+        .ui-text { 
+            position: absolute; 
+            padding: 12px; 
+            font-size: 10px; 
+            pointer-events: none; 
+            z-index: 4; 
+            text-transform: uppercase; 
+            color: #fff;
+            text-shadow: 0 0 10px #fff; 
         }
         .ui-top-left { top: 0; left: 0; }
         .ui-bottom-right { bottom: 0; right: 0; text-align: right; opacity: 0.8; }
-        
-        /* 階段1 五官偵測標記 */
-        .facial-marker {
-            position: absolute;
-            border: 2px solid var(--glow-bright);
-            pointer-events: none;
-            z-index: 4;
-            box-shadow: 0 0 10px var(--glow-color);
-            transition: all 0.3s;
-        }
-        
-        .facial-marker::before {
-            content: attr(data-label);
-            position: absolute;
-            top: -18px;
-            left: 0;
-            font-size: 8px;
-            color: var(--glow-bright);
-            text-shadow: 0 0 5px var(--glow-color);
-            white-space: nowrap;
-        }
-        
-        /* 手部偵測框 */
-        .hand-marker {
-            position: absolute;
-            border: 2px dashed rgba(100, 255, 100, 0.8);
-            pointer-events: none;
-            z-index: 4;
-            box-shadow: 0 0 15px rgba(100, 255, 100, 0.5);
-            animation: handPulse 1.5s ease-in-out infinite;
-        }
-        
-        .hand-marker::before {
-            content: attr(data-label);
-            position: absolute;
-            top: -18px;
-            left: 0;
-            font-size: 9px;
-            color: rgba(100, 255, 100, 1);
-            text-shadow: 0 0 8px rgba(100, 255, 100, 0.8);
-            font-weight: bold;
-        }
-        
-        @keyframes handPulse {
-            0%, 100% { opacity: 0.7; }
-            50% { opacity: 1; }
-        }
 
         #videoElement { display: none; }
-        
-        /* 開場說明頁面 */
-        .intro-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: linear-gradient(135deg, #000 0%, #1a1a1a 50%, #000 100%);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 10000;
-            padding: 40px;
-            box-sizing: border-box;
-            opacity: 1;
-            transition: opacity 0.5s;
-        }
-        
-        .intro-screen.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
-        
-        .intro-title {
-            font-family: 'Orbitron', monospace;
-            font-size: clamp(28px, 5vw, 48px);
-            color: var(--glow-bright);
-            text-shadow: 0 0 20px var(--glow-color), 0 0 40px var(--glow-color);
-            margin-bottom: 40px;
-            text-align: center;
-            letter-spacing: 3px;
-            animation: titleGlow 3s ease-in-out infinite;
-        }
-        
-        @keyframes titleGlow {
-            0%, 100% { text-shadow: 0 0 20px var(--glow-color), 0 0 40px var(--glow-color); }
-            50% { text-shadow: 0 0 30px var(--glow-bright), 0 0 60px var(--glow-bright); }
-        }
-        
-        .intro-content {
-            max-width: 900px;
-            background: transparent;  /* 移除背景 */
-            border: none;  /* 移除邊框 */
-            border-radius: 0;
-            padding: 20px;  /* 減少內邊距 */
-            box-shadow: none;  /* 移除陰影 */
-            margin-bottom: 30px;  /* 減少間距 */
-            max-height: 75vh;  /* 增加可視高度 */
-            overflow-y: auto;
-        }
-        
-        /* 圖形化控制說明 */
-        .control-diagram {
-            position: relative;
-            width: 100%;
-            max-width: 800px;
-            aspect-ratio: 1000 / 667;
-            margin: 20px auto;
-            background: rgba(26, 26, 26, 0.5);
-            background-image: url('Image.png');
-            background-size: contain;
-            background-position: center;
-            background-repeat: no-repeat;
-            border: 1px solid rgba(212, 165, 116, 0.3);
-            border-radius: 8px;
-        }
-        
-        /* 標記點 */
-        .marker {
-            position: absolute;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            z-index: 10;
-        }
-        
-        .marker-dot {
-            width: 12px;
-            height: 12px;
-            background: var(--glow-bright);
-            border-radius: 50%;
-            box-shadow: 0 0 15px var(--glow-bright), 0 0 25px var(--glow-color);
-            position: relative;
-            animation: dotPulse 2s ease-in-out infinite;
-        }
-        
-        @keyframes dotPulse {
-            0%, 100% { 
-                transform: scale(1); 
-                box-shadow: 0 0 15px var(--glow-bright), 0 0 25px var(--glow-color);
-            }
-            50% { 
-                transform: scale(1.3); 
-                box-shadow: 0 0 25px var(--glow-bright), 0 0 40px var(--glow-color);
-            }
-        }
-        
-        .marker-dot::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 6px;
-            height: 6px;
-            background: #fff;
-            border-radius: 50%;
-            animation: innerPulse 2s ease-in-out infinite;
-        }
-        
-        @keyframes innerPulse {
-            0%, 100% { opacity: 0.8; }
-            50% { opacity: 1; }
-        }
-        
-        .marker-label {
-            background: rgba(0, 0, 0, 0.9);
-            color: var(--glow-bright);
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-size: clamp(10px, 1.5vw, 13px);
-            border: 1px solid var(--glow-color);
-            box-shadow: 0 0 10px rgba(212, 165, 116, 0.5);
-            white-space: nowrap;
-            font-weight: bold;
-            animation: labelFloat 3s ease-in-out infinite;
-        }
-        
-        @keyframes labelFloat {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-3px); }
-        }
-        
-        /* 標記位置 */
-        .marker-knob-left {
-            top: 15%;
-            left: 5%;
-        }
-        
-        .marker-knob-right {
-            top: 15%;
-            right: 5%;
-        }
-        
-        .marker-mode {
-            bottom: 12%;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-        
-        .marker-cam {
-            bottom: 28%;
-            left: 15%;
-        }
-        
-        .marker-run {
-            bottom: 28%;
-            right: 15%;
-        }
-        
-        .marker-screen {
-            top: 8%;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-        
-        .marker-fine-tune {
-            top: 35%;
-            left: 28%;
-        }
-        
-        /* 模式說明區 */
-        .mode-info {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 10px;  /* 減少間距 */
-            margin-top: 15px;  /* 減少上邊距 */
-        }
-        
-        .mode-card {
-            background: transparent;  /* 移除背景 */
-            border: none;  /* 移除邊框 */
-            border-radius: 0;
-            padding: 10px 5px;  /* 減少內邊距 */
-            transition: all 0.3s;
-        }
-        
-        .mode-card:hover {
-            background: rgba(212, 165, 116, 0.1);
-            box-shadow: none;
-        }
-        
-        .mode-card h4 {
-            color: var(--glow-bright);
-            font-size: clamp(13px, 2vw, 15px);  /* 縮小字體 */
-            margin-bottom: 5px;  /* 減少間距 */
-            text-shadow: 0 0 5px var(--glow-color);
-        }
-        
-        .mode-card p {
-            color: rgba(212, 165, 116, 0.85);
-            font-size: clamp(11px, 1.5vw, 13px);  /* 縮小字體 */
-            line-height: 1.4;  /* 減少行高 */
-            margin: 0;
-        }
-        
-        /* 互動提示 */
-        .interaction-tip {
-            background: transparent;  /* 移除背景 */
-            border: none;  /* 移除邊框 */
-            border-radius: 0;
-            padding: 10px 5px;  /* 減少內邊距 */
-            margin-top: 15px;  /* 減少上邊距 */
-        }
-        
-        .interaction-tip h4 {
-            color: rgba(100, 255, 100, 1);
-            font-size: clamp(13px, 2vw, 15px);  /* 縮小字體 */
-            margin-bottom: 8px;  /* 減少間距 */
-            text-shadow: 0 0 5px rgba(100, 255, 100, 0.5);
-        }
-        
-        .interaction-tip ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        
-        .interaction-tip li {
-            color: rgba(100, 255, 100, 0.85);
-            font-size: clamp(11px, 1.5vw, 13px);  /* 縮小字體 */
-            margin-bottom: 5px;  /* 減少間距 */
-            padding-left: 15px;  /* 減少縮排 */
-            position: relative;
-            line-height: 1.4;  /* 減少行高 */
-        }
-        
-        .interaction-tip li::before {
-            content: '▸';
-            position: absolute;
-            left: 0;
-            color: rgba(100, 255, 100, 1);
-        }
-        
-        /* 自定義滾動條 */
-        .intro-content::-webkit-scrollbar {
-            width: 8px;
-        }
-        
-        .intro-content::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 4px;
-        }
-        
-        .intro-content::-webkit-scrollbar-thumb {
-            background: var(--glow-color);
-            border-radius: 4px;
-        }
-        
-        .intro-content::-webkit-scrollbar-thumb:hover {
-            background: var(--glow-bright);
-        }
-        
-        /* Firefox 滾動條 */
-        .intro-content {
-            scrollbar-width: thin;
-            scrollbar-color: var(--glow-color) rgba(0, 0, 0, 0.3);
-        }
-        
-        /* 手機版優化 */
-        @media (max-width: 768px) {
-            .intro-screen {
-                padding: 15px;  /* 減少內邊距 */
-            }
-            
-            .intro-content {
-                padding: 10px;  /* 減少內邊距 */
-                max-height: 60vh;  /* 限制高度確保按鈕可見 */
-            }
-            
-            .intro-title {
-                margin-bottom: 15px;  /* 減少間距 */
-                font-size: clamp(20px, 5vw, 32px);  /* 縮小標題 */
-            }
-            
-            .intro-section {
-                margin-bottom: 15px;
-            }
-            
-            .start-button {
-                padding: 12px 35px;  /* 減少按鈕內邊距 */
-                font-size: 16px;  /* 縮小字體 */
-                margin-top: 15px;  /* 增加上邊距 */
-            }
-            
-            /* 手機版控制圖示 */
-            .control-diagram {
-                aspect-ratio: 1000 / 700;  /* 調整比例 */
-                margin: 10px auto;  /* 減少間距 */
-            }
-            
-            .marker {
-                gap: 5px;
-            }
-            
-            .marker-dot {
-                width: 8px;  /* 縮小標記點 */
-                height: 8px;
-            }
-            
-            .marker-dot::before {
-                width: 3px;
-                height: 3px;
-            }
-            
-            .marker-label {
-                padding: 4px 8px;  /* 減少內邊距 */
-                font-size: 9px;  /* 縮小字體 */
-            }
-            
-            /* 手機版調整標記位置 */
-            .marker-knob-left {
-                top: 12%;
-                left: 2%;
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            
-            .marker-knob-right {
-                top: 12%;
-                right: 2%;
-                flex-direction: column;
-                align-items: flex-end;
-            }
-            
-            .marker-screen {
-                top: 5%;
-            }
-            
-            .marker-fine-tune {
-                display: none;  /* 手機版隱藏微調標記以節省空間 */
-            }
-            
-            .marker-mode {
-                bottom: 8%;
-            }
-            
-            .mode-info {
-                grid-template-columns: 1fr;
-                gap: 8px;  /* 減少間距 */
-            }
-            
-            .mode-card {
-                padding: 8px 5px;  /* 減少內邊距 */
-            }
-            
-            .mode-card h4 {
-                font-size: 12px;  /* 縮小字體 */
-                margin-bottom: 3px;
-            }
-            
-            .mode-card p {
-                font-size: 10px;  /* 縮小字體 */
-            }
-            
-            .interaction-tip {
-                padding: 8px 5px;  /* 減少內邊距 */
-                margin-top: 10px;
-            }
-            
-            .interaction-tip h4 {
-                font-size: 12px;
-                margin-bottom: 5px;
-            }
-            
-            .interaction-tip li {
-                font-size: 10px;
-                margin-bottom: 3px;
-            }
-            
-            /* 手機版減少動畫以提升性能 */
-            .marker-label {
-                animation: none;
-            }
-            
-            .marker-dot::before {
-                animation: none;
-            }
-        }
-        
-        /* 平板版優化 */
-        @media (min-width: 769px) and (max-width: 1024px) {
-            .intro-content {
-                max-width: 750px;
-            }
-            
-            .control-diagram {
-                max-width: 700px;
-            }
-            
-            .marker-label {
-                font-size: 12px;
-            }
-        }
-        
-        .intro-section {
-            margin-bottom: 25px;
-        }
-        
-        .intro-section h3 {
-            color: var(--glow-bright);
-            font-size: clamp(16px, 2.5vw, 20px);
-            margin-bottom: 12px;
-            text-shadow: 0 0 8px var(--glow-color);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .intro-section h3::before {
-            content: '▸';
-            color: var(--glow-bright);
-        }
-        
-        .intro-section p, .intro-section ul {
-            color: rgba(212, 165, 116, 0.9);
-            font-size: clamp(13px, 2vw, 15px);
-            line-height: 1.6;
-            margin: 0;
-        }
-        
-        .intro-section ul {
-            list-style: none;
-            padding-left: 20px;
-        }
-        
-        .intro-section li {
-            margin-bottom: 8px;
-            position: relative;
-        }
-        
-        .intro-section li::before {
-            content: '•';
-            position: absolute;
-            left: -15px;
-            color: var(--glow-bright);
-        }
-        
-        .start-button {
-            font-family: 'Orbitron', monospace;
-            font-size: clamp(18px, 3vw, 24px);
-            padding: 18px 50px;
-            background: linear-gradient(135deg, rgba(212, 165, 116, 0.2), rgba(232, 200, 145, 0.3));
-            border: 3px solid var(--glow-bright);
-            border-radius: 8px;
-            color: var(--glow-bright);
-            cursor: pointer;
-            transition: all 0.3s;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            box-shadow: 0 0 20px rgba(212, 165, 116, 0.5);
-            animation: buttonPulse 2s ease-in-out infinite;
-            -webkit-tap-highlight-color: transparent;  /* 移除手機點擊高亮 */
-            user-select: none;  /* 防止選取文字 */
-        }
-        
-        .start-button:hover {
-            background: linear-gradient(135deg, rgba(232, 200, 145, 0.4), rgba(255, 220, 145, 0.5));
-            box-shadow: 0 0 40px var(--glow-bright);
-            transform: scale(1.05);
-        }
-        
-        .start-button:active {
-            transform: scale(0.98);
-        }
-        
-        @keyframes buttonPulse {
-            0%, 100% { box-shadow: 0 0 20px rgba(212, 165, 116, 0.5); }
-            50% { box-shadow: 0 0 35px rgba(232, 200, 145, 0.8); }
-        }
-        
-        /* 退出按鈕 */
-        .exit-button {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            width: 50px;
-            height: 50px;
-            background: rgba(0, 0, 0, 0.7);
-            border: 2px solid var(--glow-color);
-            border-radius: 50%;
-            cursor: pointer;
-            z-index: 9999;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s;
-            box-shadow: 0 0 15px rgba(212, 165, 116, 0.3);
-            -webkit-tap-highlight-color: transparent;  /* 移除手機點擊高亮 */
-        }
-        
-        .exit-button.visible {
-            display: flex;
-        }
-        
-        .exit-button:hover {
-            background: rgba(212, 165, 116, 0.3);
-            box-shadow: 0 0 25px var(--glow-bright);
-            transform: scale(1.1);
-        }
-        
-        .exit-button:active {
-            transform: scale(0.95);
-        }
-        
-        .exit-button::before,
-        .exit-button::after {
-            content: '';
-            position: absolute;
-            width: 60%;
-            height: 2px;
-            background: var(--glow-bright);
-            box-shadow: 0 0 5px var(--glow-bright);
-        }
-        
-        .exit-button::before {
-            transform: rotate(45deg);
-        }
-        
-        .exit-button::after {
-            transform: rotate(-45deg);
-        }
-        
-        /* 手機版退出按鈕調整 */
-        @media (max-width: 768px) {
-            .exit-button {
-                top: 15px;
-                right: 15px;
-                width: 45px;
-                height: 45px;
-            }
-        }
-
-        .tooltip {
-            position: absolute;
-            background: rgba(0,0,0,0.9);
-            border: 1px solid var(--glow-color);
-            padding: 4px 8px;
-            font-size: 10px;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.2s;
-            z-index: 20;
-            white-space: nowrap;
-            color: var(--glow-bright);
-        }
     </style>
 </head>
 <body>
 
-    <!-- 開場說明頁面 -->
-    <div class="intro-screen" id="introScreen">
-        <h1 class="intro-title">Self-Observation Device</h1>
-        
-        <!-- 實現階段標示 -->
-        <div style="text-align: center; margin: -15px 0 20px 0; opacity: 0.8;">
-            <span style="display: inline-block; padding: 6px 16px; background: rgba(212, 165, 116, 0.2); border: 1px solid var(--glow-color); border-radius: 20px; font-size: clamp(11px, 1.8vw, 13px); color: var(--glow-bright);">
-                📍 概念原型 v1.0 | Conceptual Prototype
-            </span>
-        </div>
-        
-        <div class="intro-content">
-            <!-- 圖形化控制說明 -->
-            <div class="control-diagram">
-                <!-- 左側旋鈕標記 -->
-                <div class="marker marker-knob-left">
-                    <div class="marker-dot"></div>
-                    <div class="marker-label">密度</div>
-                </div>
-                
-                <!-- 右側旋鈕標記 -->
-                <div class="marker marker-knob-right">
-                    <div class="marker-label">變形</div>
-                    <div class="marker-dot"></div>
-                </div>
-                
-                <!-- 螢幕標記 -->
-                <div class="marker marker-screen">
-                    <div class="marker-label">觀測螢幕</div>
-                </div>
-                
-                <!-- 微調按鈕標記 -->
-                <div class="marker marker-fine-tune">
-                    <div class="marker-dot"></div>
-                    <div class="marker-label">微調 +/-</div>
-                </div>
-                
-                <!-- CAM 按鈕標記 -->
-                <div class="marker marker-cam">
-                    <div class="marker-dot"></div>
-                    <div class="marker-label">CAM 🟢</div>
-                </div>
-                
-                <!-- RUN 按鈕標記 -->
-                <div class="marker marker-run">
-                    <div class="marker-label">RUN 🔴</div>
-                    <div class="marker-dot"></div>
-                </div>
-                
-                <!-- MODE 標記 -->
-                <div class="marker marker-mode">
-                    <div class="marker-label">三階段模式</div>
-                </div>
-            </div>
-            
-            <!-- 三種觀測模式說明 -->
-            <div class="mode-info">
-                <div class="mode-card">
-                    <h4>階段 1｜鏡像期</h4>
-                    <p>臉部掃描與特徵點追蹤</p>
-                </div>
-                
-                <div class="mode-card">
-                    <h4>階段 2｜資料規訓</h4>
-                    <p>色彩解構與像素化處理</p>
-                </div>
-                
-                <div class="mode-card">
-                    <h4>階段 3｜超真實擬像</h4>
-                    <p>五官碎片 3D 漂浮互動 <span style="opacity: 0.7; font-size: 0.9em;">（視覺模擬版）</span></p>
-                </div>
-            </div>
-            
-            <!-- 互動技巧提示 -->
-            <div class="interaction-tip">
-                <h4>💡 互動方式（階段 3）</h4>
-                <ul>
-                    <li>搖頭 → 影響碎片移動</li>
-                    <li>伸手 → 推開碎片</li>
-                    <li>旋鈕 → 調整密度/變形</li>
-                </ul>
-                <p style="margin-top: 10px; font-size: 0.85em; opacity: 0.7; line-height: 1.3;">
-                    ⚙️ 當前版本使用視覺輸入。完整版將整合腦波感測與AI生成。
-                </p>
-            </div>
-            
-            <!-- 技術發展路線圖 -->
-            <div style="margin-top: 20px; padding: 15px; background: rgba(212, 165, 116, 0.05); border-left: 3px solid var(--glow-color); border-radius: 4px;">
-                <h4 style="color: var(--glow-color); font-size: clamp(12px, 1.8vw, 14px); margin-bottom: 10px;">
-                    🔬 技術發展路線
-                </h4>
-                <div style="font-size: clamp(10px, 1.5vw, 12px); color: rgba(212, 165, 116, 0.8); line-height: 1.6;">
-                    <div style="margin-bottom: 6px;">
-                        <span style="color: #0f8;">✓</span> <strong>階段 1（完成）</strong>：視覺系統 + 互動機制
-                    </div>
-                    <div style="margin-bottom: 6px;">
-                        <span style="color: #fa0;">⚙️</span> <strong>階段 2（進行中）</strong>：整合 EEG 腦波感測
-                    </div>
-                    <div>
-                        <span style="color: #888;">○</span> <strong>階段 3（規劃中）</strong>：整合 AI 即時生成
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <button class="start-button" onclick="startExperience()">開始體驗</button>
-    </div>
-    
-    <!-- 退出全螢幕按鈕 -->
-    <div class="exit-button" id="exitButton" onclick="exitFullscreen()"></div>
-
-    <div class="machine-wrapper">
+    <div class="machine-wrapper" id="machine">
         <div class="screen-container">
             <div class="ui-text ui-top-left">
                 <div id="disp-mode">MODE: MIRROR_STAGE</div>
                 <div id="disp-status">SYS: STANDBY</div>
-                <div style="opacity: 0.5; font-size: 8px; margin-top: 4px; letter-spacing: 1px;">
-                    PROTO v1.0 | VISUAL SIM
-                </div>
             </div>
             <div class="ui-text ui-bottom-right" id="log-stream">
-                AWAITING DATA...
+                CORE SYSTEM INITIALIZED...
             </div>
             <canvas id="mainCanvas"></canvas>
             <div class="crt-overlay"></div>
-            
-            <!-- 左側微調面板 -->
-            <div class="fine-tune-panel fine-tune-left">
-                <div class="fine-tune-control">
-                    <div class="fine-tune-label">M1</div>
-                    <div class="fine-tune-buttons">
-                        <div class="fine-tune-btn" onclick="adjustMode1(1)">+</div>
-                        <div class="fine-tune-btn" onclick="adjustMode1(-1)">-</div>
-                    </div>
-                    <div class="fine-tune-value" id="m1-val">0</div>
-                </div>
-                <div class="fine-tune-control">
-                    <div class="fine-tune-label">M2</div>
-                    <div class="fine-tune-buttons">
-                        <div class="fine-tune-btn" onclick="adjustMode2(1)">+</div>
-                        <div class="fine-tune-btn" onclick="adjustMode2(-1)">-</div>
-                    </div>
-                    <div class="fine-tune-value" id="m2-val">0</div>
-                </div>
-            </div>
-            
-            <!-- 右側微調面板 -->
-            <div class="fine-tune-panel fine-tune-right">
-                <div class="fine-tune-control">
-                    <div class="fine-tune-label">M3</div>
-                    <div class="fine-tune-buttons">
-                        <div class="fine-tune-btn" onclick="adjustMode3(1)">+</div>
-                        <div class="fine-tune-btn" onclick="adjustMode3(-1)">-</div>
-                    </div>
-                    <div class="fine-tune-value" id="m3-val">0</div>
-                </div>
-                <div class="fine-tune-control">
-                    <div class="fine-tune-label">SYS</div>
-                    <div class="fine-tune-buttons">
-                        <div class="fine-tune-btn" onclick="adjustSystem(1)">+</div>
-                        <div class="fine-tune-btn" onclick="adjustSystem(-1)">-</div>
-                    </div>
-                    <div class="fine-tune-value" id="sys-val">0</div>
-                </div>
-            </div>
         </div>
 
-        <!-- 左側旋鈕（碎片密度） -->
+        <!-- 旋鈕 -->
         <div class="knob-container knob-left">
             <div class="knob-area" id="knobDensity"></div>
             <div class="knob-value" id="valDensity">12</div>
         </div>
 
-        <!-- 右側旋鈕（變形強度） -->
         <div class="knob-container knob-right">
             <div class="knob-area" id="knobDistort"></div>
             <div class="knob-value" id="valDistort">70%</div>
         </div>
         
-        <!-- 模式選擇器 -->
+        <!-- 模式切換按鈕：黑白高亮 17px -->
         <div class="mode-selector">
-            <div class="mode-target" onclick="setMode(1)"></div>
-            <div class="mode-target" onclick="setMode(2)"></div>
-            <div class="mode-target" onclick="setMode(3)"></div>
+            <div class="mode-target active" onclick="setMode(1)">REFLEX</div>
+            <div class="mode-target" onclick="setMode(2)">PROCESS</div>
+            <div class="mode-target" onclick="setMode(3)">SYNTH</div>
         </div>
 
-        <!-- 按鈕 -->
+        <!-- 功能按鈕 -->
         <div class="btn btn-cam" id="btnCam"></div>
         <div class="btn btn-run" id="btnRun"></div>
 
-        <!-- 指示燈 -->
-        <div class="light light-left" id="indGreen"></div>  <!-- 左邊：綠燈（CAM） -->
-        <div class="light light-right" id="indRed"></div>    <!-- 右邊：紅燈（RUN） -->
-
-        <div id="valTip" class="tooltip"></div>
+        <!-- 指示燈：保留紅綠色 -->
+        <div class="light light-left" id="indGreen" data-label="CAM LINK"></div>
+        <div class="light light-right" id="indRed" data-label="SYS RUN"></div>
     </div>
 
     <video id="videoElement" autoplay playsinline></video>
 
-    <!-- 音效（需要上傳） -->
-    <audio id="sndClick" preload="auto"><source src="sounds/click.mp3"></audio>
-    <audio id="sndKnob" preload="auto"><source src="sounds/knob.mp3"></audio>
-    <audio id="sndMode" preload="auto"><source src="sounds/mode.mp3"></audio>
-
     <script>
-        // ==================== 全螢幕控制 ====================
-        function startExperience() {
-            const introScreen = document.getElementById('introScreen');
-            const exitButton = document.getElementById('exitButton');
-            
-            // 隱藏開場頁面
-            introScreen.classList.add('hidden');
-            
-            // 進入全螢幕
-            const elem = document.documentElement;
-            if (elem.requestFullscreen) {
-                elem.requestFullscreen().then(() => {
-                    exitButton.classList.add('visible');
-                }).catch(err => {
-                    console.log('Fullscreen request failed:', err);
-                    exitButton.classList.add('visible');
-                });
-            } else if (elem.webkitRequestFullscreen) { // Safari
-                elem.webkitRequestFullscreen();
-                exitButton.classList.add('visible');
-            } else if (elem.msRequestFullscreen) { // IE11
-                elem.msRequestFullscreen();
-                exitButton.classList.add('visible');
-            } else {
-                // 不支援全螢幕，仍然顯示退出按鈕
-                exitButton.classList.add('visible');
-            }
-            
-            // 播放音效
-            playSound('mode');
-        }
-        
-        function exitFullscreen() {
-            const introScreen = document.getElementById('introScreen');
-            const exitButton = document.getElementById('exitButton');
-            
-            // 退出全螢幕
-            if (document.exitFullscreen) {
-                document.exitFullscreen();
-            } else if (document.webkitExitFullscreen) {
-                document.webkitExitFullscreen();
-            } else if (document.msExitFullscreen) {
-                document.msExitFullscreen();
-            }
-            
-            // 顯示開場頁面
-            introScreen.classList.remove('hidden');
-            exitButton.classList.remove('visible');
-            
-            // 停止系統
-            if (state.isRunning) {
-                toggleSystem();
-            }
-            
-            // 播放音效
-            playSound('click');
-        }
-        
-        // 監聽全螢幕狀態變化
-        document.addEventListener('fullscreenchange', handleFullscreenChange);
-        document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
-        document.addEventListener('msfullscreenchange', handleFullscreenChange);
-        
-        // 監聽 ESC 鍵
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && document.fullscreenElement) {
-                exitFullscreen();
-            }
-        });
-        
-        function handleFullscreenChange() {
-            const isFullscreen = !!(document.fullscreenElement || 
-                                   document.webkitFullscreenElement || 
-                                   document.msFullscreenElement);
-            
-            const exitButton = document.getElementById('exitButton');
-            const introScreen = document.getElementById('introScreen');
-            
-            if (!isFullscreen && !introScreen.classList.contains('hidden')) {
-                // 如果退出全螢幕且不在開場頁面，返回開場頁面
-                exitButton.classList.remove('visible');
-            }
-        }
-        
         const canvas = document.getElementById('mainCanvas');
         const ctx = canvas.getContext('2d');
         const video = document.getElementById('videoElement');
-        const tip = document.getElementById('valTip');
-        
         const captureCanvas = document.createElement('canvas');
         const captureCtx = captureCanvas.getContext('2d');
         
-        // 音效
-        const sounds = {
-            click: document.getElementById('sndClick'),
-            knob: document.getElementById('sndKnob'),
-            mode: document.getElementById('sndMode')
-        };
-
         const state = {
             isRunning: false,
             cameraActive: false,
             currentMode: 1,
-            density: 12,  // 減少預設碎片數量從 28 到 12
+            density: 12,
             distortion: 0.7,
             frameCount: 0,
             scanProgress: 0,
             facialFragments: [],
-            facialDatabase: {
-                eyes: [],
-                ears: [],
-                nose: [],
-                mouth: [],
-                skin: []
-            },
-            databaseReady: false,
-            useExternalImages: false,
             faceCenter: { x: 0.5, y: 0.45 },
-            faceSize: { w: 0.35, h: 0.45 },
-            lastReshuffleTime: 0,
-            reshuffleSpeed: 3.0,
-            // 微調參數
-            mode1Adjust: 0,    // 階段1掃描速度調整
-            mode2Adjust: 0,    // 階段2色彩強度調整
-            mode3Adjust: 0,    // 階段3碎片運動速度調整
-            systemAdjust: 0,   // 系統整體亮度調整
-            // 旋鈕旋轉角度
-            knobDensityRotation: 60,   // 初始角度 (12個碎片對應約60度)
-            knobDistortRotation: 252,    // 初始角度 (70%對應約252度)
-            // 頭部姿態偵測
-            headTiltX: 0,  // 左右擺頭 -1 到 1
-            headTiltY: 0,  // 上下點頭 -1 到 1
-            // 手部姿勢偵測
-            handDetected: false,
-            handPosition: { x: 0.5, y: 0.5 }  // 手部位置 (歸一化座標)
+            headTiltX: 0,
+            headTiltY: 0
         };
-        
-        // 微調函數
-        function adjustMode1(delta) {
-            state.mode1Adjust = Math.max(-10, Math.min(10, state.mode1Adjust + delta));
-            document.getElementById('m1-val').textContent = state.mode1Adjust;
-            playSound('click');
-        }
-        
-        function adjustMode2(delta) {
-            state.mode2Adjust = Math.max(-10, Math.min(10, state.mode2Adjust + delta));
-            document.getElementById('m2-val').textContent = state.mode2Adjust;
-            playSound('click');
-        }
-        
-        function adjustMode3(delta) {
-            state.mode3Adjust = Math.max(-10, Math.min(10, state.mode3Adjust + delta));
-            document.getElementById('m3-val').textContent = state.mode3Adjust;
-            playSound('click');
-        }
-        
-        function adjustSystem(delta) {
-            state.systemAdjust = Math.max(-10, Math.min(10, state.systemAdjust + delta));
-            document.getElementById('sys-val').textContent = state.systemAdjust;
-            playSound('click');
-        }
-        
-        // 更新旋鈕視覺旋轉
-        function updateKnobRotation(knobId, rotation) {
-            const knob = document.getElementById(knobId);
-            if (knob) {
-                // 通過 CSS 變數控制 ::after 偽元素的旋轉
-                knob.style.setProperty('--rotation', `${rotation}deg`);
-            }
-        }
-
-        // ==================== 外部圖片載入（可選） ====================
-        async function loadExternalImages() {
-            addLog("LOADING EXTERNAL DB...");
-            
-            state.facialDatabase = {
-                eyes: [],
-                ears: [],
-                nose: [],
-                mouth: [],
-                skin: []
-            };
-            
-            const parts = ['eyes', 'ears', 'nose', 'mouth', 'skin'];
-            
-            for (const part of parts) {
-                for (let i = 1; i <= 50; i++) {
-                    try {
-                        const img = new Image();
-                        const filename = `facial-parts/${part}/${part}_${String(i).padStart(2, '0')}.png`;
-                        
-                        await new Promise((resolve, reject) => {
-                            img.onload = () => {
-                                const canvas = document.createElement('canvas');
-                                canvas.width = img.width;
-                                canvas.height = img.height;
-                                const ctx = canvas.getContext('2d');
-                                ctx.drawImage(img, 0, 0);
-                                state.facialDatabase[part].push(canvas);
-                                resolve();
-                            };
-                            img.onerror = () => resolve();
-                            img.src = filename;
-                        });
-                    } catch (e) {
-                        console.log(`Skip ${part}_${i}`);
-                    }
-                }
-                addLog(`${part.toUpperCase()}: ${state.facialDatabase[part].length}`);
-            }
-            
-            const totalLoaded = state.facialDatabase.eyes.length + 
-                              state.facialDatabase.ears.length + 
-                              state.facialDatabase.nose.length + 
-                              state.facialDatabase.mouth.length + 
-                              state.facialDatabase.skin.length;
-            
-            if (totalLoaded > 0) {
-                state.databaseReady = true;
-                state.useExternalImages = true;
-                addLog("EXTERNAL DB READY");
-                addLog(`TOTAL: ${totalLoaded} images`);
-                setTimeout(() => {
-                    captureFacialFragments();
-                }, 500);
-            } else {
-                addLog("NO EXTERNAL IMAGES");
-                addLog("USING AUTO-BUILD");
-                buildFacialDatabase();
-            }
-        }
 
         function init() {
             resize();
@@ -1565,152 +302,68 @@
             captureCanvas.height = 480;
             setupEvents();
             requestAnimationFrame(loop);
-            addLog("CORE LINK READY.");
-            addLog("MODE: VISUAL SIMULATION");
-            addLog("v1.0 PROTOTYPE BUILD");
-            
-            // 初始化微調值顯示
-            document.getElementById('m1-val').textContent = state.mode1Adjust;
-            document.getElementById('m2-val').textContent = state.mode2Adjust;
-            document.getElementById('m3-val').textContent = state.mode3Adjust;
-            document.getElementById('sys-val').textContent = state.systemAdjust;
-            
-            window.addEventListener('orientationchange', handleOrientationChange);
-            handleOrientationChange();
-        }
-        
-        function handleOrientationChange() {
-            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-            const isPortrait = window.innerHeight > window.innerWidth;
-            
-            if (isMobile && isPortrait) {
-                addLog("ROTATE TO LANDSCAPE");
-            } else if (isMobile) {
-                addLog("LANDSCAPE MODE OK");
-                setTimeout(resize, 100);
-            }
+            addLog("3D CORE ENGINE READY.");
         }
 
         function setupEvents() {
-            document.getElementById('btnCam').onclick = () => {
-                playSound('click');
-                toggleCamera();
-            };
-            
-            document.getElementById('btnRun').onclick = () => {
-                playSound('click');
-                toggleSystem();
-            };
+            document.getElementById('btnCam').onclick = toggleCamera;
+            document.getElementById('btnRun').onclick = toggleSystem;
             
             setupKnob('knobDensity', (val) => {
                 state.density = Math.floor(8 + val * 24);
                 document.getElementById('valDensity').textContent = state.density;
-                playSound('knob');
-                if (state.currentMode === 3 && state.databaseReady && state.isRunning) {
-                    captureFacialFragments();
-                }
             });
             
             setupKnob('knobDistort', (val) => {
                 state.distortion = val;
                 document.getElementById('valDistort').textContent = Math.floor(val*100) + '%';
-                playSound('knob');
             });
 
             window.addEventListener('resize', resize);
         }
 
-        function playSound(name) {
-            if (sounds[name]) {
-                sounds[name].currentTime = 0;
-                sounds[name].play().catch(e => {});
-            }
-        }
-
         function setupKnob(id, callback) {
             let isDragging = false;
             let lastY = 0;
-            let currentVal = (id === 'knobDensity') ? 0.167 : 0.7;  // 12個碎片對應 (12-8)/(32-8) = 0.167
             const el = document.getElementById(id);
-            
-            const startDrag = (y) => {
-                isDragging = true;
-                lastY = y;
-                el.classList.add('active');
-            };
+            let currentVal = (id === 'knobDensity') ? 0.167 : 0.7;
 
+            const startDrag = (y) => { isDragging = true; lastY = y; };
             const doDrag = (y) => {
                 if (!isDragging) return;
                 let delta = (lastY - y) * 0.005;
                 currentVal = Math.min(1, Math.max(0, currentVal + delta));
                 lastY = y;
                 callback(currentVal);
-                
-                // 更新旋鈕視覺旋轉 (0-1 映射到 0-360度)
-                const rotation = currentVal * 360;
-                if (id === 'knobDensity') {
-                    state.knobDensityRotation = rotation;
-                } else if (id === 'knobDistort') {
-                    state.knobDistortRotation = rotation;
-                }
-                updateKnobRotation(id, rotation);
+                el.style.setProperty('--rotation', `${currentVal * 360}deg`);
             };
+            const endDrag = () => { isDragging = false; };
 
-            const endDrag = () => {
-                isDragging = false;
-                el.classList.remove('active');
-            };
-            
-            el.onmousedown = (e) => { 
-                e.preventDefault();
-                startDrag(e.clientY);
-            };
-            
-            el.ontouchstart = (e) => {
-                e.preventDefault();
-                startDrag(e.touches[0].clientY);
-            };
-            
-            // 關鍵修正：使用 addEventListener 而不是 onmousemove/ontouchmove
-            // 這樣多個旋鈕可以共存，互不干擾
+            el.onmousedown = (e) => { e.preventDefault(); startDrag(e.clientY); };
+            el.ontouchstart = (e) => { e.preventDefault(); startDrag(e.touches[0].clientY); };
+
             window.addEventListener('mousemove', (e) => doDrag(e.clientY));
-            window.addEventListener('touchmove', (e) => {
-                if (e.touches.length > 0) {
-                    doDrag(e.touches[0].clientY);
-                }
-            }, { passive: false });
-            
+            window.addEventListener('touchmove', (e) => doDrag(e.touches[0].clientY), { passive: false });
             window.addEventListener('mouseup', endDrag);
             window.addEventListener('touchend', endDrag);
-            
-            // 初始化旋轉角度
-            const initialRotation = currentVal * 360;
-            if (id === 'knobDensity') {
-                state.knobDensityRotation = initialRotation;
-            } else if (id === 'knobDistort') {
-                state.knobDistortRotation = initialRotation;
-            }
-            updateKnobRotation(id, initialRotation);
+
+            el.style.setProperty('--rotation', `${currentVal * 360}deg`);
         }
 
         async function toggleCamera() {
             if (!state.cameraActive) {
                 try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ 
-                        video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' }
-                    });
+                    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
                     video.srcObject = stream;
                     state.cameraActive = true;
                     document.getElementById('indGreen').classList.add('active-green');
-                    addLog("VIDEO LINK: ON");
-                } catch (e) { addLog("ERR: NO CAMERA"); }
+                    addLog("CAPTURE LINK: ON");
+                } catch (e) { addLog("ERR: ACCESS DENIED"); }
             } else {
-                const stream = video.srcObject;
-                if (stream) stream.getTracks().forEach(t => t.stop());
-                video.srcObject = null;
+                if (video.srcObject) video.srcObject.getTracks().forEach(t => t.stop());
                 state.cameraActive = false;
                 document.getElementById('indGreen').classList.remove('active-green');
-                addLog("VIDEO LINK: OFF");
+                addLog("CAPTURE LINK: OFF");
             }
         }
 
@@ -1718,906 +371,107 @@
             state.isRunning = !state.isRunning;
             document.getElementById('indRed').classList.toggle('active-red', state.isRunning);
             document.getElementById('disp-status').textContent = `SYS: ${state.isRunning ? 'OBSERVING' : 'STANDBY'}`;
+            if(state.isRunning && state.currentMode === 3) buildFragments();
             addLog(state.isRunning ? "INITIATING SCAN..." : "SCAN PAUSED.");
-            
-            if (state.isRunning && state.currentMode === 3 && state.cameraActive) {
-                if (!state.databaseReady) {
-                    loadExternalImages();
-                } else {
-                    captureFacialFragments();
-                }
-            }
         }
 
         function setMode(m) {
             state.currentMode = m;
-            const names = ["", "1_MIRROR_STAGE", "2_DATA_DISCIPLINE", "3_HYPERREAL_SIM"];
+            const names = ["", "MIRROR_STAGE", "DATA_DISCIPLINE", "HYPERREAL_SIM"];
             document.getElementById('disp-mode').textContent = `MODE: ${names[m]}`;
-            
-            document.querySelectorAll('.mode-target').forEach((el, i) => {
-                el.classList.toggle('active', i === m - 1);
-            });
-            
-            playSound('mode');
-            
-            if (m === 3) {
-                addLog(`STAGE_${m} ACTIVATED.`);
-                addLog(`VISUAL SIM MODE`); // 標示為視覺模擬
-            } else {
-                addLog(`STAGE_${m} ACTIVATED.`);
-            }
-            
-            if (m === 3 && state.cameraActive && state.isRunning) {
-                if (!state.databaseReady) {
-                    loadExternalImages();
-                } else {
-                    captureFacialFragments();
-                }
-            }
+            document.querySelectorAll('.mode-target').forEach((el, i) => el.classList.toggle('active', i === m-1));
+            if(m === 3 && state.isRunning) buildFragments();
+            addLog(`STAGE_${m} ACTIVATED.`);
         }
 
-        // ==================== 臉部檢測 ====================
-        function detectFaceCenter() {
+        function detectFace() {
             if (!video.readyState || video.readyState < 2) return;
-            
-            captureCtx.drawImage(video, 0, 0, captureCanvas.width, captureCanvas.height);
-            const imageData = captureCtx.getImageData(0, 0, captureCanvas.width, captureCanvas.height);
-            const data = imageData.data;
-            
-            let maxBrightness = 0;
-            let brightX = captureCanvas.width * 0.5;
-            let brightY = captureCanvas.height * 0.45;
-            
-            const sampleSize = 20;
-            for (let y = 100; y < captureCanvas.height - 100; y += sampleSize) {
-                for (let x = 100; x < captureCanvas.width - 100; x += sampleSize) {
-                    let brightness = 0, count = 0;
-                    
-                    for (let dy = 0; dy < sampleSize; dy++) {
-                        for (let dx = 0; dx < sampleSize; dx++) {
-                            const index = ((y + dy) * captureCanvas.width + (x + dx)) * 4;
-                            brightness += (data[index] + data[index + 1] + data[index + 2]) / 3;
-                            count++;
-                        }
-                    }
-                    
-                    brightness /= count;
-                    if (brightness > maxBrightness) {
-                        maxBrightness = brightness;
-                        brightX = x + sampleSize / 2;
-                        brightY = y + sampleSize / 2;
-                    }
-                }
+            captureCtx.drawImage(video, 0, 0, 640, 480);
+            const data = captureCtx.getImageData(0, 0, 640, 480).data;
+            let maxB = 0, bX = 320, bY = 240;
+            for (let i = 0; i < data.length; i += 800) {
+                let b = (data[i] + data[i+1] + data[i+2]) / 3;
+                if(b > maxB) { maxB = b; let p = i / 4; bX = p % 640; bY = Math.floor(p / 640); }
             }
-            
-            state.faceCenter.x = brightX / captureCanvas.width;
-            state.faceCenter.y = brightY / captureCanvas.height;
-            
-            // 簡易頭部姿態估計（基於臉部位置變化）
-            state.headTiltX = (state.faceCenter.x - 0.5) * 2;  // -1 到 1
-            state.headTiltY = (state.faceCenter.y - 0.45) * 2; // -1 到 1
-        }
-        
-        // 簡易手部偵測（基於顏色和位置）
-        function detectHand() {
-            if (!video.readyState || video.readyState < 2) return;
-            
-            captureCtx.drawImage(video, 0, 0, captureCanvas.width, captureCanvas.height);
-            const imageData = captureCtx.getImageData(0, 0, captureCanvas.width, captureCanvas.height);
-            const data = imageData.data;
-            
-            let handPixels = [];
-            const sampleSize = 15;
-            
-            // 尋找膚色區域（簡化版）
-            for (let y = 0; y < captureCanvas.height; y += sampleSize) {
-                for (let x = 0; x < captureCanvas.width; x += sampleSize) {
-                    const index = (y * captureCanvas.width + x) * 4;
-                    const r = data[index];
-                    const g = data[index + 1];
-                    const b = data[index + 2];
-                    
-                    // 簡單膚色檢測
-                    if (r > 95 && g > 40 && b > 20 && 
-                        r > g && r > b && 
-                        Math.abs(r - g) > 15) {
-                        handPixels.push({ x, y });
-                    }
-                }
-            }
-            
-            if (handPixels.length > 30) {  // 足夠的膚色像素
-                // 計算膚色區域中心
-                let avgX = 0, avgY = 0;
-                handPixels.forEach(p => {
-                    avgX += p.x;
-                    avgY += p.y;
-                });
-                avgX /= handPixels.length;
-                avgY /= handPixels.length;
-                
-                state.handDetected = true;
-                state.handPosition.x = avgX / captureCanvas.width;
-                state.handPosition.y = avgY / captureCanvas.height;
-            } else {
-                state.handDetected = false;
-            }
+            state.faceCenter.x = bX / 640; state.faceCenter.y = bY / 480;
+            state.headTiltX = (state.faceCenter.x - 0.5) * 2; state.headTiltY = (state.faceCenter.y - 0.45) * 2;
         }
 
-        // ==================== 建立五官資料庫 ====================
-        async function buildFacialDatabase() {
-            if (!video.readyState || video.readyState < 2) return;
-            
-            addLog("BUILDING DATABASE...");
-            
-            state.facialDatabase = {
-                eyes: [],
-                ears: [],
-                nose: [],
-                mouth: [],
-                skin: []
-            };
-            
-            for (let frame = 0; frame < 20; frame++) {
-                await new Promise(resolve => setTimeout(resolve, 100));
-                
-                detectFaceCenter();
-                
-                captureCtx.save();
-                captureCtx.scale(-1, 1);
-                captureCtx.drawImage(video, -captureCanvas.width, 0, captureCanvas.width, captureCanvas.height);
-                captureCtx.restore();
-                
-                const faceCenterX = state.faceCenter.x * captureCanvas.width;
-                const faceCenterY = state.faceCenter.y * captureCanvas.height;
-                const faceWidth = state.faceSize.w * captureCanvas.width;
-                const faceHeight = state.faceSize.h * captureCanvas.height;
-                
-                const positions = {
-                    eyes: { x: 0, y: -0.15, w: 0.5, h: 0.2 },
-                    ears: { x: 0, y: 0, w: 0.6, h: 0.4 },
-                    nose: { x: 0, y: 0.1, w: 0.25, h: 0.3 },
-                    mouth: { x: 0, y: 0.35, w: 0.4, h: 0.2 },
-                    skin: { x: 0, y: 0, w: 0.6, h: 0.6 }
-                };
-                
-                for (const [part, pos] of Object.entries(positions)) {
-                    const partWidth = faceWidth * pos.w;
-                    const partHeight = faceHeight * pos.h;
-                    
-                    const sourceX = Math.max(0, Math.min(
-                        captureCanvas.width - partWidth,
-                        faceCenterX + pos.x * faceWidth - partWidth / 2
-                    ));
-                    const sourceY = Math.max(0, Math.min(
-                        captureCanvas.height - partHeight,
-                        faceCenterY + pos.y * faceHeight - partHeight / 2
-                    ));
-                    
-                    const partCanvas = document.createElement('canvas');
-                    partCanvas.width = partWidth;
-                    partCanvas.height = partHeight;
-                    const partCtx = partCanvas.getContext('2d');
-                    
-                    partCtx.drawImage(
-                        captureCanvas,
-                        sourceX, sourceY, partWidth, partHeight,
-                        0, 0, partWidth, partHeight
-                    );
-                    
-                    state.facialDatabase[part].push(partCanvas);
-                }
-            }
-            
-            state.databaseReady = true;
-            addLog(`DATABASE READY`);
-            addLog(`EYES: ${state.facialDatabase.eyes.length}`);
-            addLog(`NOSE: ${state.facialDatabase.nose.length}`);
-            addLog(`MOUTH: ${state.facialDatabase.mouth.length}`);
-            
-            setTimeout(() => {
-                captureFacialFragments();
-            }, 500);
-        }
-
-        // ==================== 五官拼貼碎片生成（加入 3D 座標） ====================
-        function captureFacialFragments() {
-            if (!state.databaseReady) return;
-            if (canvas.width === 0 || canvas.height === 0) {
-                addLog("CANVAS NOT READY");
-                return;
-            }
-            
+        function buildFragments() {
+            if(!state.cameraActive) return;
             state.facialFragments = [];
-            
-            const availableParts = [];
-            if (state.facialDatabase.eyes.length > 0) availableParts.push('eyes');
-            if (state.facialDatabase.ears.length > 0) availableParts.push('ears');
-            if (state.facialDatabase.nose.length > 0) availableParts.push('nose');
-            if (state.facialDatabase.mouth.length > 0) availableParts.push('mouth');
-            if (state.facialDatabase.skin.length > 0) availableParts.push('skin');
-            
-            if (availableParts.length === 0) {
-                addLog("NO PARTS AVAILABLE");
-                return;
-            }
-            
             for (let i = 0; i < state.density; i++) {
-                const partType = availableParts[Math.floor(Math.random() * availableParts.length)];
-                const partArray = state.facialDatabase[partType];
-                const partCanvas = partArray[Math.floor(Math.random() * partArray.length)];
-                
-                const transform = {
-                    flipH: Math.random() > 0.7,
-                    flipV: Math.random() > 0.85,
-                    rotate: (Math.random() - 0.5) * 30,
-                    scaleX: 0.8 + Math.random() * 0.4,  // 縮小範圍：0.8-1.2（原本0.7-1.3）
-                    scaleY: 0.8 + Math.random() * 0.4   // 縮小範圍：0.8-1.2（原本0.7-1.3）
-                };
-                
-                const baseAngle = (i / state.density) * Math.PI * 2;
-                const angleOffset = (Math.random() - 0.5) * (Math.PI / state.density * 0.5);
-                const angle = baseAngle + angleOffset;
-                const radius = 120 + Math.random() * 100;  // 增加距離：120-220px，更分散
-                const startX = canvas.width/2 + Math.cos(angle) * radius;
-                const startY = canvas.height/2 + Math.sin(angle) * radius;
-                
-                // **增加初始速度，避免聚集**
-                const initialSpeed = 1.5;
-                const velocityAngle = Math.random() * Math.PI * 2;
-                
-                // **新增：3D 座標系統**
+                const fw = 80 + Math.random() * 100, fh = 50 + Math.random() * 50;
+                const fCanvas = document.createElement('canvas');
+                fCanvas.width = fw; fCanvas.height = fh;
+                const fCtx = fCanvas.getContext('2d');
+                fCtx.drawImage(video, Math.random()*(640-fw), Math.random()*(480-fh), fw, fh, 0, 0, fw, fh);
                 state.facialFragments.push({
-                    canvas: partCanvas,
-                    width: partCanvas.width,
-                    height: partCanvas.height,
-                    partType,
-                    transform,
-                    // 2D 位置
-                    x: startX,
-                    y: startY,
-                    vx: Math.cos(velocityAngle) * initialSpeed,  // 隨機方向的初始速度
-                    vy: Math.sin(velocityAngle) * initialSpeed,
-                    // **3D 深度座標（Z 軸）**
-                    z: Math.random() * 300 - 150,  // -150 到 +150（前後浮動）
-                    vz: (Math.random() - 0.5) * 1.0,  // 增加 Z 軸初始速度
-                    // 3D 旋轉角度
-                    rotateX: (Math.random() - 0.5) * 60,  // X 軸旋轉 -30° 到 +30°
-                    rotateY: (Math.random() - 0.5) * 60,  // Y 軸旋轉
-                    rotateZ: (Math.random() - 0.5) * 180, // Z 軸旋轉（原本的 rotate）
-                    rotationSpeedX: (Math.random() - 0.5) * 0.3,
-                    rotationSpeedY: (Math.random() - 0.5) * 0.3,
-                    rotationSpeedZ: (Math.random() - 0.5) * 0.3,
-                    alpha: 0.8 + Math.random() * 0.2,
-                    zIndex: Math.random(),
-                    depth: 0
+                    canvas: fCanvas, x: Math.random() * canvas.width, y: Math.random() * canvas.height, z: Math.random() * 400 - 200,
+                    vx: (Math.random()-0.5)*3, vy: (Math.random()-0.5)*3, vz: (Math.random()-0.5)*3,
+                    rotY: Math.random()*360, rs: (Math.random()-0.5)*2
                 });
             }
-            
-            state.facialFragments.sort((a, b) => a.zIndex - b.zIndex);
-            state.lastReshuffleTime = performance.now();
-            addLog(`FRAGMENTS: ${state.facialFragments.length}`);
-            addLog(`PARTS: ${availableParts.join(',')}`);
         }
 
-        function addLog(msg) {
-            const el = document.getElementById('log-stream');
-            const lines = el.innerHTML.split('<br>');
-            
-            // 在階段1和3添加偵測狀態
-            let statusLine = '';
-            if (state.currentMode === 1 || state.currentMode === 3) {
-                const handStatus = state.handDetected ? 'DETECTED' : 'NONE';
-                const tiltX = (state.headTiltX * 100).toFixed(0);
-                const tiltY = (state.headTiltY * 100).toFixed(0);
-                statusLine = `HAND:${handStatus} | TILT:${tiltX},${tiltY}<br>`;
-            }
-            
-            el.innerHTML = statusLine + msg + "<br>" + lines.slice(0, 1).join('<br>');
-        }
-
-        function resize() {
-            const container = document.querySelector('.screen-container');
-            if (container) {
-                canvas.width = container.clientWidth;
-                canvas.height = container.clientHeight;
-            }
-        }
-
-        function loop(timestamp) {
-            if (state.isRunning && state.cameraActive && video.readyState >= 2) {
-                state.frameCount++;
-                
-                if (state.currentMode === 1 || state.currentMode === 2) {
-                    detectFaceCenter();
-                }
-                
-                if (state.currentMode === 3) {
-                    detectFaceCenter();
-                    
-                    if (timestamp - state.lastReshuffleTime > 10000 && state.databaseReady) {
-                        captureFacialFragments();
-                        state.lastReshuffleTime = timestamp;
-                    }
-                }
-                
-                render();
-            }
+        function loop() {
+            if (state.isRunning && state.cameraActive) { detectFace(); render(); }
             requestAnimationFrame(loop);
         }
 
-        function rgbToHsl(r, g, b) {
-            r /= 255; g /= 255; b /= 255;
-            const max = Math.max(r, g, b), min = Math.min(r, g, b);
-            let h, s, l = (max + min) / 2;
-            if (max === min) { h = s = 0; } 
-            else {
-                const d = max - min;
-                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-                switch (max) {
-                    case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
-                    case g: h = ((b - r) / d + 2) / 6; break;
-                    case b: h = ((r - g) / d + 4) / 6; break;
-                }
-            }
-            return { h: h * 360, s: s * 100, l: l * 100 };
-        }
-
         function render() {
-            const w = canvas.width;
-            const h = canvas.height;
-            
-            ctx.fillStyle = '#000';
-            ctx.fillRect(0, 0, w, h);
-            
-            // 系統整體亮度調整（通過 globalAlpha 微調）
-            const baseBrightness = 1.0 + state.systemAdjust * 0.05;
+            const w = canvas.width, h = canvas.height;
+            ctx.fillStyle = '#000'; ctx.fillRect(0, 0, w, h);
 
             if (state.currentMode === 1) {
-                // 階段1：掃描 + 人臉鎖定
-                ctx.globalAlpha = 0.3 * baseBrightness;
-                ctx.save();
-                ctx.scale(-1, 1);
+                ctx.globalAlpha = 0.3; ctx.save(); ctx.scale(-1, 1); ctx.drawImage(video, -w, 0, w, h); ctx.restore();
+                ctx.globalAlpha = 1;
+                state.scanProgress = (state.scanProgress + 3) % h;
+                ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2;
+                ctx.shadowBlur = 10; ctx.shadowColor = '#fff';
+                ctx.beginPath(); ctx.moveTo(0, state.scanProgress); ctx.lineTo(w, state.scanProgress); ctx.stroke();
+                ctx.shadowBlur = 0;
+            } 
+            else if (state.currentMode === 2) {
+                ctx.save(); ctx.scale(-1, 1);
                 ctx.drawImage(video, -w, 0, w, h);
                 ctx.restore();
-                ctx.globalAlpha = baseBrightness;
-                
-                // 掃描速度受 mode1Adjust 影響 (-10到+10 影響速度)
-                const scanSpeed = 2 + state.mode1Adjust * 0.3;
-                state.scanProgress = (state.scanProgress + scanSpeed) % h;
-                
-                ctx.strokeStyle = 'rgba(212, 165, 116, 0.8)';
-                ctx.lineWidth = 3;
-                ctx.beginPath();
-                ctx.moveTo(0, state.scanProgress);
-                ctx.lineTo(w, state.scanProgress);
-                ctx.stroke();
-                
-                const gradient = ctx.createLinearGradient(0, state.scanProgress - 50, 0, state.scanProgress + 50);
-                gradient.addColorStop(0, 'rgba(212, 165, 116, 0)');
-                gradient.addColorStop(0.5, 'rgba(212, 165, 116, 0.2)');
-                gradient.addColorStop(1, 'rgba(212, 165, 116, 0)');
-                ctx.fillStyle = gradient;
-                ctx.fillRect(0, state.scanProgress - 50, w, 100);
-                
-                const faceCenterX = state.faceCenter.x * w;
-                const faceCenterY = state.faceCenter.y * h;
-                const faceWidth = state.faceSize.w * w;
-                const faceHeight = state.faceSize.h * h;
-                
-                // 專業臉部特徵點標記（點對點方式 - 小點+線條輪廓）
-                const drawFeaturePoint = (x, y, label, color, size = 2) => {
-                    // 小圓點
-                    ctx.fillStyle = color;
-                    ctx.beginPath();
-                    ctx.arc(x, y, size, 0, Math.PI * 2);
-                    ctx.fill();
-                    
-                    // 標籤（僅顯示重要點的標籤）
-                    if (label && label.includes('1')) {  // 只標記第一個點
-                        ctx.fillStyle = color;
-                        ctx.font = '6px monospace';
-                        ctx.fillText(label, x + 6, y + 2);
-                    }
-                };
-                
-                const drawLine = (x1, y1, x2, y2, color) => {
-                    ctx.strokeStyle = color;
-                    ctx.lineWidth = 1;
-                    ctx.beginPath();
-                    ctx.moveTo(x1, y1);
-                    ctx.lineTo(x2, y2);
-                    ctx.stroke();
-                };
-                
-                const pointColor = 'rgba(100, 255, 255, 0.9)';
-                const eyeY = faceCenterY - faceHeight * 0.15;
-                const eyeSpacing = faceWidth * 0.2;
-                
-                // 左眼特徵點（5個點）+ 連線
-                const leftEyePoints = [
-                    { x: faceCenterX - eyeSpacing - 15, y: eyeY, label: 'L1' },
-                    { x: faceCenterX - eyeSpacing - 7, y: eyeY - 5, label: '' },
-                    { x: faceCenterX - eyeSpacing, y: eyeY, label: '' },
-                    { x: faceCenterX - eyeSpacing + 7, y: eyeY - 5, label: '' },
-                    { x: faceCenterX - eyeSpacing + 15, y: eyeY, label: '' }
-                ];
-                
-                leftEyePoints.forEach((p, i) => {
-                    drawFeaturePoint(p.x, p.y, p.label, pointColor);
-                    if (i < leftEyePoints.length - 1) {
-                        drawLine(p.x, p.y, leftEyePoints[i + 1].x, leftEyePoints[i + 1].y, pointColor);
-                    }
-                });
-                // 閉合眼睛輪廓
-                drawLine(leftEyePoints[4].x, leftEyePoints[4].y, leftEyePoints[0].x, leftEyePoints[0].y, pointColor);
-                
-                // 右眼特徵點（5個點）+ 連線
-                const rightEyePoints = [
-                    { x: faceCenterX + eyeSpacing - 15, y: eyeY, label: 'R1' },
-                    { x: faceCenterX + eyeSpacing - 7, y: eyeY - 5, label: '' },
-                    { x: faceCenterX + eyeSpacing, y: eyeY, label: '' },
-                    { x: faceCenterX + eyeSpacing + 7, y: eyeY - 5, label: '' },
-                    { x: faceCenterX + eyeSpacing + 15, y: eyeY, label: '' }
-                ];
-                
-                rightEyePoints.forEach((p, i) => {
-                    drawFeaturePoint(p.x, p.y, p.label, pointColor);
-                    if (i < rightEyePoints.length - 1) {
-                        drawLine(p.x, p.y, rightEyePoints[i + 1].x, rightEyePoints[i + 1].y, pointColor);
-                    }
-                });
-                drawLine(rightEyePoints[4].x, rightEyePoints[4].y, rightEyePoints[0].x, rightEyePoints[0].y, pointColor);
-                
-                // 鼻子特徵點（4個點）+ 連線
-                const noseColor = 'rgba(255, 255, 100, 0.9)';
-                const noseY = faceCenterY + faceHeight * 0.05;
-                const nosePoints = [
-                    { x: faceCenterX, y: noseY - 15, label: 'N1' },
-                    { x: faceCenterX - 8, y: noseY + 5, label: '' },
-                    { x: faceCenterX, y: noseY + 10, label: '' },
-                    { x: faceCenterX + 8, y: noseY + 5, label: '' }
-                ];
-                
-                nosePoints.forEach((p, i) => {
-                    drawFeaturePoint(p.x, p.y, p.label, noseColor);
-                    if (i < nosePoints.length - 1) {
-                        drawLine(p.x, p.y, nosePoints[i + 1].x, nosePoints[i + 1].y, noseColor);
-                    }
-                });
-                drawLine(nosePoints[3].x, nosePoints[3].y, nosePoints[0].x, nosePoints[0].y, noseColor);
-                
-                // 嘴巴特徵點（6個點）+ 連線
-                const mouthColor = 'rgba(255, 100, 255, 0.9)';
-                const mouthY = faceCenterY + faceHeight * 0.25;
-                const mouthPoints = [
-                    { x: faceCenterX - 25, y: mouthY, label: 'M1' },
-                    { x: faceCenterX - 12, y: mouthY - 3, label: '' },
-                    { x: faceCenterX, y: mouthY - 2, label: '' },
-                    { x: faceCenterX + 12, y: mouthY - 3, label: '' },
-                    { x: faceCenterX + 25, y: mouthY, label: '' },
-                    { x: faceCenterX, y: mouthY + 8, label: '' }
-                ];
-                
-                mouthPoints.forEach((p, i) => {
-                    drawFeaturePoint(p.x, p.y, p.label, mouthColor);
-                    if (i < mouthPoints.length - 1) {
-                        drawLine(p.x, p.y, mouthPoints[i + 1].x, mouthPoints[i + 1].y, mouthColor);
-                    }
-                });
-                drawLine(mouthPoints[5].x, mouthPoints[5].y, mouthPoints[0].x, mouthPoints[0].y, mouthColor);
-                
-                // 臉部輪廓點（8個點）+ 連線
-                const contourColor = 'rgba(212, 165, 116, 0.6)';
-                const contourPoints = [
-                    { x: faceCenterX - faceWidth * 0.45, y: faceCenterY - faceHeight * 0.3, label: 'C1' },
-                    { x: faceCenterX - faceWidth * 0.48, y: faceCenterY, label: '' },
-                    { x: faceCenterX - faceWidth * 0.4, y: faceCenterY + faceHeight * 0.35, label: '' },
-                    { x: faceCenterX - faceWidth * 0.2, y: faceCenterY + faceHeight * 0.45, label: '' },
-                    { x: faceCenterX + faceWidth * 0.2, y: faceCenterY + faceHeight * 0.45, label: '' },
-                    { x: faceCenterX + faceWidth * 0.4, y: faceCenterY + faceHeight * 0.35, label: '' },
-                    { x: faceCenterX + faceWidth * 0.48, y: faceCenterY, label: '' },
-                    { x: faceCenterX + faceWidth * 0.45, y: faceCenterY - faceHeight * 0.3, label: '' }
-                ];
-                
-                contourPoints.forEach((p, i) => {
-                    drawFeaturePoint(p.x, p.y, p.label, contourColor, 1.5);
-                    if (i < contourPoints.length - 1) {
-                        drawLine(p.x, p.y, contourPoints[i + 1].x, contourPoints[i + 1].y, contourColor);
-                    }
-                });
-                drawLine(contourPoints[7].x, contourPoints[7].y, contourPoints[0].x, contourPoints[0].y, contourColor);
-                
-                // 手部偵測
-                detectHand();
-                
-                if (state.handDetected) {
-                    const handX = state.handPosition.x * w;
-                    const handY = state.handPosition.y * h;
-                    
-                    // 手部中心點（較大）
-                    ctx.strokeStyle = 'rgba(100, 255, 100, 1)';
-                    ctx.lineWidth = 2;
-                    ctx.beginPath();
-                    ctx.arc(handX, handY, 8, 0, Math.PI * 2);
-                    ctx.stroke();
-                    
-                    ctx.beginPath();
-                    ctx.arc(handX, handY, 4, 0, Math.PI * 2);
-                    ctx.stroke();
-                    
-                    ctx.fillStyle = 'rgba(100, 255, 100, 0.8)';
-                    ctx.beginPath();
-                    ctx.arc(handX, handY, 2, 0, Math.PI * 2);
-                    ctx.fill();
-                    
-                    // 手部標籤
-                    ctx.fillStyle = 'rgba(100, 255, 100, 1)';
-                    ctx.font = 'bold 9px monospace';
-                    ctx.fillText('HAND', handX + 12, handY - 10);
-                    
-                    // 手部影響範圍圈（虛線）
-                    ctx.strokeStyle = 'rgba(100, 255, 100, 0.3)';
-                    ctx.lineWidth = 1;
-                    ctx.setLineDash([5, 5]);
-                    ctx.beginPath();
-                    ctx.arc(handX, handY, 60, 0, Math.PI * 2);
-                    ctx.stroke();
-                    ctx.setLineDash([]);
-                }
-                
-            } else if (state.currentMode === 2) {
-                // 階段2：色彩
-                captureCtx.save();
-                captureCtx.scale(-1, 1);
-                captureCtx.drawImage(video, -captureCanvas.width, 0, captureCanvas.width, captureCanvas.height);
-                captureCtx.restore();
-                
-                const imageData = captureCtx.getImageData(0, 0, captureCanvas.width, captureCanvas.height);
-                const data = imageData.data;
-                const time = performance.now() * 0.0012;
-                const pixelSize = 15;
-                const cols = Math.ceil(captureCanvas.width / pixelSize);
-                const rows = Math.ceil(captureCanvas.height / pixelSize);
-                
-                for (let y = 0; y < rows; y++) {
-                    for (let x = 0; x < cols; x++) {
-                        let r = 0, g = 0, b = 0, count = 0;
-                        
-                        for (let py = 0; py < pixelSize; py++) {
-                            for (let px = 0; px < pixelSize; px++) {
-                                const sourceX = x * pixelSize + px;
-                                const sourceY = y * pixelSize + py;
-                                if (sourceX < captureCanvas.width && sourceY < captureCanvas.height) {
-                                    const index = (sourceY * captureCanvas.width + sourceX) * 4;
-                                    r += data[index]; 
-                                    g += data[index + 1]; 
-                                    b += data[index + 2];
-                                    count++;
-                                }
-                            }
-                        }
-                        
-                        if (count > 0) {
-                            r = Math.floor(r / count); 
-                            g = Math.floor(g / count); 
-                            b = Math.floor(b / count);
-                            
-                            const hsl = rgbToHsl(r, g, b);
-                            // 色彩強度受 mode2Adjust 影響
-                            const colorIntensity = 1 + state.mode2Adjust * 0.05;
-                            hsl.h = (hsl.h + time * 50 * colorIntensity + x * 10 + y * 10) % 360;
-                            hsl.s = Math.max(0, Math.min(100, hsl.s + Math.sin(time + x * 0.1) * 30 * colorIntensity));
-                            hsl.l = Math.max(0, Math.min(100, hsl.l + Math.cos(time + y * 0.1) * 20 * colorIntensity));
-                            
-                            const drawX = (x * pixelSize) * (w / captureCanvas.width);
-                            const drawY = (y * pixelSize) * (h / captureCanvas.height);
-                            const drawSize = pixelSize * (w / captureCanvas.width);
-                            
-                            ctx.fillStyle = `hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`;
-                            ctx.fillRect(drawX, drawY, drawSize, drawSize);
-                        }
-                    }
-                }
-                
-            } else if (state.currentMode === 3) {
-                // ==================== 階段3：3D 立體五官碎片 ====================
-                
-                // 背景人像（保持原樣）
-                ctx.globalAlpha = 0.6 * baseBrightness;
-                ctx.save();
-                ctx.scale(-1, 1);
-                ctx.drawImage(video, -w, 0, w, h);
-                ctx.restore();
-                ctx.globalAlpha = baseBrightness;
-                
-                if (state.facialFragments.length === 0) {
-                    ctx.fillStyle = 'rgba(212, 165, 116, 0.8)';
-                    ctx.font = '14px monospace';
-                    ctx.textAlign = 'center';
-                    ctx.fillText('WAITING FOR FRAGMENTS...', w/2, h/2);
-                    ctx.fillText(`DB READY: ${state.databaseReady}`, w/2, h/2 + 20);
-                    ctx.fillText(`CANVAS: ${canvas.width}x${canvas.height}`, w/2, h/2 + 40);
-                    return;
-                }
-                
-                const faceCenterX = state.faceCenter.x * w;
-                const faceCenterY = state.faceCenter.y * h;
-                
-                // 偵測手部（用於互動）
-                detectHand();
-                
-                // **更新所有碎片的 3D 運動**
-                state.facialFragments.forEach(frag => {
-                    // 運動速度受 mode3Adjust 影響
-                    const motionMultiplier = 1 + state.mode3Adjust * 0.1;
-                    
-                    // 計算 XY 平面距離（用於吸引/推離力）
-                    const dx = faceCenterX - frag.x;
-                    const dy = faceCenterY - frag.y;
-                    const xyDistance = Math.sqrt(dx * dx + dy * dy);
-                    
-                    // **頭部姿態影響** - 擺頭會推動碎片
-                    const headInfluenceX = state.headTiltX * 15;  // 左右擺頭影響
-                    const headInfluenceY = state.headTiltY * 10;  // 上下點頭影響
-                    
-                    // **手部影響** - 手靠近會推開碎片
-                    let handInfluenceX = 0;
-                    let handInfluenceY = 0;
-                    if (state.handDetected) {
-                        const handX = state.handPosition.x * w;
-                        const handY = state.handPosition.y * h;
-                        const handDx = frag.x - handX;
-                        const handDy = frag.y - handY;
-                        const handDist = Math.sqrt(handDx * handDx + handDy * handDy);
-                        
-                        if (handDist < 150) {  // 手部影響範圍
-                            const handPower = (150 - handDist) / 150;
-                            handInfluenceX = (handDx / handDist) * handPower * 3;
-                            handInfluenceY = (handDy / handDist) * handPower * 3;
-                        }
-                    }
-                    
-                    // **1. XY 平面磁性運動 + 頭部和手部影響**
-                    const targetDistance = 100;  // 保持合適的目標距離
-                    
-                    if (xyDistance > targetDistance + 30) {  // 增加吸引閾值
-                        const attractionStrength = 0.06 * motionMultiplier;  // 適度吸引力
-                        const pull = (xyDistance - targetDistance) / 200;
-                        frag.vx += (dx / xyDistance) * attractionStrength * pull;
-                        frag.vy += (dy / xyDistance) * attractionStrength * pull;
-                    } else if (xyDistance < targetDistance - 30) {  // 增加推離閾值
-                        const repulsionStrength = 0.03 * motionMultiplier;  // 增強推離力
-                        frag.vx -= (dx / xyDistance) * repulsionStrength;
-                        frag.vy -= (dy / xyDistance) * repulsionStrength;
-                    } else {
-                        const orbitStrength = 0.02 * motionMultiplier;  // 適度環繞力
-                        frag.vx += -dy / xyDistance * orbitStrength;
-                        frag.vy += dx / xyDistance * orbitStrength;
-                    }
-                    
-                    // 應用頭部和手部影響
-                    frag.vx += headInfluenceX * 0.1 + handInfluenceX;
-                    frag.vy += headInfluenceY * 0.1 + handInfluenceY;
-                    
-                    // **碎片之間的排斥力（防止聚集）**
-                    state.facialFragments.forEach(otherFrag => {
-                        if (otherFrag === frag) return;
-                        
-                        const fragDx = frag.x - otherFrag.x;
-                        const fragDy = frag.y - otherFrag.y;
-                        const fragDist = Math.sqrt(fragDx * fragDx + fragDy * fragDy);
-                        
-                        // 當碎片太近時互相推開（增加影響範圍）
-                        if (fragDist < 80 && fragDist > 0) {  // 從60增加到80
-                            const repelPower = (80 - fragDist) / 80;
-                            const repelStrength = 0.8 * repelPower;  // 增強排斥力
-                            frag.vx += (fragDx / fragDist) * repelStrength;
-                            frag.vy += (fragDy / fragDist) * repelStrength;
-                        }
-                    });
-                    
-                    // **2. Z 軸深度運動（新增）**
-                    // Z 軸在 -150 到 +150 之間浮動
-                    if (frag.z > 150) {
-                        frag.vz -= 0.05 * motionMultiplier;  // 太遠則往回拉
-                    } else if (frag.z < -150) {
-                        frag.vz += 0.05 * motionMultiplier;  // 太近則往外推
-                    } else {
-                        // 在正常範圍內，隨機漂浮
-                        frag.vz += (Math.random() - 0.5) * 0.1 * motionMultiplier;
-                    }
-                    
-                    // Z 軸速度阻尼
-                    frag.vz *= 0.95;
-                    
-                    // 限制 Z 軸速度
-                    frag.vz = Math.max(-2, Math.min(2, frag.vz));
-                    
-                    // 更新 Z 座標
-                    frag.z += frag.vz;
-                    
-                    // **3. XY 速度阻尼和擾動（保持原邏輯）**
-                    frag.vx *= 0.95;
-                    frag.vy *= 0.95;
-                    
-                    frag.vx += (Math.random() - 0.5) * 0.1 * motionMultiplier;
-                    frag.vy += (Math.random() - 0.5) * 0.1 * motionMultiplier;
-                    
-                    const maxSpeed = 2;
-                    const speed = Math.sqrt(frag.vx * frag.vx + frag.vy * frag.vy);
-                    if (speed > maxSpeed) {
-                        frag.vx = (frag.vx / speed) * maxSpeed;
-                        frag.vy = (frag.vy / speed) * maxSpeed;
-                    }
-                    
-                    // 更新 XY 位置
-                    frag.x += frag.vx;
-                    frag.y += frag.vy;
-                    
-                    // 邊界處理：軟反彈 + 角落推力
-                    const margin = 40;  // 增加邊界範圍
-                    
-                    if (frag.x < margin) { 
-                        frag.vx += 0.5; 
-                        frag.x = margin;
-                        // 角落額外推力
-                        if (frag.y < margin || frag.y > h - margin) {
-                            frag.vy += (frag.y < h/2) ? 0.5 : -0.5;
-                        }
-                    }
-                    if (frag.x > w - margin) { 
-                        frag.vx -= 0.5; 
-                        frag.x = w - margin;
-                        // 角落額外推力
-                        if (frag.y < margin || frag.y > h - margin) {
-                            frag.vy += (frag.y < h/2) ? 0.5 : -0.5;
-                        }
-                    }
-                    if (frag.y < margin) { 
-                        frag.vy += 0.5; 
-                        frag.y = margin;
-                        // 角落額外推力
-                        if (frag.x < margin || frag.x > w - margin) {
-                            frag.vx += (frag.x < w/2) ? 0.5 : -0.5;
-                        }
-                    }
-                    if (frag.y > h - margin) { 
-                        frag.vy -= 0.5; 
-                        frag.y = h - margin;
-                        // 角落額外推力
-                        if (frag.x < margin || frag.x > w - margin) {
-                            frag.vx += (frag.x < w/2) ? 0.5 : -0.5;
-                        }
-                    }
-                    
-                    // **4. 3D 旋轉更新 - 受頭部姿態影響**
-                    frag.rotateX += frag.rotationSpeedX + state.headTiltY * 2;  // 點頭影響X軸旋轉
-                    frag.rotateY += frag.rotationSpeedY + state.headTiltX * 2;  // 搖頭影響Y軸旋轉
-                    frag.rotateZ += frag.rotationSpeedZ;
-                    
-                    // **5. 計算總深度（用於排序和透視）**
-                    frag.depth = xyDistance + Math.abs(frag.z);
-                });
-                
-                // **根據深度排序（遠的先畫）**
-                state.facialFragments.sort((a, b) => (b.depth + b.z) - (a.depth + a.z));
-                
-                // **繪製所有碎片（3D 效果）**
-                state.facialFragments.forEach(frag => {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.7)'; ctx.fillRect(0,0,w,h);
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+                for(let i=0; i<w; i+=25) { ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,h); ctx.stroke(); }
+            }
+            else if (state.currentMode === 3) {
+                ctx.globalAlpha = 0.4; ctx.save(); ctx.scale(-1, 1); ctx.drawImage(video, -w, 0, w, h); ctx.restore();
+                const focalLength = 600;
+                state.facialFragments.forEach(f => {
+                    f.x += f.vx; f.y += f.vy; f.z += f.vz; f.rotY += f.rs;
+                    if(f.x < 0 || f.x > w) f.vx *= -1; if(f.y < 0 || f.y > h) f.vy *= -1; if(f.z < -200 || f.z > 200) f.vz *= -1;
+                    const perspective = focalLength / (focalLength + f.z);
+                    const drawX = f.x + state.headTiltX * 40;
+                    const drawY = f.y + state.headTiltY * 20;
                     ctx.save();
-                    
-                    // **透視投影參數**
-                    const focalLength = 500;  // 焦距（越小透視越強）
-                    const perspective = focalLength / (focalLength + frag.z);
-                    
-                    // **投影後的位置**
-                    const projectedX = frag.x;
-                    const projectedY = frag.y;
-                    
-                    ctx.translate(projectedX, projectedY);
-                    
-                    // **3D 旋轉模擬（使用 skew 和 scale）**
-                    const radX = frag.rotateX * Math.PI / 180;
-                    const radY = frag.rotateY * Math.PI / 180;
-                    const radZ = frag.rotateZ * Math.PI / 180;
-                    
-                    // Y 軸旋轉效果（左右傾斜）
-                    const skewX = Math.tan(radY) * 0.5;
-                    const scaleXFromY = Math.abs(Math.cos(radY));
-                    
-                    // X 軸旋轉效果（上下傾斜）
-                    const skewY = Math.tan(radX) * 0.5;
-                    const scaleYFromX = Math.abs(Math.cos(radX));
-                    
-                    // Z 軸旋轉（平面旋轉）
-                    ctx.rotate(radZ);
-                    
-                    // 應用 3D 效果
-                    ctx.transform(
-                        scaleXFromY, skewY,
-                        skewX, scaleYFromX,
-                        0, 0
-                    );
-                    
-                    // **透視縮放**
-                    let scaleX = frag.transform.scaleX * perspective;
-                    let scaleY = frag.transform.scaleY * perspective;
-                    if (frag.transform.flipH) scaleX *= -1;
-                    if (frag.transform.flipV) scaleY *= -1;
-                    
-                    ctx.scale(scaleX, scaleY);
-                    
-                    // **碎片大小（縮小到一半）**
-                    const displayWidth = frag.width * (w / captureCanvas.width) * 0.5;
-                    const displayHeight = frag.height * (h / captureCanvas.height) * 0.5;
-                    
-                    // **深度比例（用於光影效果）**
-                    const depthRatio = Math.max(0, Math.min(1, (frag.z + 150) / 300));  // 0（近）到 1（遠）
-                    
-                    // **1. 深層陰影（3D 立體感）**
-                    const shadowOffset = 15 * (1 - depthRatio);
-                    const shadowBlur = 25 * (1 - depthRatio);
-                    ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
-                    ctx.shadowBlur = shadowBlur;
-                    ctx.shadowOffsetX = shadowOffset;
-                    ctx.shadowOffsetY = shadowOffset;
-                    
-                    // **2. 繪製五官碎片（根據深度調整透明度）**
-                    const alphaByDepth = frag.alpha * (1 - depthRatio * 0.5);  // 遠的更透明
-                    ctx.globalAlpha = alphaByDepth;
-                    ctx.drawImage(frag.canvas, -displayWidth / 2, -displayHeight / 2, displayWidth, displayHeight);
-                    
-                    // 重置陰影
-                    ctx.shadowColor = 'transparent';
-                    ctx.shadowBlur = 0;
-                    ctx.shadowOffsetX = 0;
-                    ctx.shadowOffsetY = 0;
-                    
-                    // **3. 玻璃邊框（雙層）**
-                    ctx.globalAlpha = 0.6 * (1 - depthRatio * 0.3);
-                    ctx.strokeStyle = `rgba(${150 + depthRatio * 50}, ${120 + depthRatio * 30}, 80, 0.8)`;
-                    ctx.lineWidth = 2.5;
-                    ctx.strokeRect(-displayWidth / 2, -displayHeight / 2, displayWidth, displayHeight);
-                    
-                    ctx.globalAlpha = 0.4 * (1 - depthRatio * 0.3);
-                    ctx.strokeStyle = 'rgba(255, 220, 180, 0.6)';
-                    ctx.lineWidth = 1;
-                    ctx.strokeRect(-displayWidth / 2 + 1, -displayHeight / 2 + 1, displayWidth - 2, displayHeight - 2);
-                    
-                    // **4. 玻璃高光（根據 3D 角度調整）**
-                    // 左上角主高光
-                    const glareIntensity = (1 - depthRatio * 0.6) * (0.5 + Math.abs(Math.sin(radY)) * 0.5);
-                    const glareGradient = ctx.createLinearGradient(
-                        -displayWidth / 2, -displayHeight / 2,
-                        -displayWidth / 2 + displayWidth * 0.4, -displayHeight / 2 + displayHeight * 0.4
-                    );
-                    glareGradient.addColorStop(0, `rgba(255, 255, 255, ${0.7 * glareIntensity})`);
-                    glareGradient.addColorStop(0.5, `rgba(255, 255, 255, ${0.3 * glareIntensity})`);
-                    glareGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
-                    
-                    ctx.globalAlpha = 0.6 * glareIntensity;
-                    ctx.fillStyle = glareGradient;
-                    ctx.fillRect(-displayWidth / 2, -displayHeight / 2, displayWidth * 0.4, displayHeight * 0.4);
-                    
-                    // 右下角次要高光
-                    const glare2Intensity = (1 - depthRatio * 0.6) * (0.3 + Math.abs(Math.sin(radX)) * 0.3);
-                    const glare2Gradient = ctx.createLinearGradient(
-                        displayWidth / 2, displayHeight / 2,
-                        displayWidth / 2 - displayWidth * 0.2, displayHeight / 2 - displayHeight * 0.2
-                    );
-                    glare2Gradient.addColorStop(0, `rgba(255, 255, 255, ${0.4 * glare2Intensity})`);
-                    glare2Gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
-                    
-                    ctx.globalAlpha = 0.4 * glare2Intensity;
-                    ctx.fillStyle = glare2Gradient;
-                    ctx.fillRect(displayWidth / 2 - displayWidth * 0.2, displayHeight / 2 - displayHeight * 0.2, displayWidth * 0.2, displayHeight * 0.2);
-                    
+                    ctx.translate(drawX, drawY);
+                    ctx.scale(perspective, perspective);
+                    ctx.transform(Math.cos(f.rotY * 0.017), 0, 0, 1, 0, 0);
+                    ctx.globalAlpha = 0.9;
+                    ctx.drawImage(f.canvas, -f.canvas.width/2, -f.canvas.height/2);
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+                    ctx.strokeRect(-f.canvas.width/2, -f.canvas.height/2, f.canvas.width, f.canvas.height);
                     ctx.restore();
                 });
             }
         }
-        
+
+        function addLog(msg) {
+            const el = document.getElementById('log-stream');
+            el.innerHTML = msg + "<br>" + el.innerHTML.split('<br>').slice(0, 1).join('<br>');
+        }
+
+        function resize() {
+            const container = document.querySelector('.screen-container');
+            if(container) { canvas.width = container.clientWidth; canvas.height = container.clientHeight; }
+        }
+
         window.onload = init;
     </script>
 </body>
