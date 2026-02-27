@@ -3,237 +3,182 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>自我觀測儀 | 3D 重構特效完整版</title>
+    <title>自我觀測儀 | SELF-OBSERVATORY</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap');
-        
+
         :root {
-            --glow-color: #ffffff;
-            --text-dim: rgba(255, 255, 255, 0.4);
+            --glow: #ffffff;
+            --dim: rgba(255,255,255,0.4);
             --crt-bg: #020202;
         }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * { margin:0; padding:0; box-sizing:border-box; }
 
         body {
-            font-family: 'Share Tech Mono', monospace;
-            background: #000;
-            color: var(--glow-color);
-            height: 100vh;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            font-family:'Share Tech Mono', monospace;
+            background:#000; color:var(--glow);
+            height:100vh; overflow:hidden;
+            display:flex; justify-content:center; align-items:center;
         }
 
+        /* ── 開場 ── */
         .intro-screen {
-            position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            background: #000;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 10000;
-            padding: 20px;
-            opacity: 1;
-            transition: opacity 0.8s ease;
+            position:fixed; inset:0; background:#000;
+            display:flex; flex-direction:column;
+            justify-content:center; align-items:center;
+            z-index:10000; padding:20px;
+            transition:opacity .8s ease;
         }
-        .intro-screen.hidden { opacity: 0; pointer-events: none; }
+        .intro-screen.hidden { opacity:0; pointer-events:none; }
 
         .intro-title {
-            font-family: 'Orbitron', sans-serif;
-            font-size: clamp(24px, 5vw, 42px);
-            color: #fff;
-            text-shadow: 0 0 30px #fff, 0 0 60px rgba(255,255,255,0.3);
-            margin-bottom: 30px;
-            letter-spacing: 8px;
+            font-family:'Orbitron',sans-serif;
+            font-size:clamp(22px,5vw,42px);
+            text-shadow:0 0 30px #fff, 0 0 60px rgba(255,255,255,.3);
+            margin-bottom:28px; letter-spacing:8px;
         }
         .intro-content {
-            max-width: 600px;
-            text-align: center;
-            color: var(--text-dim);
-            font-size: 13px;
-            line-height: 2;
-            margin-bottom: 40px;
-            letter-spacing: 1px;
+            max-width:580px; text-align:center;
+            color:var(--dim); font-size:13px; line-height:2;
+            margin-bottom:38px; letter-spacing:1px;
         }
         .start-button {
-            font-family: 'Orbitron', sans-serif;
-            padding: 15px 50px;
-            background: transparent;
-            border: 1px solid rgba(255,255,255,0.8);
-            color: #fff;
-            font-size: 16px;
-            cursor: pointer;
-            letter-spacing: 4px;
-            transition: all 0.3s;
-            box-shadow: 0 0 20px rgba(255,255,255,0.15), inset 0 0 20px rgba(255,255,255,0.03);
+            font-family:'Orbitron',sans-serif;
+            padding:14px 48px; background:transparent;
+            border:1px solid rgba(255,255,255,.8); color:#fff;
+            font-size:15px; cursor:pointer; letter-spacing:4px;
+            box-shadow:0 0 20px rgba(255,255,255,.15),inset 0 0 20px rgba(255,255,255,.03);
+            transition:all .3s;
         }
         .start-button:hover {
-            background: rgba(255,255,255,0.05);
-            box-shadow: 0 0 40px rgba(255,255,255,0.4), inset 0 0 30px rgba(255,255,255,0.08);
+            background:rgba(255,255,255,.05);
+            box-shadow:0 0 40px rgba(255,255,255,.4),inset 0 0 30px rgba(255,255,255,.08);
         }
 
+        /* ── 機台 ── */
         .machine-wrapper {
-            position: relative;
-            width: 95vw;
-            max-width: 1000px;
-            aspect-ratio: 1000 / 667;
-            background-color: #0a0a0a;
-            box-shadow: 0 0 100px rgba(255,255,255,0.04);
+            position:relative; width:95vw; max-width:1000px;
+            aspect-ratio:1000/667; background:#0a0a0a;
+            box-shadow:0 0 100px rgba(255,255,255,.04);
         }
         .machine-wrapper::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-image: url('Image2.png');
-            background-size: contain;
-            background-position: center;
-            background-repeat: no-repeat;
-            z-index: 0;
-            pointer-events: none;
-            animation: floatBg 15s ease-in-out infinite;
+            content:''; position:absolute; inset:0;
+            background:url('Image2.png') center/contain no-repeat;
+            z-index:0; pointer-events:none;
+            animation:floatBg 15s ease-in-out infinite;
         }
         .machine-wrapper::after {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-image: url('Image.png');
-            background-size: contain;
-            background-position: center;
-            background-repeat: no-repeat;
-            z-index: 1;
-            pointer-events: none;
-            animation: floatFg 10s ease-in-out infinite;
+            content:''; position:absolute; inset:0;
+            background:url('Image.png') center/contain no-repeat;
+            z-index:1; pointer-events:none;
+            animation:floatFg 10s ease-in-out infinite;
         }
         @keyframes floatBg { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-5px,3px)} }
         @keyframes floatFg { 0%,100%{transform:translate(0,0)} 50%{transform:translate(3px,-2px)} }
 
+        /* ── 螢幕 ── */
         .screen-container {
-            position: absolute;
-            top: 8.5%; left: 25.5%; width: 49%; height: 54%;
-            background: var(--crt-bg);
-            border-radius: 4px;
-            overflow: hidden;
-            z-index: 2;
-            border: 1px solid rgba(255,255,255,0.25);
-            box-shadow: 0 0 0 1px rgba(255,255,255,0.05),
-                        0 0 20px rgba(255,255,255,0.08),
-                        inset 0 0 30px rgba(0,0,0,0.8);
+            position:absolute;
+            top:8.5%; left:25.5%; width:49%; height:54%;
+            background:var(--crt-bg); border-radius:4px;
+            overflow:hidden; z-index:2;
+            border:1px solid rgba(255,255,255,.25);
+            box-shadow:0 0 0 1px rgba(255,255,255,.05),
+                       0 0 20px rgba(255,255,255,.08),
+                       inset 0 0 30px rgba(0,0,0,.8);
         }
-        #mainCanvas { width: 100%; height: 100%; display: block; }
-
+        #mainCanvas { width:100%; height:100%; display:block; }
         .crt-overlay {
-            position: absolute; top:0; left:0; width:100%; height:100%;
-            background: linear-gradient(rgba(0,0,0,0) 50%, rgba(0,0,0,0.18) 50%),
-                        linear-gradient(90deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01),rgba(255,255,255,0.02));
-            background-size: 100% 3px, 3px 100%;
-            pointer-events: none; z-index: 5;
+            position:absolute; inset:0;
+            background:linear-gradient(rgba(0,0,0,0) 50%,rgba(0,0,0,.18) 50%),
+                       linear-gradient(90deg,rgba(255,255,255,.02),rgba(255,255,255,.01),rgba(255,255,255,.02));
+            background-size:100% 3px,3px 100%;
+            pointer-events:none; z-index:5;
         }
         .vignette {
-            position: absolute; top:0; left:0; width:100%; height:100%;
-            background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.7) 100%);
-            pointer-events: none; z-index: 6;
+            position:absolute; inset:0;
+            background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.7) 100%);
+            pointer-events:none; z-index:6;
         }
 
+        /* ── UI 文字 ── */
+        .ui-text {
+            position:absolute; padding:8px 10px;
+            font-size:9px; pointer-events:none; z-index:4;
+            text-transform:uppercase; color:rgba(255,255,255,.85);
+            text-shadow:0 0 8px rgba(255,255,255,.5);
+            line-height:1.7; letter-spacing:1px;
+        }
+        .ui-top-left { top:0; left:0; }
+        .ui-top-left div:first-child { color:#fff; font-size:10px; font-weight:bold; text-shadow:0 0 12px #fff; }
+        .ui-bottom-right { bottom:0; right:0; text-align:right; color:rgba(255,255,255,.4); font-size:8px; }
+
+        /* ── 旋鈕 ── */
         .knob-container {
-            position: absolute;
-            display: flex; flex-direction: column; align-items: center;
-            z-index: 10;
+            position:absolute; display:flex;
+            flex-direction:column; align-items:center; z-index:10;
         }
-        .knob-left  { top: 8%; left: 6.5%;  width: 15%; height: 25%; }
-        .knob-right { top: 8%; right: 6.5%; width: 15%; height: 25%; }
-
+        .knob-left  { top:8%; left:6.5%;  width:15%; height:25%; }
+        .knob-right { top:8%; right:6.5%; width:15%; height:25%; }
         .knob-area {
-            width: 100%; height: 85%;
-            cursor: ns-resize; position: relative;
-            --rotation: 0deg;
+            width:100%; height:85%;
+            cursor:ns-resize; position:relative; --rotation:0deg;
         }
         .knob-area::after {
-            content: '';
-            position: absolute;
-            top: 5%; left: 50%; width: 2px; height: 40%;
-            background: linear-gradient(to bottom, #fff, rgba(255,255,255,0.3), transparent);
-            transform-origin: center bottom;
-            transform: translateX(-50%) rotate(var(--rotation));
-            border-radius: 2px;
-            box-shadow: 0 0 12px #fff, 0 0 25px rgba(255,255,255,0.4);
+            content:''; position:absolute;
+            top:5%; left:50%; width:2px; height:40%;
+            background:linear-gradient(to bottom,#fff,rgba(255,255,255,.3),transparent);
+            transform-origin:center bottom;
+            transform:translateX(-50%) rotate(var(--rotation));
+            border-radius:2px;
+            box-shadow:0 0 12px #fff,0 0 25px rgba(255,255,255,.4);
         }
         .knob-value {
-            font-size: 9px; color: rgba(255,255,255,0.7);
-            text-shadow: 0 0 8px #fff; margin-top: 4px;
-            font-weight: bold; letter-spacing: 1px;
+            font-size:9px; color:rgba(255,255,255,.7);
+            text-shadow:0 0 8px #fff; margin-top:4px;
+            font-weight:bold; letter-spacing:1px;
         }
 
+        /* ── 模式按鈕 ── */
         .mode-selector {
-            position: absolute;
-            bottom: 4.5%; left: 26%; width: 48%; height: 11%;
-            z-index: 10;
-            display: flex; justify-content: space-around; align-items: center;
+            position:absolute; bottom:4.5%; left:26%;
+            width:48%; height:11%; z-index:10;
+            display:flex; justify-content:space-around; align-items:center;
         }
         .mode-target {
-            flex: 1; height: 100%; cursor: pointer;
-            display: flex; flex-direction: column;
-            justify-content: center; align-items: center;
-            color: var(--text-dim);
-            font-size: 14px; font-weight: bold;
-            font-family: 'Orbitron', sans-serif;
-            letter-spacing: 2px;
-            transition: all 0.4s ease;
+            flex:1; height:100%; cursor:pointer;
+            display:flex; flex-direction:column;
+            justify-content:center; align-items:center;
+            color:var(--dim); font-size:14px; font-weight:bold;
+            font-family:'Orbitron',sans-serif; letter-spacing:2px;
+            transition:all .4s ease;
         }
         .mode-target::before {
-            content: '';
-            width: 5px; height: 5px;
-            background: #1a1a1a;
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 50%;
-            margin-bottom: 5px;
-            transition: all 0.3s;
+            content:''; width:5px; height:5px;
+            background:#1a1a1a; border:1px solid rgba(255,255,255,.1);
+            border-radius:50%; margin-bottom:5px; transition:all .3s;
         }
-        .mode-target.active {
-            color: #fff;
-            text-shadow: 0 0 12px #fff, 0 0 25px rgba(255,255,255,0.5), 0 0 50px rgba(255,255,255,0.2);
-        }
-        .mode-target.active::before {
-            background: #fff;
-            box-shadow: 0 0 12px #fff, 0 0 25px #fff, 0 0 50px rgba(255,255,255,0.5);
-            border-color: #fff;
-        }
+        .mode-target.active { color:#fff; text-shadow:0 0 12px #fff,0 0 25px rgba(255,255,255,.5),0 0 50px rgba(255,255,255,.2); }
+        .mode-target.active::before { background:#fff; box-shadow:0 0 12px #fff,0 0 25px #fff,0 0 50px rgba(255,255,255,.5); border-color:#fff; }
 
-        .btn { position: absolute; cursor: pointer; z-index: 10; border-radius: 50%; }
-        .btn-cam { bottom: 29.5%; left: 19.8%;  width: 3.5%; height: 5.5%; }
-        .btn-run { bottom: 29.5%; right: 19.8%; width: 3.5%; height: 5.5%; }
+        /* ── 燈 / 按鈕 ── */
+        .btn { position:absolute; cursor:pointer; z-index:10; border-radius:50%; }
+        .btn-cam { bottom:29.5%; left:19.8%;  width:3.5%; height:5.5%; }
+        .btn-run { bottom:29.5%; right:19.8%; width:3.5%; height:5.5%; }
 
-        .light {
-            position: absolute; width: 10px; height: 10px;
-            border-radius: 50%; z-index: 10; background: #0a0a0a;
-        }
+        .light { position:absolute; width:10px; height:10px; border-radius:50%; z-index:10; background:#0a0a0a; }
         .light::after {
-            content: attr(data-label);
-            position: absolute; top: 14px; left: 50%; transform: translateX(-50%);
-            font-size: 7px; color: rgba(255,255,255,0.25);
-            white-space: nowrap; letter-spacing: 1px;
+            content:attr(data-label);
+            position:absolute; top:14px; left:50%; transform:translateX(-50%);
+            font-size:7px; color:rgba(255,255,255,.25); white-space:nowrap; letter-spacing:1px;
         }
-        .light-left  { bottom: 22%; left: 15%; }
-        .light-right { bottom: 22%; right: 15%; }
-        .light.active-red   { background: #f00; box-shadow: 0 0 20px #f00, 0 0 40px rgba(255,0,0,0.4); animation: blink 1s infinite; }
-        .light.active-green { background: #0f8; box-shadow: 0 0 20px #0f8, 0 0 40px rgba(0,255,136,0.4); }
-        @keyframes blink { 0%,50%{opacity:1} 51%,100%{opacity:0.15} }
+        .light-left  { bottom:22%; left:15%; }
+        .light-right { bottom:22%; right:15%; }
+        .light.active-red   { background:#f00; box-shadow:0 0 20px #f00,0 0 40px rgba(255,0,0,.4); animation:blink 1s infinite; }
+        .light.active-green { background:#0f8; box-shadow:0 0 20px #0f8,0 0 40px rgba(0,255,136,.4); }
+        @keyframes blink { 0%,50%{opacity:1} 51%,100%{opacity:.15} }
 
-        .ui-text {
-            position: absolute; padding: 8px 10px;
-            font-size: 9px; pointer-events: none; z-index: 4;
-            text-transform: uppercase;
-            color: rgba(255,255,255,0.85);
-            text-shadow: 0 0 8px rgba(255,255,255,0.5);
-            line-height: 1.7; letter-spacing: 1px;
-        }
-        .ui-top-left { top: 0; left: 0; }
-        .ui-top-left div:first-child { color: #fff; font-size: 10px; font-weight: bold; text-shadow: 0 0 12px #fff; }
-        .ui-bottom-right { bottom: 0; right: 0; text-align: right; color: rgba(255,255,255,0.45); font-size: 8px; }
-
-        #videoElement { display: none; }
+        #videoElement { display:none; }
     </style>
 </head>
 <body>
@@ -242,13 +187,13 @@
     <h1 class="intro-title">SELF-OBSERVATORY</h1>
     <div class="intro-content">
         <p>這是一台解析主體擬像的數位觀測儀器。</p>
-        <p>點擊「開始」後，系統將自動啟動攝影機並進行主體重構。</p>
-        <p>您可以透過旋鈕調整面具覆蓋密度與異化強度。</p>
+        <p>系統將擷取攝影機影像，並以他者的容貌重新覆寫你的面孔。</p>
+        <p>旋鈕一：碎片密度 &nbsp;|&nbsp; 旋鈕二：異化強度</p>
     </div>
     <button class="start-button" onclick="startExperience()">開始體驗 &nbsp;/&nbsp; START</button>
 </div>
 
-<div class="machine-wrapper" id="machine">
+<div class="machine-wrapper">
     <div class="screen-container">
         <div class="ui-text ui-top-left">
             <div id="disp-mode">MODE: MIRROR_STAGE</div>
@@ -262,7 +207,7 @@
 
     <div class="knob-container knob-left">
         <div class="knob-area" id="knobDensity"></div>
-        <div class="knob-value" id="valDensity">12</div>
+        <div class="knob-value" id="valDensity">×2</div>
     </div>
     <div class="knob-container knob-right">
         <div class="knob-area" id="knobDistort"></div>
@@ -284,147 +229,144 @@
 <video id="videoElement" autoplay playsinline></video>
 
 <script>
-// ─────────────────────────────────────────────
-// 基本設定
-// ─────────────────────────────────────────────
-const canvas      = document.getElementById('mainCanvas');
-const ctx         = canvas.getContext('2d');
-const video       = document.getElementById('videoElement');
-const capCanvas   = document.createElement('canvas');
-const capCtx      = capCanvas.getContext('2d');
+// ═══════════════════════════════════════════════
+//  SOUND ENGINE
+// ═══════════════════════════════════════════════
+const SFX = {
+    click: new Audio('sounds/click.mp3'),
+    knob:  new Audio('sounds/knob.mp3'),
+    mode:  new Audio('sounds/mode.mp3'),
+};
+Object.values(SFX).forEach(a => { a.volume = 0.6; a.preload = 'auto'; });
 
-capCanvas.width  = 640;
-capCanvas.height = 480;
+function playSound(name) {
+    const a = SFX[name];
+    if (!a) return;
+    a.currentTime = 0;
+    a.play().catch(() => {}); // 靜默處理自動播放限制
+}
 
-// 機台圖片資源（Image.png / Image2.png）
-const imgSrc1 = new Image();
-const imgSrc2 = new Image();
-imgSrc1.src = 'Image.png';
-imgSrc2.src = 'Image2.png';
+// ═══════════════════════════════════════════════
+//  CANVAS & VIDEO
+// ═══════════════════════════════════════════════
+const canvas   = document.getElementById('mainCanvas');
+const ctx      = canvas.getContext('2d');
+const video    = document.getElementById('videoElement');
+const capCvs   = document.createElement('canvas');
+const capCtx   = capCvs.getContext('2d');
+capCvs.width   = 640;
+capCvs.height  = 480;
 
-// ─────────────────────────────────────────────
-// 面具零件定義
-// 各零件從哪張圖的哪個比例區域取樣，以及貼在臉上哪個相對位置
-// ─────────────────────────────────────────────
-const MASK_PARTS = [
-    // { id, srcImg(0=Img1,1=Img2), srcRect:[x%,y%,w%,h%], faceOffset:[dx%,dy%], size:[w,h], label, color, glowColor }
-    { id:'leftEye',   src:0, sr:[0.30,0.20,0.18,0.13], fo:[-0.14,-0.16], sw:110,sh:60,  label:'L.EYE',  col:'#00eeff', gc:'rgba(0,238,255,' },
-    { id:'rightEye',  src:1, sr:[0.52,0.18,0.18,0.13], fo:[ 0.14,-0.16], sw:110,sh:60,  label:'R.EYE',  col:'#00eeff', gc:'rgba(0,238,255,' },
-    { id:'nose',      src:0, sr:[0.38,0.35,0.22,0.18], fo:[ 0.00, 0.02], sw:100,sh:80,  label:'NOSE',   col:'#ff44cc', gc:'rgba(255,68,204,' },
-    { id:'mouth',     src:1, sr:[0.32,0.55,0.34,0.16], fo:[ 0.00, 0.20], sw:140,sh:65,  label:'MOUTH',  col:'#ffcc00', gc:'rgba(255,204,0,' },
-    { id:'forehead',  src:0, sr:[0.25,0.05,0.48,0.14], fo:[ 0.00,-0.34], sw:170,sh:60,  label:'FRNT',   col:'#aaffee', gc:'rgba(170,255,238,' },
-    { id:'leftCheek', src:1, sr:[0.12,0.35,0.20,0.22], fo:[-0.24, 0.05], sw: 90,sh:80,  label:'L.CHK',  col:'#ff8844', gc:'rgba(255,136,68,' },
-    { id:'rightCheek',src:0, sr:[0.68,0.35,0.20,0.22], fo:[ 0.24, 0.05], sw: 90,sh:80,  label:'R.CHK',  col:'#ff8844', gc:'rgba(255,136,68,' },
-    { id:'chin',      src:1, sr:[0.35,0.72,0.28,0.16], fo:[ 0.00, 0.36], sw:130,sh:60,  label:'CHIN',   col:'#88aaff', gc:'rgba(136,170,255,' },
-];
+// ═══════════════════════════════════════════════
+//  FACIAL-PARTS 圖片庫
+//  各部位 50 張，路徑：facial-parts/{type}/{type}_{nn}.png
+// ═══════════════════════════════════════════════
+const PART_TYPES = ['eyes','mouth','nose','ears'];
+const PART_COUNT = 50; // 每類 50 張
+const partImages = {}; // partImages['eyes'] = [Image, Image, ...]
 
-// ─────────────────────────────────────────────
-// 狀態
-// ─────────────────────────────────────────────
-const state = {
-    isRunning: false,
-    cameraActive: false,
-    currentMode: 1,
-    density: 12,          // 旋鈕1：面具層數（1~4）
-    distortion: 0.7,      // 旋鈕2：異化強度
-    frameCount: 0,
-    scanProgress: 0,
-    faceCenter: { x: 0.5, y: 0.45 },
-    headTiltX: 0,
-    headTiltY: 0,
-    // 每個面具零件的狀態（獨立的扭曲相位）
-    partStates: {},
-    // Stage 2 景深碎片（保留）
-    facialFragments: [],
-    facialDatabase: { eyes:[], nose:[], mouth:[] },
-    dbBuilt: false,
-    // Stage 3 面具切片 canvas 快取
-    maskSlices: null,
-    imagesLoaded: 0,
+// 部位對應臉部位置（相對臉寬 faceScale 的偏移）
+// fo: [dx, dy]  sw/sh: 顯示尺寸
+const FACE_LAYOUT = {
+    eyes:  { left:  { fo:[-0.30, -0.18], sw:110, sh:58  },
+              right: { fo:[ 0.30, -0.18], sw:110, sh:58  } },
+    nose:  { center:{ fo:[ 0.00,  0.08], sw: 90, sh:80  } },
+    mouth: { center:{ fo:[ 0.00,  0.28], sw:130, sh:58  } },
+    ears:  { left:  { fo:[-0.52,  0.00], sw: 55, sh:80  },
+              right: { fo:[ 0.52,  0.00], sw: 55, sh:80  } },
 };
 
-// 為每個 part 建立獨立的扭曲相位
-MASK_PARTS.forEach(p => {
-    state.partStates[p.id] = {
-        phaseX:  Math.random() * Math.PI * 2,
-        phaseY:  Math.random() * Math.PI * 2,
-        speedX:  0.4 + Math.random() * 0.6,
-        speedY:  0.3 + Math.random() * 0.5,
-        glitchTimer: Math.random() * 120,
-        glitchOffX: 0,
-        glitchOffY: 0,
-        glitchScaleX: 1,
-        glitchAlpha: 0,
-        layerOffset: (Math.random() - 0.5) * 6,  // 微小景深錯位
+// 顏色對應
+const PART_COLOR = {
+    eyes:  { col:'#00eeff', gc:'rgba(0,238,255,'  },
+    mouth: { col:'#ffcc00', gc:'rgba(255,204,0,'   },
+    nose:  { col:'#ff44cc', gc:'rgba(255,68,204,'  },
+    ears:  { col:'#88aaff', gc:'rgba(136,170,255,' },
+};
+
+// ── 預載所有圖片（非同步，但不阻塞主流程）──
+let imagesReady = false;
+function preloadImages() {
+    let loaded = 0;
+    const total = PART_TYPES.length * PART_COUNT;
+    PART_TYPES.forEach(type => {
+        partImages[type] = [];
+        for (let i = 1; i <= PART_COUNT; i++) {
+            const img = new Image();
+            const nn  = String(i).padStart(2, '0');
+            img.src   = `facial-parts/${type}/${type}_${nn}.png`;
+            img.onload  = () => { loaded++; if (loaded >= total) { imagesReady = true; addLog("IMG DB LOADED."); } };
+            img.onerror = () => { loaded++; };
+            partImages[type].push(img);
+        }
+    });
+}
+preloadImages();
+
+// ── 每個位置的目前使用圖片索引（按時間輪換）──
+const slotIndex = {
+    eyes_left: 0, eyes_right: 5,
+    nose_center: 10,
+    mouth_center: 15,
+    ears_left: 20, ears_right: 25,
+};
+// 每個位置的扭曲相位
+const slotPhase = {};
+Object.keys(slotIndex).forEach(k => {
+    slotPhase[k] = {
+        px: Math.random() * Math.PI * 2,
+        py: Math.random() * Math.PI * 2,
+        sx: 0.3 + Math.random() * 0.5,
+        sy: 0.2 + Math.random() * 0.4,
+        glitchTimer: Math.floor(Math.random() * 120),
+        glitchDur: 0,
+        gox: 0, goy: 0, gsx: 1,
     };
 });
 
-// ─────────────────────────────────────────────
-// 圖片載入
-// ─────────────────────────────────────────────
-function onImageLoad() {
-    state.imagesLoaded++;
-    if (state.imagesLoaded >= 2) {
-        buildMaskSlices();
-        addLog("IMG SRC LOADED.");
-    }
-}
-imgSrc1.onload = onImageLoad;
-imgSrc2.onload = onImageLoad;
-// 圖片可能已快取，強制觸發
-if (imgSrc1.complete) onImageLoad();
-if (imgSrc2.complete) onImageLoad();
-
-// ─────────────────────────────────────────────
-// 面具切片快取 — 從 Image.png/Image2.png 裁切出各零件
-// ─────────────────────────────────────────────
-function buildMaskSlices() {
-    state.maskSlices = {};
-    const sources = [imgSrc1, imgSrc2];
-
-    MASK_PARTS.forEach(p => {
-        const fc = document.createElement('canvas');
-        fc.width  = p.sw;
-        fc.height = p.sh;
-        const fCtx = fc.getContext('2d');
-        const src = sources[p.src];
-
-        if (src.naturalWidth > 0) {
-            const sx = p.sr[0] * src.naturalWidth;
-            const sy = p.sr[1] * src.naturalHeight;
-            const sw = p.sr[2] * src.naturalWidth;
-            const sh = p.sr[3] * src.naturalHeight;
-            fCtx.drawImage(src, sx, sy, sw, sh, 0, 0, p.sw, p.sh);
-
-            // 疊加彩色色調以符合各部位顏色識別
-            fCtx.globalCompositeOperation = 'color';
-            fCtx.fillStyle = p.col + 'cc';
-            fCtx.fillRect(0, 0, p.sw, p.sh);
-            fCtx.globalCompositeOperation = 'source-over';
-
-            // 疊加 screen 混合讓細節更明顯
-            fCtx.globalCompositeOperation = 'multiply';
-            fCtx.fillStyle = 'rgba(0,0,0,0.25)';
-            fCtx.fillRect(0, 0, p.sw, p.sh);
-            fCtx.globalCompositeOperation = 'source-over';
-        } else {
-            // fallback：若圖片未載入，畫一個漸層佔位
-            const g = fCtx.createLinearGradient(0, 0, p.sw, p.sh);
-            g.addColorStop(0, p.col + '44');
-            g.addColorStop(1, p.col + '11');
-            fCtx.fillStyle = g;
-            fCtx.fillRect(0, 0, p.sw, p.sh);
+// ── 每隔一段時間換一張圖（面孔隨機替換效果）──
+let swapInterval = null;
+function startImageSwap(intervalMs) {
+    clearInterval(swapInterval);
+    swapInterval = setInterval(() => {
+        const slots = Object.keys(slotIndex);
+        // 每次隨機換 1~2 個位置
+        const n = Math.floor(Math.random() * 2) + 1;
+        for (let i = 0; i < n; i++) {
+            const slot = slots[Math.floor(Math.random() * slots.length)];
+            const [type] = slot.split('_');
+            slotIndex[slot] = Math.floor(Math.random() * PART_COUNT);
         }
-        state.maskSlices[p.id] = fc;
-    });
+    }, intervalMs);
 }
 
-// ─────────────────────────────────────────────
-// 啟動
-// ─────────────────────────────────────────────
+// ═══════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════
+const state = {
+    isRunning:     false,
+    cameraActive:  false,
+    currentMode:   1,
+    layers:        2,       // 旋鈕1：面具層數 1~4
+    distortion:    0.7,     // 旋鈕2：異化強度
+    frameCount:    0,
+    scanProgress:  0,
+    faceCenter:    { x:0.5, y:0.46 },
+    headTiltX:     0,
+    headTiltY:     0,
+    dbBuilt:       false,
+    // Stage 2 碎片
+    facialFragments: [],
+    facialDatabase:  { eyes:[], nose:[], mouth:[] },
+};
+
+// ═══════════════════════════════════════════════
+//  STARTUP
+// ═══════════════════════════════════════════════
 async function startExperience() {
+    playSound('click');
     document.getElementById('introScreen').classList.add('hidden');
-    addLog("AUTO-INITIALIZING SYSTEMS...");
+    addLog("INITIALIZING...");
     await toggleCamera();
     if (!state.isRunning) toggleSystem();
     addLog("ALL SYSTEMS GO.");
@@ -438,37 +380,49 @@ function init() {
 }
 
 function setupEvents() {
-    document.getElementById('btnCam').onclick = toggleCamera;
-    document.getElementById('btnRun').onclick = toggleSystem;
+    document.getElementById('btnCam').addEventListener('click', () => { playSound('click'); toggleCamera(); });
+    document.getElementById('btnRun').addEventListener('click', () => { playSound('click'); toggleSystem(); });
+
     setupKnob('knobDensity', val => {
-        // 映射為面具層數 1~4
-        state.density = Math.floor(1 + val * 3);
-        document.getElementById('valDensity').textContent = 'x' + state.density;
+        state.layers = Math.max(1, Math.floor(1 + val * 3));
+        document.getElementById('valDensity').textContent = '×' + state.layers;
+        playKnobSound();
     });
     setupKnob('knobDistort', val => {
         state.distortion = val;
         document.getElementById('valDistort').textContent = Math.floor(val * 100) + '%';
+        playKnobSound();
     });
+
     window.addEventListener('resize', resize);
 }
 
-function setupKnob(id, callback) {
-    let isDragging = false, lastY = 0;
-    const el = document.getElementById(id);
-    let cur = (id === 'knobDensity') ? 0.33 : 0.7;
-    const start = y => { isDragging = true; lastY = y; };
+// 節流旋鈕聲（避免連續觸發）
+let knobSoundTimer = null;
+function playKnobSound() {
+    clearTimeout(knobSoundTimer);
+    knobSoundTimer = setTimeout(() => playSound('knob'), 80);
+}
+
+function setupKnob(id, cb) {
+    let dragging = false, lastY = 0;
+    const el  = document.getElementById(id);
+    let cur   = (id === 'knobDensity') ? 0.33 : 0.7;
+
+    const start = y => { dragging = true; lastY = y; };
     const drag  = y => {
-        if (!isDragging) return;
+        if (!dragging) return;
         cur = Math.min(1, Math.max(0, cur + (lastY - y) * 0.005));
         lastY = y;
-        callback(cur);
+        cb(cur);
         el.style.setProperty('--rotation', `${cur * 360}deg`);
     };
-    const end = () => { isDragging = false; };
-    el.onmousedown      = e => { e.preventDefault(); start(e.clientY); };
-    el.ontouchstart     = e => { e.preventDefault(); start(e.touches[0].clientY); };
+    const end = () => { dragging = false; };
+
+    el.onmousedown  = e => { e.preventDefault(); start(e.clientY); };
+    el.ontouchstart = e => { e.preventDefault(); start(e.touches[0].clientY); };
     window.addEventListener('mousemove',  e => drag(e.clientY));
-    window.addEventListener('touchmove',  e => drag(e.touches[0].clientY), { passive: false });
+    window.addEventListener('touchmove',  e => drag(e.touches[0].clientY), { passive:false });
     window.addEventListener('mouseup',   end);
     window.addEventListener('touchend',  end);
     el.style.setProperty('--rotation', `${cur * 360}deg`);
@@ -477,16 +431,17 @@ function setupKnob(id, callback) {
 async function toggleCamera() {
     if (!state.cameraActive) {
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-            video.srcObject = stream;
+            video.srcObject = await navigator.mediaDevices.getUserMedia({ video:true });
             state.cameraActive = true;
             document.getElementById('indGreen').classList.add('active-green');
             addLog("CAPTURE LINK: ON");
+            startImageSwap(2500); // 每 2.5 秒換一張五官
         } catch(e) { addLog("ERR: ACCESS DENIED"); }
     } else {
         if (video.srcObject) video.srcObject.getTracks().forEach(t => t.stop());
         state.cameraActive = false;
-        state.dbBuilt = false;
+        state.dbBuilt      = false;
+        clearInterval(swapInterval);
         document.getElementById('indGreen').classList.remove('active-green');
         addLog("CAPTURE LINK: OFF");
     }
@@ -496,21 +451,22 @@ function toggleSystem() {
     state.isRunning = !state.isRunning;
     document.getElementById('indRed').classList.toggle('active-red', state.isRunning);
     document.getElementById('disp-status').textContent = `SYS: ${state.isRunning ? 'OBSERVING' : 'STANDBY'}`;
-    if (state.isRunning && !state.dbBuilt) buildFacialDatabase();
+    if (state.isRunning && !state.dbBuilt) buildStage2DB();
     addLog(state.isRunning ? "PROC_START" : "PROC_HALT");
 }
 
 function setMode(m) {
     state.currentMode = m;
-    const names = ['', 'MIRROR_STAGE', 'DATA_DISCIPLINE', 'FACE_REWRITE'];
+    playSound('mode');
+    const names = ['','MIRROR_STAGE','DATA_DISCIPLINE','FACE_REWRITE'];
     document.getElementById('disp-mode').textContent = `MODE: ${names[m]}`;
-    document.querySelectorAll('.mode-target').forEach((el, i) => el.classList.toggle('active', i === m - 1));
+    document.querySelectorAll('.mode-target').forEach((el,i) => el.classList.toggle('active', i === m-1));
     addLog(`STAGE_${m} ACTIVATED.`);
 }
 
-// ─────────────────────────────────────────────
-// 臉部偵測
-// ─────────────────────────────────────────────
+// ═══════════════════════════════════════════════
+//  FACE DETECTION
+// ═══════════════════════════════════════════════
 function detectFace() {
     if (!video.readyState || video.readyState < 2) return;
     capCtx.drawImage(video, 0, 0, 640, 480);
@@ -518,240 +474,225 @@ function detectFace() {
     let maxB = 0, bX = 320, bY = 240;
     for (let i = 0; i < data.length; i += 2000) {
         const b = (data[i] + data[i+1] + data[i+2]) / 3;
-        if (b > maxB) { maxB = b; const p = i / 4; bX = p % 640; bY = Math.floor(p / 640); }
+        if (b > maxB) { maxB = b; const p = i/4; bX = p%640; bY = Math.floor(p/640); }
     }
     state.faceCenter.x = bX / 640;
     state.faceCenter.y = bY / 480;
-    state.headTiltX = (state.faceCenter.x - 0.5) * 2;
-    state.headTiltY = (state.faceCenter.y - 0.45) * 2;
+    state.headTiltX    = (state.faceCenter.x - 0.5) * 2;
+    state.headTiltY    = (state.faceCenter.y - 0.46) * 2;
 }
 
-// Stage 2 資料庫
-function buildFacialDatabase() {
-    if (!state.cameraActive) return;
-    const parts = ['eyes','nose','mouth'];
-    parts.forEach((pt, i) => {
-        const fc = document.createElement('canvas');
-        fc.width = 120; fc.height = 60;
+// ── Stage 2 DB ──
+function buildStage2DB() {
+    ['eyes','nose','mouth'].forEach((pt, i) => {
+        const fc   = document.createElement('canvas');
+        fc.width   = 120; fc.height = 60;
         const fCtx = fc.getContext('2d');
-        if (video.readyState >= 2) fCtx.drawImage(video, 260, 150 + i * 80, 120, 60, 0, 0, 120, 60);
+        if (video.readyState >= 2) fCtx.drawImage(video, 260, 150+i*80, 120, 60, 0, 0, 120, 60);
         state.facialDatabase[pt] = [fc];
     });
     state.dbBuilt = true;
-    buildFragments();
-    addLog("DB INITIALIZED.");
+    buildStage2Fragments();
 }
-function buildFragments() {
+function buildStage2Fragments() {
     state.facialFragments = [];
     const parts = ['eyes','nose','mouth'];
     const w = canvas.width, h = canvas.height;
     const fx = w * state.faceCenter.x, fy = h * state.faceCenter.y;
     for (let i = 0; i < 12; i++) {
-        const type = parts[i % 3];
+        const type = parts[i%3];
         state.facialFragments.push({
             canvas: state.facialDatabase[type][0],
-            x: fx + (Math.random()-0.5)*180, y: fy + (Math.random()-0.5)*180,
+            x: fx+(Math.random()-.5)*180, y: fy+(Math.random()-.5)*180,
             z: Math.random()*400-200,
-            vx:(Math.random()-0.5)*1.5, vy:(Math.random()-0.5)*1.5, vz:(Math.random()-0.5)*1.8,
-            rotY: Math.random()*360, rs:(Math.random()-0.5)*1.2, type
+            vx:(Math.random()-.5)*1.5, vy:(Math.random()-.5)*1.5, vz:(Math.random()-.5)*1.8,
+            rotY:Math.random()*360, rs:(Math.random()-.5)*1.2, type
         });
     }
 }
 
-// ─────────────────────────────────────────────
-// 主迴圈
-// ─────────────────────────────────────────────
+// ═══════════════════════════════════════════════
+//  MAIN LOOP
+// ═══════════════════════════════════════════════
 function loop() {
     state.frameCount++;
     if (state.isRunning && state.cameraActive) { detectFace(); render(); }
     requestAnimationFrame(loop);
 }
 
-// ─────────────────────────────────────────────
-// 渲染
-// ─────────────────────────────────────────────
+// ═══════════════════════════════════════════════
+//  RENDER
+// ═══════════════════════════════════════════════
 function render() {
     const w = canvas.width, h = canvas.height;
     ctx.fillStyle = '#000'; ctx.fillRect(0, 0, w, h);
 
-    // ── STAGE 1: MIRROR / SCAN ────────────────
+    // ── STAGE 1: MIRROR / SCAN ────────────────────────
     if (state.currentMode === 1) {
-        ctx.save(); ctx.globalAlpha = 0.45; ctx.scale(-1,1);
-        ctx.drawImage(video, -w, 0, w, h); ctx.restore();
-        ctx.globalAlpha = 1;
+        ctx.save(); ctx.globalAlpha = .45; ctx.scale(-1,1);
+        ctx.drawImage(video,-w,0,w,h); ctx.restore(); ctx.globalAlpha = 1;
 
+        // 掃描線
         state.scanProgress = (state.scanProgress + 3) % h;
         const sp = state.scanProgress;
-        const trail = ctx.createLinearGradient(0, sp-60, 0, sp);
-        trail.addColorStop(0, 'rgba(255,255,255,0)');
-        trail.addColorStop(1, 'rgba(255,255,255,0.06)');
-        ctx.fillStyle = trail; ctx.fillRect(0, sp-60, w, 60);
-
+        const trail = ctx.createLinearGradient(0,sp-60,0,sp);
+        trail.addColorStop(0,'rgba(255,255,255,0)');
+        trail.addColorStop(1,'rgba(255,255,255,.06)');
+        ctx.fillStyle = trail; ctx.fillRect(0,sp-60,w,60);
         ctx.save();
-        ctx.shadowBlur = 18; ctx.shadowColor = '#fff';
-        ctx.strokeStyle = 'rgba(255,255,255,0.9)'; ctx.lineWidth = 1.5;
+        ctx.shadowBlur=18; ctx.shadowColor='#fff';
+        ctx.strokeStyle='rgba(255,255,255,.9)'; ctx.lineWidth=1.5;
         ctx.beginPath(); ctx.moveTo(0,sp); ctx.lineTo(w,sp); ctx.stroke();
         ctx.restore();
 
-        const fx = state.faceCenter.x * w, fy = state.faceCenter.y * h;
+        // 臉部追蹤框
+        const fx = state.faceCenter.x*w, fy = state.faceCenter.y*h;
         ctx.save();
-        ctx.shadowBlur = 20; ctx.shadowColor = '#fff';
-        ctx.strokeStyle = 'rgba(255,255,255,0.85)'; ctx.lineWidth = 1;
-        const bx=fx-65, by=fy-85, bw=130, bh=165, cs=18;
+        ctx.shadowBlur=20; ctx.shadowColor='#fff';
+        ctx.strokeStyle='rgba(255,255,255,.85)'; ctx.lineWidth=1;
+        const bx=fx-65,by=fy-85,bw=130,bh=165,cs=18;
         ctx.beginPath();
         ctx.moveTo(bx+cs,by); ctx.lineTo(bx+bw-cs,by);
         ctx.moveTo(bx+bw,by+cs); ctx.lineTo(bx+bw,by+bh-cs);
         ctx.moveTo(bx+bw-cs,by+bh); ctx.lineTo(bx+cs,by+bh);
-        ctx.moveTo(bx,by+bh-cs); ctx.lineTo(bx,by+cs);
-        ctx.stroke();
-        ctx.lineWidth = 2;
+        ctx.moveTo(bx,by+bh-cs); ctx.lineTo(bx,by+cs); ctx.stroke();
+        ctx.lineWidth=2;
         [[bx,by,cs,0,0,cs],[bx+bw,by,-cs,0,0,cs],[bx+bw,by+bh,-cs,0,0,-cs],[bx,by+bh,cs,0,0,-cs]].forEach(([px,py,ax,ay,bx2,by2])=>{
             ctx.beginPath(); ctx.moveTo(px+ax,py+ay); ctx.lineTo(px,py); ctx.lineTo(px+bx2,py+by2); ctx.stroke();
         });
-        const eyeL={x:fx-35,y:fy-22}, eyeR={x:fx+35,y:fy-22};
-        const noseT={x:fx,y:fy+5}, mL={x:fx-28,y:fy+42}, mR={x:fx+28,y:fy+42};
-        ctx.strokeStyle='rgba(255,255,255,0.5)'; ctx.lineWidth=0.8; ctx.shadowBlur=8;
+        const eL={x:fx-35,y:fy-22},eR={x:fx+35,y:fy-22},nT={x:fx,y:fy+5},mL={x:fx-28,y:fy+42},mR={x:fx+28,y:fy+42};
+        ctx.strokeStyle='rgba(255,255,255,.5)'; ctx.lineWidth=.8; ctx.shadowBlur=8;
         ctx.beginPath();
-        ctx.moveTo(eyeL.x,eyeL.y); ctx.lineTo(eyeR.x,eyeR.y);
-        ctx.moveTo(eyeL.x,eyeL.y); ctx.lineTo(noseT.x,noseT.y);
-        ctx.moveTo(eyeR.x,eyeR.y); ctx.lineTo(noseT.x,noseT.y);
-        ctx.moveTo(noseT.x,noseT.y); ctx.lineTo(mL.x,mL.y);
-        ctx.moveTo(mL.x,mL.y); ctx.lineTo(mR.x,mR.y);
-        ctx.moveTo(mR.x,mR.y); ctx.lineTo(noseT.x,noseT.y); ctx.stroke();
-        ctx.fillStyle='rgba(255,255,255,0.8)';
-        [eyeL,eyeR,noseT,mL,mR].forEach(pt=>{ ctx.beginPath(); ctx.arc(pt.x,pt.y,2.5,0,Math.PI*2); ctx.fill(); });
+        ctx.moveTo(eL.x,eL.y); ctx.lineTo(eR.x,eR.y);
+        ctx.moveTo(eL.x,eL.y); ctx.lineTo(nT.x,nT.y); ctx.moveTo(eR.x,eR.y); ctx.lineTo(nT.x,nT.y);
+        ctx.moveTo(nT.x,nT.y); ctx.lineTo(mL.x,mL.y); ctx.moveTo(mL.x,mL.y); ctx.lineTo(mR.x,mR.y);
+        ctx.moveTo(mR.x,mR.y); ctx.lineTo(nT.x,nT.y); ctx.stroke();
+        ctx.fillStyle='rgba(255,255,255,.8)';
+        [eL,eR,nT,mL,mR].forEach(p=>{ ctx.beginPath(); ctx.arc(p.x,p.y,2.5,0,Math.PI*2); ctx.fill(); });
         ctx.restore();
     }
 
-    // ── STAGE 2: DATA PROCESS（景深色彩） ─────
+    // ── STAGE 2: DATA PROCESS（景深色彩） ─────────────
     else if (state.currentMode === 2) {
-        ctx.save(); ctx.globalAlpha=0.35; ctx.scale(-1,1);
+        ctx.save(); ctx.globalAlpha=.35; ctx.scale(-1,1);
         ctx.drawImage(video,-w,0,w,h); ctx.restore(); ctx.globalAlpha=1;
-        ctx.fillStyle='rgba(0,0,0,0.72)'; ctx.fillRect(0,0,w,h);
-        const gridSize=24;
-        const fx=state.faceCenter.x*w, fy=state.faceCenter.y*h;
-        for(let i=0;i<w;i+=gridSize) {
-            for(let j=0;j<h;j+=gridSize) {
-                const dist=Math.hypot((i+gridSize/2)-fx,(j+gridSize/2)-fy);
-                const norm=Math.min(dist/(Math.hypot(w,h)/2),1);
-                const hue=Math.round(norm*250), sat=80-norm*40, lum=30+(1-norm)*35, alpha=0.15+(1-norm)*0.5;
-                ctx.strokeStyle=`hsla(${hue},${sat}%,${lum}%,${alpha})`;
-                ctx.lineWidth=0.6; ctx.strokeRect(i,j,gridSize,gridSize);
-                if(Math.random()>0.96+norm*0.03){
-                    ctx.fillStyle=`hsla(${hue},${sat}%,${lum+20}%,${alpha+0.3})`;
+        ctx.fillStyle='rgba(0,0,0,.72)'; ctx.fillRect(0,0,w,h);
+        const gs=24, fx=state.faceCenter.x*w, fy=state.faceCenter.y*h;
+        for(let i=0;i<w;i+=gs){
+            for(let j=0;j<h;j+=gs){
+                const d=Math.hypot((i+gs/2)-fx,(j+gs/2)-fy);
+                const n=Math.min(d/(Math.hypot(w,h)/2),1);
+                const hue=Math.round(n*250),sat=80-n*40,lum=30+(1-n)*35,a=.15+(1-n)*.5;
+                ctx.strokeStyle=`hsla(${hue},${sat}%,${lum}%,${a})`;
+                ctx.lineWidth=.6; ctx.strokeRect(i,j,gs,gs);
+                if(Math.random()>.96+n*.03){
+                    ctx.fillStyle=`hsla(${hue},${sat}%,${lum+20}%,${a+.3})`;
                     ctx.font='9px Share Tech Mono';
                     ctx.fillText(Math.random().toString(16).slice(2,4).toUpperCase(),i+5,j+15);
                 }
             }
         }
-        const rg=ctx.createRadialGradient(fx,fy,10,fx,fy,120);
-        rg.addColorStop(0,'rgba(255,255,255,0.06)'); rg.addColorStop(1,'rgba(255,255,255,0)');
-        ctx.fillStyle=rg; ctx.fillRect(0,0,w,h);
     }
 
-    // ── STAGE 3: FACE REWRITE（面具貼臉 + 異化） ─
+    // ── STAGE 3: FACE REWRITE ─────────────────────────
     else if (state.currentMode === 3) {
         renderFaceRewrite(w, h);
     }
 }
 
-// ─────────────────────────────────────────────
-// Stage 3 核心：面具貼臉 + 異化扭曲
-// ─────────────────────────────────────────────
+// ═══════════════════════════════════════════════
+//  STAGE 3 CORE — 面具貼臉 + 異化
+// ═══════════════════════════════════════════════
 function renderFaceRewrite(w, h) {
-    const t   = state.frameCount * 0.016; // 時間（秒）
-    const fx  = state.faceCenter.x * w;
-    const fy  = state.faceCenter.y * h;
-    const dist = state.distortion;        // 0~1 異化強度
+    const t    = state.frameCount * 0.016;
+    const dist = state.distortion;
+    const fx   = state.faceCenter.x * w;
+    const fy   = state.faceCenter.y * h;
 
-    // 底層：鏡像影片，低透明度，做為「原臉」殘影
-    ctx.save();
-    ctx.globalAlpha = 0.18 + dist * 0.06;
-    ctx.scale(-1, 1);
-    ctx.drawImage(video, -w, 0, w, h);
-    ctx.restore();
+    // 底層：原臉殘影
+    ctx.save(); ctx.globalAlpha = .15 + dist * .05;
+    ctx.scale(-1,1); ctx.drawImage(video,-w,0,w,h); ctx.restore();
     ctx.globalAlpha = 1;
 
-    // 若切片未建好，嘗試建立
-    if (!state.maskSlices) buildMaskSlices();
+    // 臉部尺度（以畫布高度的比例推算臉寬）
+    const faceScale = h * 0.5;
 
-    // 面具覆蓋：density 決定疊加幾層（層數 1~4，每層有更強的位移）
-    for (let layer = 0; layer < state.density; layer++) {
-        const layerPhase = (layer / Math.max(state.density - 1, 1)) * Math.PI; // 各層相位錯開
-        const layerAlpha = layer === 0 ? 0.92 : 0.35 - layer * 0.06;           // 第一層最不透明，後續層越來越透明
+    // 依序繪製各部位（多層）
+    // 繪製順序：ears → nose → eyes → mouth（遮擋正確）
+    const drawOrder = [
+        { type:'ears',  slot:'left',   key:'ears_left'   },
+        { type:'ears',  slot:'right',  key:'ears_right'  },
+        { type:'nose',  slot:'center', key:'nose_center' },
+        { type:'eyes',  slot:'left',   key:'eyes_left'   },
+        { type:'eyes',  slot:'right',  key:'eyes_right'  },
+        { type:'mouth', slot:'center', key:'mouth_center'},
+    ];
 
-        MASK_PARTS.forEach(p => {
-            if (!state.maskSlices || !state.maskSlices[p.id]) return;
+    for (let layer = 0; layer < state.layers; layer++) {
+        const layerPhase  = (layer / Math.max(state.layers-1,1)) * Math.PI;
+        const layerAlpha  = layer === 0 ? 0.90 : Math.max(0.12, 0.40 - layer * 0.10);
 
-            const ps = state.partStates[p.id];
+        drawOrder.forEach(({ type, slot, key }) => {
+            const layout = FACE_LAYOUT[type][slot];
+            if (!layout) return;
 
-            // ── 基礎貼附位置（臉部中心 + 各部位偏移）──
-            // fo 是相對臉寬/臉高的比例，臉寬約 canvas 高度的 0.55
-            const faceScale = h * 0.55;
-            const baseX = fx + p.fo[0] * faceScale;
-            const baseY = fy + p.fo[1] * faceScale;
+            // 從圖片庫取得目前的圖
+            const imgPool = partImages[type];
+            if (!imgPool || !imgPool.length) return;
+            const img = imgPool[slotIndex[key] % imgPool.length];
+            if (!img || !img.complete || img.naturalWidth === 0) return;
 
-            // ── 旋鈕2：異化位移 ──
-            // 每個部位獨立 sin 波，層與層之間相位相差 layerPhase
-            const ampX = dist * 18 * (layer + 1);
-            const ampY = dist * 10 * (layer + 1);
-            const waveX = Math.sin(t * ps.speedX + ps.phaseX + layerPhase) * ampX;
-            const waveY = Math.cos(t * ps.speedY + ps.phaseY + layerPhase) * ampY;
+            const ps = slotPhase[key];
 
-            // ── 隨機 Glitch ──
+            // 基礎貼附位置
+            const baseX = fx + layout.fo[0] * faceScale;
+            const baseY = fy + layout.fo[1] * faceScale;
+
+            // 異化波動
+            const ampX = dist * 16 * (layer + 1);
+            const ampY = dist *  9 * (layer + 1);
+            const waveX = Math.sin(t * ps.sx + ps.px + layerPhase) * ampX;
+            const waveY = Math.cos(t * ps.sy + ps.py + layerPhase) * ampY;
+
+            // Glitch
             ps.glitchTimer--;
             if (ps.glitchTimer <= 0) {
-                // 觸發新 glitch
-                ps.glitchTimer    = 40 + Math.random() * 200;
-                ps.glitchOffX     = (Math.random() - 0.5) * dist * 50;
-                ps.glitchOffY     = (Math.random() - 0.5) * dist * 20;
-                ps.glitchScaleX   = 1 + (Math.random() - 0.5) * dist * 0.5;
-                ps.glitchDuration = 3 + Math.floor(Math.random() * 8);
+                ps.glitchTimer = 50 + Math.random() * 180;
+                ps.gox = (Math.random()-.5) * dist * 45;
+                ps.goy = (Math.random()-.5) * dist * 18;
+                ps.gsx = 1 + (Math.random()-.5) * dist * 0.45;
+                ps.glitchDur = 3 + Math.floor(Math.random() * 6);
             }
-            const isGlitching = ps.glitchDuration > 0;
-            if (isGlitching) ps.glitchDuration--;
+            const glitching = ps.glitchDur > 0;
+            if (glitching) ps.glitchDur--;
 
-            const gx = isGlitching ? ps.glitchOffX : 0;
-            const gy = isGlitching ? ps.glitchOffY : 0;
-            const gsx = isGlitching ? ps.glitchScaleX : 1;
-
-            // ── 最終繪製位置 ──
-            const drawX = baseX + waveX + gx + ps.layerOffset * layer;
-            const drawY = baseY + waveY + gy + ps.layerOffset * layer * 0.5;
-
-            const sliceW = p.sw * (1 + layer * 0.04);  // 後層微微放大，強化異化
-            const sliceH = p.sh * (1 + layer * 0.04);
+            const drawX = baseX + waveX + (glitching ? ps.gox : 0);
+            const drawY = baseY + waveY + (glitching ? ps.goy : 0);
+            const sw    = layout.sw * (1 + layer * 0.05);
+            const sh    = layout.sh * (1 + layer * 0.05);
+            const gsx   = glitching ? ps.gsx : 1;
+            const col   = PART_COLOR[type];
 
             ctx.save();
             ctx.translate(drawX, drawY);
             ctx.scale(gsx, 1);
+            if (layer > 0) ctx.rotate(Math.sin(t * 0.25 + ps.px + layer) * dist * 0.07);
 
-            // 後層加輕微旋轉（異化感）
-            if (layer > 0) {
-                const tiltAngle = Math.sin(t * 0.3 + ps.phaseX + layer) * dist * 0.08;
-                ctx.rotate(tiltAngle);
-            }
+            ctx.globalAlpha  = layerAlpha;
+            ctx.shadowBlur   = layer === 0 ? 12 + dist * 14 : 5 + dist * 7;
+            ctx.shadowColor  = col.col;
 
-            ctx.globalAlpha = layerAlpha;
+            // 繪製五官圖片
+            ctx.drawImage(img, -sw/2, -sh/2, sw, sh);
 
-            // 彩色發光（近臉第一層最亮）
-            ctx.shadowBlur  = layer === 0 ? 10 + dist * 15 : 5 + dist * 8;
-            ctx.shadowColor = p.col;
-
-            // 繪製面具切片
-            ctx.drawImage(state.maskSlices[p.id], -sliceW/2, -sliceH/2, sliceW, sliceH);
-
-            // 彩色邊框（第一層清晰，後層用 screen 疊加）
+            // 第一層：清晰邊框 + 標籤
             if (layer === 0) {
-                ctx.strokeStyle = p.gc + '0.75)';
-                ctx.lineWidth   = 1;
-                ctx.strokeRect(-sliceW/2, -sliceH/2, sliceW, sliceH);
+                ctx.strokeStyle = col.gc + '0.65)';
+                ctx.lineWidth   = 0.8;
+                ctx.strokeRect(-sw/2, -sh/2, sw, sh);
 
-                // 角落缺角框
-                const cs = 7;
-                const hx = sliceW/2, hy = sliceH/2;
-                ctx.strokeStyle = p.gc + '0.9)';
-                ctx.lineWidth = 1.5;
+                const cs = 6, hx = sw/2, hy = sh/2;
+                ctx.strokeStyle = col.gc + '0.9)'; ctx.lineWidth = 1.5;
                 ctx.beginPath();
                 ctx.moveTo(-hx,-hy+cs); ctx.lineTo(-hx,-hy); ctx.lineTo(-hx+cs,-hy);
                 ctx.moveTo( hx-cs,-hy); ctx.lineTo( hx,-hy); ctx.lineTo( hx,-hy+cs);
@@ -759,22 +700,16 @@ function renderFaceRewrite(w, h) {
                 ctx.moveTo(-hx+cs, hy); ctx.lineTo(-hx, hy); ctx.lineTo(-hx, hy-cs);
                 ctx.stroke();
 
-                // 標籤
-                ctx.fillStyle  = p.col;
-                ctx.font       = '7px Orbitron';
-                ctx.shadowBlur = 6;
-                ctx.fillText(p.label, -hx, -hy - 4);
+                ctx.fillStyle = col.col; ctx.font = '7px Orbitron'; ctx.shadowBlur = 6;
+                ctx.fillText(type.toUpperCase() + (slot !== 'center' ? '_'+slot.toUpperCase()[0] : ''), -hx, -hy-4);
             }
 
-            // glitch 時加水平掃描撕裂線
-            if (isGlitching && dist > 0.3) {
-                ctx.strokeStyle = p.gc + '0.5)';
-                ctx.lineWidth = 1;
+            // Glitch 撕裂線
+            if (glitching && dist > 0.25) {
+                ctx.strokeStyle = col.gc + '0.45)'; ctx.lineWidth = 1;
                 ctx.globalCompositeOperation = 'screen';
-                const lineY = -sliceH/2 + Math.random() * sliceH;
-                ctx.beginPath();
-                ctx.moveTo(-sliceW/2, lineY); ctx.lineTo(sliceW/2, lineY);
-                ctx.stroke();
+                const ly = -sh/2 + Math.random() * sh;
+                ctx.beginPath(); ctx.moveTo(-sw/2, ly); ctx.lineTo(sw/2, ly); ctx.stroke();
                 ctx.globalCompositeOperation = 'source-over';
             }
 
@@ -782,35 +717,27 @@ function renderFaceRewrite(w, h) {
         });
     }
 
-    // ── 臉部中心十字準線 ──
-    ctx.save();
-    ctx.globalAlpha = 0.4;
-    ctx.strokeStyle = '#fff'; ctx.lineWidth = 0.7;
-    ctx.shadowBlur  = 6; ctx.shadowColor = '#fff';
+    // 臉部準線
+    ctx.save(); ctx.globalAlpha = .35;
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = .6;
+    ctx.shadowBlur = 5; ctx.shadowColor = '#fff';
     ctx.beginPath();
-    ctx.moveTo(fx-14,fy); ctx.lineTo(fx+14,fy);
-    ctx.moveTo(fx,fy-14); ctx.lineTo(fx,fy+14);
-    ctx.stroke();
-
-    // 臉部輪廓橢圓（低透明度，顯示面具覆蓋範圍）
-    ctx.globalAlpha   = 0.12 + dist * 0.1;
-    ctx.strokeStyle   = 'rgba(255,255,255,0.5)';
-    ctx.lineWidth     = 0.8;
-    ctx.setLineDash([4, 8]);
-    ctx.beginPath();
-    ctx.ellipse(fx, fy, h * 0.19, h * 0.28, 0, 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.setLineDash([]);
-    ctx.restore();
+    ctx.moveTo(fx-12,fy); ctx.lineTo(fx+12,fy);
+    ctx.moveTo(fx,fy-12); ctx.lineTo(fx,fy+12); ctx.stroke();
+    ctx.globalAlpha = .08 + dist * .08;
+    ctx.strokeStyle = 'rgba(255,255,255,.4)'; ctx.lineWidth = .7;
+    ctx.setLineDash([4,8]);
+    ctx.beginPath(); ctx.ellipse(fx,fy,h*.18,h*.27,0,0,Math.PI*2); ctx.stroke();
+    ctx.setLineDash([]); ctx.restore();
 }
 
-// ─────────────────────────────────────────────
-// 工具
-// ─────────────────────────────────────────────
+// ═══════════════════════════════════════════════
+//  UTILS
+// ═══════════════════════════════════════════════
 function addLog(msg) {
     const el = document.getElementById('log-stream');
     const lines = el.innerHTML.split('<br>');
-    el.innerHTML = `<span style="color:rgba(255,255,255,0.6)">></span> ${msg}<br>${lines.slice(0, 2).join('<br>')}`;
+    el.innerHTML = `<span style="color:rgba(255,255,255,.5)">></span> ${msg}<br>${lines.slice(0,2).join('<br>')}`;
 }
 
 function resize() {
