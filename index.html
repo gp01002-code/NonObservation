@@ -8,7 +8,6 @@
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap');
         
         :root {
-            /* 切換為黑白高亮主題 */
             --glow-color: #ffffff;     
             --glow-bright: #ffffff;    
             --text-dim: rgba(255, 255, 255, 0.4);
@@ -27,7 +26,59 @@
             justify-content: center;
             align-items: center;
         }
-        
+
+        /* --- 開場說明頁面 --- */
+        .intro-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            padding: 20px;
+            opacity: 1;
+            transition: opacity 0.8s ease;
+        }
+        .intro-screen.hidden { opacity: 0; pointer-events: none; }
+
+        .intro-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(24px, 5vw, 42px);
+            color: #fff;
+            text-shadow: 0 0 20px #fff;
+            margin-bottom: 30px;
+            letter-spacing: 5px;
+        }
+
+        .intro-content {
+            max-width: 600px;
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 14px;
+            line-height: 1.8;
+            margin-bottom: 40px;
+        }
+
+        .start-button {
+            font-family: 'Orbitron', sans-serif;
+            padding: 15px 40px;
+            background: transparent;
+            border: 2px solid #fff;
+            color: #fff;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 0 15px rgba(255,255,255,0.2);
+        }
+        .start-button:hover {
+            background: #fff;
+            color: #000;
+            box-shadow: 0 0 30px #fff;
+        }
+
+        /* --- 主機器介面 --- */
         .machine-wrapper {
             position: relative;
             width: 95vw;
@@ -37,7 +88,6 @@
             box-shadow: 0 0 80px rgba(255, 255, 255, 0.05);
         }
         
-        /* 雙層背景動態： Image2 為底層電路，Image 為上層面板 */
         .machine-wrapper::before {
             content: '';
             position: absolute;
@@ -67,7 +117,6 @@
         @keyframes floatBackground { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(-8px, 4px); } }
         @keyframes floatForeground { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(4px, -3px); } }
 
-        /* 螢幕視窗 */
         .screen-container {
             position: absolute;
             top: 8.5%; left: 25.5%; width: 49%; height: 54%;
@@ -126,7 +175,7 @@
             font-weight: bold;
         }
 
-        /* 模式切換：黑白明亮版 */
+        /* 模式切換 */
         .mode-selector {
             position: absolute;
             bottom: 4.5%; left: 26%;
@@ -154,7 +203,6 @@
             position: relative;
         }
 
-        /* 模擬指示燈 */
         .mode-target::before {
             content: '';
             width: 6px; height: 6px;
@@ -168,7 +216,6 @@
         .mode-target.active {
             color: #ffffff;
             text-shadow: 0 0 15px #fff, 0 0 30px rgba(255, 255, 255, 0.5);
-            transform: scale(1.05);
         }
 
         .mode-target.active::before {
@@ -176,12 +223,12 @@
             box-shadow: 0 0 15px #fff, 0 0 30px #fff;
         }
 
-        /* 按鈕 hitboxes */
+        /* 功能按鈕 */
         .btn { position: absolute; cursor: pointer; z-index: 10; border-radius: 50%; }
         .btn-cam { bottom: 29.5%; left: 19.8%; width: 3.5%; height: 5.5%; }
         .btn-run { bottom: 29.5%; right: 19.8%; width: 3.5%; height: 5.5%; }
 
-        /* 指示燈：保持原色 */
+        /* 指示燈 */
         .light { 
             position: absolute; 
             width: 10px; height: 10px; 
@@ -207,14 +254,10 @@
         .light-right { bottom: 22%; right: 15%; }
         
         .light.active-red { background: #f00; box-shadow: 0 0 15px #f00, 0 0 30px #f00; animation: blink 1s infinite; }
-        .light.active-red::after { color: #f88; text-shadow: 0 0 5px #f00; }
-        
         .light.active-green { background: #0f8; box-shadow: 0 0 15px #0f8, 0 0 25px #0f8; }
-        .light.active-green::after { color: #8ff; text-shadow: 0 0 5px #0f8; }
 
         @keyframes blink { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0.2; } }
 
-        /* UI 文字光暈 */
         .ui-text { 
             position: absolute; 
             padding: 12px; 
@@ -233,6 +276,17 @@
 </head>
 <body>
 
+    <!-- 開場說明頁面 -->
+    <div class="intro-screen" id="introScreen">
+        <h1 class="intro-title">SELF-OBSERVATORY</h1>
+        <div class="intro-content">
+            <p>這是一台解析主體擬像的數位觀測儀器。</p>
+            <p>點擊「開始」後，系統將自動啟動攝影機與觀測循環。</p>
+            <p>您可以透過機身上的旋鈕調整碎片密度，並切換三種觀測模式。</p>
+        </div>
+        <button class="start-button" onclick="startExperience()">開始體驗 / START</button>
+    </div>
+
     <div class="machine-wrapper" id="machine">
         <div class="screen-container">
             <div class="ui-text ui-top-left">
@@ -246,7 +300,6 @@
             <div class="crt-overlay"></div>
         </div>
 
-        <!-- 旋鈕 -->
         <div class="knob-container knob-left">
             <div class="knob-area" id="knobDensity"></div>
             <div class="knob-value" id="valDensity">12</div>
@@ -257,18 +310,15 @@
             <div class="knob-value" id="valDistort">70%</div>
         </div>
         
-        <!-- 模式切換按鈕：黑白高亮 17px -->
         <div class="mode-selector">
             <div class="mode-target active" onclick="setMode(1)">REFLEX</div>
             <div class="mode-target" onclick="setMode(2)">PROCESS</div>
             <div class="mode-target" onclick="setMode(3)">SYNTH</div>
         </div>
 
-        <!-- 功能按鈕 -->
         <div class="btn btn-cam" id="btnCam"></div>
         <div class="btn btn-run" id="btnRun"></div>
 
-        <!-- 指示燈：保留紅綠色 -->
         <div class="light light-left" id="indGreen" data-label="CAM LINK"></div>
         <div class="light light-right" id="indRed" data-label="SYS RUN"></div>
     </div>
@@ -295,6 +345,24 @@
             headTiltX: 0,
             headTiltY: 0
         };
+
+        // ==================== 自動化開啟邏輯 ====================
+        async function startExperience() {
+            // 隱藏說明頁面
+            document.getElementById('introScreen').classList.add('hidden');
+            
+            addLog("STARTING AUTOMATIC INITIALIZATION...");
+            
+            // 1. 自動開啟攝影機
+            await toggleCamera();
+            
+            // 2. 自動開啟系統運作
+            if (!state.isRunning) {
+                toggleSystem();
+            }
+            
+            addLog("ALL SYSTEMS GO.");
+        }
 
         function init() {
             resize();
@@ -389,7 +457,7 @@
             captureCtx.drawImage(video, 0, 0, 640, 480);
             const data = captureCtx.getImageData(0, 0, 640, 480).data;
             let maxB = 0, bX = 320, bY = 240;
-            for (let i = 0; i < data.length; i += 800) {
+            for (let i = 0; i < data.length; i += 1000) {
                 let b = (data[i] + data[i+1] + data[i+2]) / 3;
                 if(b > maxB) { maxB = b; let p = i / 4; bX = p % 640; bY = Math.floor(p / 640); }
             }
@@ -433,9 +501,7 @@
                 ctx.shadowBlur = 0;
             } 
             else if (state.currentMode === 2) {
-                ctx.save(); ctx.scale(-1, 1);
-                ctx.drawImage(video, -w, 0, w, h);
-                ctx.restore();
+                ctx.save(); ctx.scale(-1, 1); ctx.drawImage(video, -w, 0, w, h); ctx.restore();
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.7)'; ctx.fillRect(0,0,w,h);
                 ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
                 for(let i=0; i<w; i+=25) { ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,h); ctx.stroke(); }
