@@ -9,9 +9,8 @@
         
         :root {
             --glow-color: #ffffff;
-            --glow-bright: #ffffff;
             --text-dim: rgba(255, 255, 255, 0.4);
-            --crt-bg: #020202;  /* 更純黑 */
+            --crt-bg: #020202;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -27,7 +26,6 @@
             align-items: center;
         }
 
-        /* --- 開場說明頁面 --- */
         .intro-screen {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
@@ -51,7 +49,6 @@
             margin-bottom: 30px;
             letter-spacing: 8px;
         }
-
         .intro-content {
             max-width: 600px;
             text-align: center;
@@ -61,7 +58,6 @@
             margin-bottom: 40px;
             letter-spacing: 1px;
         }
-
         .start-button {
             font-family: 'Orbitron', sans-serif;
             padding: 15px 50px;
@@ -77,19 +73,16 @@
         .start-button:hover {
             background: rgba(255,255,255,0.05);
             box-shadow: 0 0 40px rgba(255,255,255,0.4), inset 0 0 30px rgba(255,255,255,0.08);
-            border-color: #fff;
         }
 
-        /* --- 主介面佈局 --- */
         .machine-wrapper {
             position: relative;
             width: 95vw;
             max-width: 1000px;
             aspect-ratio: 1000 / 667;
             background-color: #0a0a0a;
-            box-shadow: 0 0 100px rgba(255, 255, 255, 0.04);
+            box-shadow: 0 0 100px rgba(255,255,255,0.04);
         }
-        
         .machine-wrapper::before {
             content: '';
             position: absolute;
@@ -100,9 +93,8 @@
             background-repeat: no-repeat;
             z-index: 0;
             pointer-events: none;
-            animation: floatBackground 15s ease-in-out infinite;
+            animation: floatBg 15s ease-in-out infinite;
         }
-        
         .machine-wrapper::after {
             content: '';
             position: absolute;
@@ -113,11 +105,10 @@
             background-repeat: no-repeat;
             z-index: 1;
             pointer-events: none;
-            animation: floatForeground 10s ease-in-out infinite;
+            animation: floatFg 10s ease-in-out infinite;
         }
-        
-        @keyframes floatBackground { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(-5px, 3px); } }
-        @keyframes floatForeground { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(3px, -2px); } }
+        @keyframes floatBg { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-5px,3px)} }
+        @keyframes floatFg { 0%,100%{transform:translate(0,0)} 50%{transform:translate(3px,-2px)} }
 
         .screen-container {
             position: absolute;
@@ -126,51 +117,37 @@
             border-radius: 4px;
             overflow: hidden;
             z-index: 2;
-            /* 強化發光邊框 */
-            border: 1px solid rgba(255, 255, 255, 0.25);
-            box-shadow: 
-                0 0 0 1px rgba(255,255,255,0.05),
-                0 0 20px rgba(255,255,255,0.08),
-                inset 0 0 30px rgba(0,0,0,0.8);
+            border: 1px solid rgba(255,255,255,0.25);
+            box-shadow: 0 0 0 1px rgba(255,255,255,0.05),
+                        0 0 20px rgba(255,255,255,0.08),
+                        inset 0 0 30px rgba(0,0,0,0.8);
         }
-
         #mainCanvas { width: 100%; height: 100%; display: block; }
 
         .crt-overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: 
-                linear-gradient(rgba(0,0,0,0) 50%, rgba(0,0,0,0.18) 50%),
-                linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01), rgba(255,255,255,0.02));
+            position: absolute; top:0; left:0; width:100%; height:100%;
+            background: linear-gradient(rgba(0,0,0,0) 50%, rgba(0,0,0,0.18) 50%),
+                        linear-gradient(90deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01),rgba(255,255,255,0.02));
             background-size: 100% 3px, 3px 100%;
-            pointer-events: none;
-            z-index: 5;
+            pointer-events: none; z-index: 5;
         }
-        
-        /* 螢幕四角暗角效果 */
         .vignette {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.6) 100%);
-            pointer-events: none;
-            z-index: 6;
+            position: absolute; top:0; left:0; width:100%; height:100%;
+            background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.7) 100%);
+            pointer-events: none; z-index: 6;
         }
 
-        /* 旋鈕 */
         .knob-container {
             position: absolute;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            display: flex; flex-direction: column; align-items: center;
             z-index: 10;
         }
-        .knob-left { top: 8%; left: 6.5%; width: 15%; height: 25%; }
+        .knob-left  { top: 8%; left: 6.5%;  width: 15%; height: 25%; }
         .knob-right { top: 8%; right: 6.5%; width: 15%; height: 25%; }
 
         .knob-area {
             width: 100%; height: 85%;
-            cursor: ns-resize;
-            position: relative;
+            cursor: ns-resize; position: relative;
             --rotation: 0deg;
         }
         .knob-area::after {
@@ -184,42 +161,27 @@
             box-shadow: 0 0 12px #fff, 0 0 25px rgba(255,255,255,0.4);
         }
         .knob-value {
-            font-size: 9px;
-            color: rgba(255,255,255,0.7);
-            text-shadow: 0 0 8px #fff;
-            margin-top: 4px;
-            font-weight: bold;
-            letter-spacing: 1px;
+            font-size: 9px; color: rgba(255,255,255,0.7);
+            text-shadow: 0 0 8px #fff; margin-top: 4px;
+            font-weight: bold; letter-spacing: 1px;
         }
 
-        /* 模式切換 */
         .mode-selector {
             position: absolute;
-            bottom: 4.5%; left: 26%;
-            width: 48%; height: 11%;
+            bottom: 4.5%; left: 26%; width: 48%; height: 11%;
             z-index: 10;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
+            display: flex; justify-content: space-around; align-items: center;
         }
-        
         .mode-target {
-            flex: 1;
-            height: 100%;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
+            flex: 1; height: 100%; cursor: pointer;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
             color: var(--text-dim);
-            font-size: 14px;
-            font-weight: bold;
+            font-size: 14px; font-weight: bold;
             font-family: 'Orbitron', sans-serif;
             letter-spacing: 2px;
             transition: all 0.4s ease;
-            position: relative;
         }
-
         .mode-target::before {
             content: '';
             width: 5px; height: 5px;
@@ -229,620 +191,634 @@
             margin-bottom: 5px;
             transition: all 0.3s;
         }
-
         .mode-target.active {
-            color: #ffffff;
+            color: #fff;
             text-shadow: 0 0 12px #fff, 0 0 25px rgba(255,255,255,0.5), 0 0 50px rgba(255,255,255,0.2);
         }
-
         .mode-target.active::before {
             background: #fff;
             box-shadow: 0 0 12px #fff, 0 0 25px #fff, 0 0 50px rgba(255,255,255,0.5);
             border-color: #fff;
         }
 
-        /* 按鈕與燈號 */
         .btn { position: absolute; cursor: pointer; z-index: 10; border-radius: 50%; }
-        .btn-cam { bottom: 29.5%; left: 19.8%; width: 3.5%; height: 5.5%; }
+        .btn-cam { bottom: 29.5%; left: 19.8%;  width: 3.5%; height: 5.5%; }
         .btn-run { bottom: 29.5%; right: 19.8%; width: 3.5%; height: 5.5%; }
 
-        .light { position: absolute; width: 10px; height: 10px; border-radius: 50%; z-index: 10; background: #0a0a0a; }
+        .light {
+            position: absolute; width: 10px; height: 10px;
+            border-radius: 50%; z-index: 10; background: #0a0a0a;
+        }
         .light::after {
             content: attr(data-label);
             position: absolute; top: 14px; left: 50%; transform: translateX(-50%);
-            font-size: 7px; color: rgba(255, 255, 255, 0.25); white-space: nowrap;
-            letter-spacing: 1px;
+            font-size: 7px; color: rgba(255,255,255,0.25);
+            white-space: nowrap; letter-spacing: 1px;
         }
-
-        .light-left { bottom: 22%; left: 15%; }
+        .light-left  { bottom: 22%; left: 15%; }
         .light-right { bottom: 22%; right: 15%; }
-        
-        .light.active-red { background: #f00; box-shadow: 0 0 20px #f00, 0 0 40px rgba(255,0,0,0.4); animation: blink 1s infinite; }
+        .light.active-red   { background: #f00; box-shadow: 0 0 20px #f00, 0 0 40px rgba(255,0,0,0.4); animation: blink 1s infinite; }
         .light.active-green { background: #0f8; box-shadow: 0 0 20px #0f8, 0 0 40px rgba(0,255,136,0.4); }
+        @keyframes blink { 0%,50%{opacity:1} 51%,100%{opacity:0.15} }
 
-        @keyframes blink { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0.15; } }
-
-        /* UI 文字 — 版排微調 */
         .ui-text {
-            position: absolute;
-            padding: 8px 10px;
-            font-size: 9px;
-            pointer-events: none;
-            z-index: 4;
+            position: absolute; padding: 8px 10px;
+            font-size: 9px; pointer-events: none; z-index: 4;
             text-transform: uppercase;
             color: rgba(255,255,255,0.85);
             text-shadow: 0 0 8px rgba(255,255,255,0.5);
-            line-height: 1.7;
-            letter-spacing: 1px;
+            line-height: 1.7; letter-spacing: 1px;
         }
         .ui-top-left { top: 0; left: 0; }
-        .ui-top-left div:first-child {
-            color: #fff;
-            font-size: 10px;
-            font-weight: bold;
-            text-shadow: 0 0 12px #fff;
-        }
-        .ui-bottom-right {
-            bottom: 0; right: 0;
-            text-align: right;
-            color: rgba(255,255,255,0.45);
-            font-size: 8px;
-        }
+        .ui-top-left div:first-child { color: #fff; font-size: 10px; font-weight: bold; text-shadow: 0 0 12px #fff; }
+        .ui-bottom-right { bottom: 0; right: 0; text-align: right; color: rgba(255,255,255,0.45); font-size: 8px; }
 
         #videoElement { display: none; }
     </style>
 </head>
 <body>
 
-    <!-- 開場說明頁面 -->
-    <div class="intro-screen" id="introScreen">
-        <h1 class="intro-title">SELF-OBSERVATORY</h1>
-        <div class="intro-content">
-            <p>這是一台解析主體擬像的數位觀測儀器。</p>
-            <p>點擊「開始」後，系統將自動啟動攝影機並進行主體重構。</p>
-            <p>您可以透過旋鈕調整碎片密度與 3D 透視感。</p>
+<div class="intro-screen" id="introScreen">
+    <h1 class="intro-title">SELF-OBSERVATORY</h1>
+    <div class="intro-content">
+        <p>這是一台解析主體擬像的數位觀測儀器。</p>
+        <p>點擊「開始」後，系統將自動啟動攝影機並進行主體重構。</p>
+        <p>您可以透過旋鈕調整面具覆蓋密度與異化強度。</p>
+    </div>
+    <button class="start-button" onclick="startExperience()">開始體驗 &nbsp;/&nbsp; START</button>
+</div>
+
+<div class="machine-wrapper" id="machine">
+    <div class="screen-container">
+        <div class="ui-text ui-top-left">
+            <div id="disp-mode">MODE: MIRROR_STAGE</div>
+            <div id="disp-status">SYS: STANDBY</div>
         </div>
-        <button class="start-button" onclick="startExperience()">開始體驗 &nbsp;/&nbsp; START</button>
+        <div class="ui-text ui-bottom-right" id="log-stream">AWAITING DATA...</div>
+        <canvas id="mainCanvas"></canvas>
+        <div class="crt-overlay"></div>
+        <div class="vignette"></div>
     </div>
 
-    <div class="machine-wrapper" id="machine">
-        <div class="screen-container">
-            <div class="ui-text ui-top-left">
-                <div id="disp-mode">MODE: MIRROR_STAGE</div>
-                <div id="disp-status">SYS: STANDBY</div>
-            </div>
-            <div class="ui-text ui-bottom-right" id="log-stream">AWAITING DATA...</div>
-            <canvas id="mainCanvas"></canvas>
-            <div class="crt-overlay"></div>
-            <div class="vignette"></div>
-        </div>
-
-        <div class="knob-container knob-left">
-            <div class="knob-area" id="knobDensity"></div>
-            <div class="knob-value" id="valDensity">12</div>
-        </div>
-
-        <div class="knob-container knob-right">
-            <div class="knob-area" id="knobDistort"></div>
-            <div class="knob-value" id="valDistort">70%</div>
-        </div>
-        
-        <div class="mode-selector">
-            <div class="mode-target active" onclick="setMode(1)">REFLEX</div>
-            <div class="mode-target" onclick="setMode(2)">PROCESS</div>
-            <div class="mode-target" onclick="setMode(3)">SYNTH</div>
-        </div>
-
-        <div class="btn btn-cam" id="btnCam"></div>
-        <div class="btn btn-run" id="btnRun"></div>
-
-        <div class="light light-left" id="indGreen" data-label="CAM LINK"></div>
-        <div class="light light-right" id="indRed" data-label="SYS RUN"></div>
+    <div class="knob-container knob-left">
+        <div class="knob-area" id="knobDensity"></div>
+        <div class="knob-value" id="valDensity">12</div>
+    </div>
+    <div class="knob-container knob-right">
+        <div class="knob-area" id="knobDistort"></div>
+        <div class="knob-value" id="valDistort">70%</div>
     </div>
 
-    <video id="videoElement" autoplay playsinline></video>
+    <div class="mode-selector">
+        <div class="mode-target active" onclick="setMode(1)">REFLEX</div>
+        <div class="mode-target"        onclick="setMode(2)">PROCESS</div>
+        <div class="mode-target"        onclick="setMode(3)">SYNTH</div>
+    </div>
 
-    <script>
-        const canvas = document.getElementById('mainCanvas');
-        const ctx = canvas.getContext('2d');
-        const video = document.getElementById('videoElement');
-        const captureCanvas = document.createElement('canvas');
-        const captureCtx = captureCanvas.getContext('2d');
+    <div class="btn btn-cam" id="btnCam"></div>
+    <div class="btn btn-run" id="btnRun"></div>
+    <div class="light light-left"  id="indGreen" data-label="CAM LINK"></div>
+    <div class="light light-right" id="indRed"   data-label="SYS RUN"></div>
+</div>
 
-        // 碎片類型對應顏色 (用於 Stage 3 景深發光)
-        const FRAG_COLORS = {
-            eyes:  { line: '#00eeff', glow: 'rgba(0,238,255,',  label: '#00eeff' },
-            nose:  { line: '#ff00aa', glow: 'rgba(255,0,170,',  label: '#ff00aa' },
-            mouth: { line: '#ffcc00', glow: 'rgba(255,204,0,',  label: '#ffcc00' }
-        };
+<video id="videoElement" autoplay playsinline></video>
 
-        const state = {
-            isRunning: false,
-            cameraActive: false,
-            currentMode: 1,
-            density: 12,
-            distortion: 0.7,
-            frameCount: 0,
-            scanProgress: 0,
-            facialFragments: [],
-            facialDatabase: { eyes: [], nose: [], mouth: [] },
-            faceCenter: { x: 0.5, y: 0.45 },
-            headTiltX: 0,
-            headTiltY: 0,
-            dbBuilt: false
-        };
+<script>
+// ─────────────────────────────────────────────
+// 基本設定
+// ─────────────────────────────────────────────
+const canvas      = document.getElementById('mainCanvas');
+const ctx         = canvas.getContext('2d');
+const video       = document.getElementById('videoElement');
+const capCanvas   = document.createElement('canvas');
+const capCtx      = capCanvas.getContext('2d');
 
-        // ==================== 啟動流程 ====================
-        async function startExperience() {
-            document.getElementById('introScreen').classList.add('hidden');
-            addLog("AUTO-INITIALIZING SYSTEMS...");
-            await toggleCamera();
-            if (!state.isRunning) toggleSystem();
-            addLog("ALL SYSTEMS GO.");
+capCanvas.width  = 640;
+capCanvas.height = 480;
+
+// 機台圖片資源（Image.png / Image2.png）
+const imgSrc1 = new Image();
+const imgSrc2 = new Image();
+imgSrc1.src = 'Image.png';
+imgSrc2.src = 'Image2.png';
+
+// ─────────────────────────────────────────────
+// 面具零件定義
+// 各零件從哪張圖的哪個比例區域取樣，以及貼在臉上哪個相對位置
+// ─────────────────────────────────────────────
+const MASK_PARTS = [
+    // { id, srcImg(0=Img1,1=Img2), srcRect:[x%,y%,w%,h%], faceOffset:[dx%,dy%], size:[w,h], label, color, glowColor }
+    { id:'leftEye',   src:0, sr:[0.30,0.20,0.18,0.13], fo:[-0.14,-0.16], sw:110,sh:60,  label:'L.EYE',  col:'#00eeff', gc:'rgba(0,238,255,' },
+    { id:'rightEye',  src:1, sr:[0.52,0.18,0.18,0.13], fo:[ 0.14,-0.16], sw:110,sh:60,  label:'R.EYE',  col:'#00eeff', gc:'rgba(0,238,255,' },
+    { id:'nose',      src:0, sr:[0.38,0.35,0.22,0.18], fo:[ 0.00, 0.02], sw:100,sh:80,  label:'NOSE',   col:'#ff44cc', gc:'rgba(255,68,204,' },
+    { id:'mouth',     src:1, sr:[0.32,0.55,0.34,0.16], fo:[ 0.00, 0.20], sw:140,sh:65,  label:'MOUTH',  col:'#ffcc00', gc:'rgba(255,204,0,' },
+    { id:'forehead',  src:0, sr:[0.25,0.05,0.48,0.14], fo:[ 0.00,-0.34], sw:170,sh:60,  label:'FRNT',   col:'#aaffee', gc:'rgba(170,255,238,' },
+    { id:'leftCheek', src:1, sr:[0.12,0.35,0.20,0.22], fo:[-0.24, 0.05], sw: 90,sh:80,  label:'L.CHK',  col:'#ff8844', gc:'rgba(255,136,68,' },
+    { id:'rightCheek',src:0, sr:[0.68,0.35,0.20,0.22], fo:[ 0.24, 0.05], sw: 90,sh:80,  label:'R.CHK',  col:'#ff8844', gc:'rgba(255,136,68,' },
+    { id:'chin',      src:1, sr:[0.35,0.72,0.28,0.16], fo:[ 0.00, 0.36], sw:130,sh:60,  label:'CHIN',   col:'#88aaff', gc:'rgba(136,170,255,' },
+];
+
+// ─────────────────────────────────────────────
+// 狀態
+// ─────────────────────────────────────────────
+const state = {
+    isRunning: false,
+    cameraActive: false,
+    currentMode: 1,
+    density: 12,          // 旋鈕1：面具層數（1~4）
+    distortion: 0.7,      // 旋鈕2：異化強度
+    frameCount: 0,
+    scanProgress: 0,
+    faceCenter: { x: 0.5, y: 0.45 },
+    headTiltX: 0,
+    headTiltY: 0,
+    // 每個面具零件的狀態（獨立的扭曲相位）
+    partStates: {},
+    // Stage 2 景深碎片（保留）
+    facialFragments: [],
+    facialDatabase: { eyes:[], nose:[], mouth:[] },
+    dbBuilt: false,
+    // Stage 3 面具切片 canvas 快取
+    maskSlices: null,
+    imagesLoaded: 0,
+};
+
+// 為每個 part 建立獨立的扭曲相位
+MASK_PARTS.forEach(p => {
+    state.partStates[p.id] = {
+        phaseX:  Math.random() * Math.PI * 2,
+        phaseY:  Math.random() * Math.PI * 2,
+        speedX:  0.4 + Math.random() * 0.6,
+        speedY:  0.3 + Math.random() * 0.5,
+        glitchTimer: Math.random() * 120,
+        glitchOffX: 0,
+        glitchOffY: 0,
+        glitchScaleX: 1,
+        glitchAlpha: 0,
+        layerOffset: (Math.random() - 0.5) * 6,  // 微小景深錯位
+    };
+});
+
+// ─────────────────────────────────────────────
+// 圖片載入
+// ─────────────────────────────────────────────
+function onImageLoad() {
+    state.imagesLoaded++;
+    if (state.imagesLoaded >= 2) {
+        buildMaskSlices();
+        addLog("IMG SRC LOADED.");
+    }
+}
+imgSrc1.onload = onImageLoad;
+imgSrc2.onload = onImageLoad;
+// 圖片可能已快取，強制觸發
+if (imgSrc1.complete) onImageLoad();
+if (imgSrc2.complete) onImageLoad();
+
+// ─────────────────────────────────────────────
+// 面具切片快取 — 從 Image.png/Image2.png 裁切出各零件
+// ─────────────────────────────────────────────
+function buildMaskSlices() {
+    state.maskSlices = {};
+    const sources = [imgSrc1, imgSrc2];
+
+    MASK_PARTS.forEach(p => {
+        const fc = document.createElement('canvas');
+        fc.width  = p.sw;
+        fc.height = p.sh;
+        const fCtx = fc.getContext('2d');
+        const src = sources[p.src];
+
+        if (src.naturalWidth > 0) {
+            const sx = p.sr[0] * src.naturalWidth;
+            const sy = p.sr[1] * src.naturalHeight;
+            const sw = p.sr[2] * src.naturalWidth;
+            const sh = p.sr[3] * src.naturalHeight;
+            fCtx.drawImage(src, sx, sy, sw, sh, 0, 0, p.sw, p.sh);
+
+            // 疊加彩色色調以符合各部位顏色識別
+            fCtx.globalCompositeOperation = 'color';
+            fCtx.fillStyle = p.col + 'cc';
+            fCtx.fillRect(0, 0, p.sw, p.sh);
+            fCtx.globalCompositeOperation = 'source-over';
+
+            // 疊加 screen 混合讓細節更明顯
+            fCtx.globalCompositeOperation = 'multiply';
+            fCtx.fillStyle = 'rgba(0,0,0,0.25)';
+            fCtx.fillRect(0, 0, p.sw, p.sh);
+            fCtx.globalCompositeOperation = 'source-over';
+        } else {
+            // fallback：若圖片未載入，畫一個漸層佔位
+            const g = fCtx.createLinearGradient(0, 0, p.sw, p.sh);
+            g.addColorStop(0, p.col + '44');
+            g.addColorStop(1, p.col + '11');
+            fCtx.fillStyle = g;
+            fCtx.fillRect(0, 0, p.sw, p.sh);
         }
+        state.maskSlices[p.id] = fc;
+    });
+}
 
-        function init() {
-            resize();
-            captureCanvas.width = 640;
-            captureCanvas.height = 480;
-            setupEvents();
-            requestAnimationFrame(loop);
-            addLog("3D CORE READY.");
-        }
+// ─────────────────────────────────────────────
+// 啟動
+// ─────────────────────────────────────────────
+async function startExperience() {
+    document.getElementById('introScreen').classList.add('hidden');
+    addLog("AUTO-INITIALIZING SYSTEMS...");
+    await toggleCamera();
+    if (!state.isRunning) toggleSystem();
+    addLog("ALL SYSTEMS GO.");
+}
 
-        function setupEvents() {
-            document.getElementById('btnCam').onclick = toggleCamera;
-            document.getElementById('btnRun').onclick = toggleSystem;
+function init() {
+    resize();
+    setupEvents();
+    requestAnimationFrame(loop);
+    addLog("3D CORE READY.");
+}
 
-            setupKnob('knobDensity', (val) => {
-                state.density = Math.floor(8 + val * 24);
-                document.getElementById('valDensity').textContent = state.density;
-                // 密度改變時重建碎片
-                if (state.dbBuilt) buildFragments();
-            });
+function setupEvents() {
+    document.getElementById('btnCam').onclick = toggleCamera;
+    document.getElementById('btnRun').onclick = toggleSystem;
+    setupKnob('knobDensity', val => {
+        // 映射為面具層數 1~4
+        state.density = Math.floor(1 + val * 3);
+        document.getElementById('valDensity').textContent = 'x' + state.density;
+    });
+    setupKnob('knobDistort', val => {
+        state.distortion = val;
+        document.getElementById('valDistort').textContent = Math.floor(val * 100) + '%';
+    });
+    window.addEventListener('resize', resize);
+}
 
-            setupKnob('knobDistort', (val) => {
-                state.distortion = val;
-                document.getElementById('valDistort').textContent = Math.floor(val * 100) + '%';
-            });
+function setupKnob(id, callback) {
+    let isDragging = false, lastY = 0;
+    const el = document.getElementById(id);
+    let cur = (id === 'knobDensity') ? 0.33 : 0.7;
+    const start = y => { isDragging = true; lastY = y; };
+    const drag  = y => {
+        if (!isDragging) return;
+        cur = Math.min(1, Math.max(0, cur + (lastY - y) * 0.005));
+        lastY = y;
+        callback(cur);
+        el.style.setProperty('--rotation', `${cur * 360}deg`);
+    };
+    const end = () => { isDragging = false; };
+    el.onmousedown      = e => { e.preventDefault(); start(e.clientY); };
+    el.ontouchstart     = e => { e.preventDefault(); start(e.touches[0].clientY); };
+    window.addEventListener('mousemove',  e => drag(e.clientY));
+    window.addEventListener('touchmove',  e => drag(e.touches[0].clientY), { passive: false });
+    window.addEventListener('mouseup',   end);
+    window.addEventListener('touchend',  end);
+    el.style.setProperty('--rotation', `${cur * 360}deg`);
+}
 
-            window.addEventListener('resize', resize);
-        }
+async function toggleCamera() {
+    if (!state.cameraActive) {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            video.srcObject = stream;
+            state.cameraActive = true;
+            document.getElementById('indGreen').classList.add('active-green');
+            addLog("CAPTURE LINK: ON");
+        } catch(e) { addLog("ERR: ACCESS DENIED"); }
+    } else {
+        if (video.srcObject) video.srcObject.getTracks().forEach(t => t.stop());
+        state.cameraActive = false;
+        state.dbBuilt = false;
+        document.getElementById('indGreen').classList.remove('active-green');
+        addLog("CAPTURE LINK: OFF");
+    }
+}
 
-        function setupKnob(id, callback) {
-            let isDragging = false, lastY = 0;
-            const el = document.getElementById(id);
-            let currentVal = (id === 'knobDensity') ? 0.167 : 0.7;
+function toggleSystem() {
+    state.isRunning = !state.isRunning;
+    document.getElementById('indRed').classList.toggle('active-red', state.isRunning);
+    document.getElementById('disp-status').textContent = `SYS: ${state.isRunning ? 'OBSERVING' : 'STANDBY'}`;
+    if (state.isRunning && !state.dbBuilt) buildFacialDatabase();
+    addLog(state.isRunning ? "PROC_START" : "PROC_HALT");
+}
 
-            const startDrag = (y) => { isDragging = true; lastY = y; };
-            const doDrag = (y) => {
-                if (!isDragging) return;
-                let delta = (lastY - y) * 0.005;
-                currentVal = Math.min(1, Math.max(0, currentVal + delta));
-                lastY = y;
-                callback(currentVal);
-                el.style.setProperty('--rotation', `${currentVal * 360}deg`);
-            };
-            const endDrag = () => { isDragging = false; };
+function setMode(m) {
+    state.currentMode = m;
+    const names = ['', 'MIRROR_STAGE', 'DATA_DISCIPLINE', 'FACE_REWRITE'];
+    document.getElementById('disp-mode').textContent = `MODE: ${names[m]}`;
+    document.querySelectorAll('.mode-target').forEach((el, i) => el.classList.toggle('active', i === m - 1));
+    addLog(`STAGE_${m} ACTIVATED.`);
+}
 
-            el.onmousedown = (e) => { e.preventDefault(); startDrag(e.clientY); };
-            el.ontouchstart = (e) => { e.preventDefault(); startDrag(e.touches[0].clientY); };
-            window.addEventListener('mousemove', (e) => doDrag(e.clientY));
-            window.addEventListener('touchmove', (e) => doDrag(e.touches[0].clientY), { passive: false });
-            window.addEventListener('mouseup', endDrag);
-            window.addEventListener('touchend', endDrag);
+// ─────────────────────────────────────────────
+// 臉部偵測
+// ─────────────────────────────────────────────
+function detectFace() {
+    if (!video.readyState || video.readyState < 2) return;
+    capCtx.drawImage(video, 0, 0, 640, 480);
+    const data = capCtx.getImageData(0, 0, 640, 480).data;
+    let maxB = 0, bX = 320, bY = 240;
+    for (let i = 0; i < data.length; i += 2000) {
+        const b = (data[i] + data[i+1] + data[i+2]) / 3;
+        if (b > maxB) { maxB = b; const p = i / 4; bX = p % 640; bY = Math.floor(p / 640); }
+    }
+    state.faceCenter.x = bX / 640;
+    state.faceCenter.y = bY / 480;
+    state.headTiltX = (state.faceCenter.x - 0.5) * 2;
+    state.headTiltY = (state.faceCenter.y - 0.45) * 2;
+}
 
-            el.style.setProperty('--rotation', `${currentVal * 360}deg`);
-        }
+// Stage 2 資料庫
+function buildFacialDatabase() {
+    if (!state.cameraActive) return;
+    const parts = ['eyes','nose','mouth'];
+    parts.forEach((pt, i) => {
+        const fc = document.createElement('canvas');
+        fc.width = 120; fc.height = 60;
+        const fCtx = fc.getContext('2d');
+        if (video.readyState >= 2) fCtx.drawImage(video, 260, 150 + i * 80, 120, 60, 0, 0, 120, 60);
+        state.facialDatabase[pt] = [fc];
+    });
+    state.dbBuilt = true;
+    buildFragments();
+    addLog("DB INITIALIZED.");
+}
+function buildFragments() {
+    state.facialFragments = [];
+    const parts = ['eyes','nose','mouth'];
+    const w = canvas.width, h = canvas.height;
+    const fx = w * state.faceCenter.x, fy = h * state.faceCenter.y;
+    for (let i = 0; i < 12; i++) {
+        const type = parts[i % 3];
+        state.facialFragments.push({
+            canvas: state.facialDatabase[type][0],
+            x: fx + (Math.random()-0.5)*180, y: fy + (Math.random()-0.5)*180,
+            z: Math.random()*400-200,
+            vx:(Math.random()-0.5)*1.5, vy:(Math.random()-0.5)*1.5, vz:(Math.random()-0.5)*1.8,
+            rotY: Math.random()*360, rs:(Math.random()-0.5)*1.2, type
+        });
+    }
+}
 
-        async function toggleCamera() {
-            if (!state.cameraActive) {
-                try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                    video.srcObject = stream;
-                    state.cameraActive = true;
-                    document.getElementById('indGreen').classList.add('active-green');
-                    addLog("CAPTURE LINK: ON");
-                } catch (e) { addLog("ERR: ACCESS DENIED"); }
-            } else {
-                if (video.srcObject) video.srcObject.getTracks().forEach(t => t.stop());
-                state.cameraActive = false;
-                state.dbBuilt = false;
-                state.facialFragments = [];
-                document.getElementById('indGreen').classList.remove('active-green');
-                addLog("CAPTURE LINK: OFF");
-            }
-        }
+// ─────────────────────────────────────────────
+// 主迴圈
+// ─────────────────────────────────────────────
+function loop() {
+    state.frameCount++;
+    if (state.isRunning && state.cameraActive) { detectFace(); render(); }
+    requestAnimationFrame(loop);
+}
 
-        function toggleSystem() {
-            state.isRunning = !state.isRunning;
-            document.getElementById('indRed').classList.toggle('active-red', state.isRunning);
-            document.getElementById('disp-status').textContent = `SYS: ${state.isRunning ? 'OBSERVING' : 'STANDBY'}`;
-            if (state.isRunning && !state.dbBuilt) buildFacialDatabase();
-            addLog(state.isRunning ? "PROC_START" : "PROC_HALT");
-        }
+// ─────────────────────────────────────────────
+// 渲染
+// ─────────────────────────────────────────────
+function render() {
+    const w = canvas.width, h = canvas.height;
+    ctx.fillStyle = '#000'; ctx.fillRect(0, 0, w, h);
 
-        function setMode(m) {
-            state.currentMode = m;
-            const names = ["", "MIRROR_STAGE", "DATA_DISCIPLINE", "HYPERREAL_SIM"];
-            document.getElementById('disp-mode').textContent = `MODE: ${names[m]}`;
-            document.querySelectorAll('.mode-target').forEach((el, i) => el.classList.toggle('active', i === m - 1));
-            addLog(`STAGE_${m} ACTIVATED.`);
-        }
+    // ── STAGE 1: MIRROR / SCAN ────────────────
+    if (state.currentMode === 1) {
+        ctx.save(); ctx.globalAlpha = 0.45; ctx.scale(-1,1);
+        ctx.drawImage(video, -w, 0, w, h); ctx.restore();
+        ctx.globalAlpha = 1;
 
-        // ==================== 臉部偵測 ====================
+        state.scanProgress = (state.scanProgress + 3) % h;
+        const sp = state.scanProgress;
+        const trail = ctx.createLinearGradient(0, sp-60, 0, sp);
+        trail.addColorStop(0, 'rgba(255,255,255,0)');
+        trail.addColorStop(1, 'rgba(255,255,255,0.06)');
+        ctx.fillStyle = trail; ctx.fillRect(0, sp-60, w, 60);
 
-        function detectFace() {
-            if (!video.readyState || video.readyState < 2) return;
-            captureCtx.drawImage(video, 0, 0, 640, 480);
-            const data = captureCtx.getImageData(0, 0, 640, 480).data;
-            let maxB = 0, bX = 320, bY = 240;
-            for (let i = 0; i < data.length; i += 2000) {
-                let b = (data[i] + data[i + 1] + data[i + 2]) / 3;
-                if (b > maxB) { maxB = b; let p = i / 4; bX = p % 640; bY = Math.floor(p / 640); }
-            }
-            state.faceCenter.x = bX / 640;
-            state.faceCenter.y = bY / 480;
-            state.headTiltX = (state.faceCenter.x - 0.5) * 2;
-            state.headTiltY = (state.faceCenter.y - 0.45) * 2;
-        }
+        ctx.save();
+        ctx.shadowBlur = 18; ctx.shadowColor = '#fff';
+        ctx.strokeStyle = 'rgba(255,255,255,0.9)'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(0,sp); ctx.lineTo(w,sp); ctx.stroke();
+        ctx.restore();
 
-        // ==================== 臉部資料庫：產生帶顏色的碎片 canvas ====================
+        const fx = state.faceCenter.x * w, fy = state.faceCenter.y * h;
+        ctx.save();
+        ctx.shadowBlur = 20; ctx.shadowColor = '#fff';
+        ctx.strokeStyle = 'rgba(255,255,255,0.85)'; ctx.lineWidth = 1;
+        const bx=fx-65, by=fy-85, bw=130, bh=165, cs=18;
+        ctx.beginPath();
+        ctx.moveTo(bx+cs,by); ctx.lineTo(bx+bw-cs,by);
+        ctx.moveTo(bx+bw,by+cs); ctx.lineTo(bx+bw,by+bh-cs);
+        ctx.moveTo(bx+bw-cs,by+bh); ctx.lineTo(bx+cs,by+bh);
+        ctx.moveTo(bx,by+bh-cs); ctx.lineTo(bx,by+cs);
+        ctx.stroke();
+        ctx.lineWidth = 2;
+        [[bx,by,cs,0,0,cs],[bx+bw,by,-cs,0,0,cs],[bx+bw,by+bh,-cs,0,0,-cs],[bx,by+bh,cs,0,0,-cs]].forEach(([px,py,ax,ay,bx2,by2])=>{
+            ctx.beginPath(); ctx.moveTo(px+ax,py+ay); ctx.lineTo(px,py); ctx.lineTo(px+bx2,py+by2); ctx.stroke();
+        });
+        const eyeL={x:fx-35,y:fy-22}, eyeR={x:fx+35,y:fy-22};
+        const noseT={x:fx,y:fy+5}, mL={x:fx-28,y:fy+42}, mR={x:fx+28,y:fy+42};
+        ctx.strokeStyle='rgba(255,255,255,0.5)'; ctx.lineWidth=0.8; ctx.shadowBlur=8;
+        ctx.beginPath();
+        ctx.moveTo(eyeL.x,eyeL.y); ctx.lineTo(eyeR.x,eyeR.y);
+        ctx.moveTo(eyeL.x,eyeL.y); ctx.lineTo(noseT.x,noseT.y);
+        ctx.moveTo(eyeR.x,eyeR.y); ctx.lineTo(noseT.x,noseT.y);
+        ctx.moveTo(noseT.x,noseT.y); ctx.lineTo(mL.x,mL.y);
+        ctx.moveTo(mL.x,mL.y); ctx.lineTo(mR.x,mR.y);
+        ctx.moveTo(mR.x,mR.y); ctx.lineTo(noseT.x,noseT.y); ctx.stroke();
+        ctx.fillStyle='rgba(255,255,255,0.8)';
+        [eyeL,eyeR,noseT,mL,mR].forEach(pt=>{ ctx.beginPath(); ctx.arc(pt.x,pt.y,2.5,0,Math.PI*2); ctx.fill(); });
+        ctx.restore();
+    }
 
-        function createFragmentCanvas(type, fromVideo) {
-            const fw = 120, fh = 60;
-            const fc = document.createElement('canvas');
-            fc.width = fw; fc.height = fh;
-            const fCtx = fc.getContext('2d');
-            const col = FRAG_COLORS[type];
-
-            if (fromVideo && state.cameraActive && video.readyState >= 2) {
-                // 嘗試從影片擷取
-                const srcY = type === 'eyes' ? 150 : type === 'nose' ? 210 : 290;
-                fCtx.drawImage(video, 260, srcY, fw, fh, 0, 0, fw, fh);
-
-                // 疊加彩色濾鏡以標示類型
-                fCtx.globalCompositeOperation = 'overlay';
-                fCtx.fillStyle = col.glow + '0.35)';
-                fCtx.fillRect(0, 0, fw, fh);
-                fCtx.globalCompositeOperation = 'source-over';
-            } else {
-                // 無影片：產生佔位圖案（帶紋理的色塊）
-                const grad = fCtx.createLinearGradient(0, 0, fw, fh);
-                grad.addColorStop(0, col.glow + '0.15)');
-                grad.addColorStop(1, col.glow + '0.05)');
-                fCtx.fillStyle = grad;
-                fCtx.fillRect(0, 0, fw, fh);
-
-                // 橫紋紋理
-                fCtx.strokeStyle = col.glow + '0.2)';
-                fCtx.lineWidth = 1;
-                for (let y = 4; y < fh; y += 8) {
-                    fCtx.beginPath(); fCtx.moveTo(0, y); fCtx.lineTo(fw, y); fCtx.stroke();
+    // ── STAGE 2: DATA PROCESS（景深色彩） ─────
+    else if (state.currentMode === 2) {
+        ctx.save(); ctx.globalAlpha=0.35; ctx.scale(-1,1);
+        ctx.drawImage(video,-w,0,w,h); ctx.restore(); ctx.globalAlpha=1;
+        ctx.fillStyle='rgba(0,0,0,0.72)'; ctx.fillRect(0,0,w,h);
+        const gridSize=24;
+        const fx=state.faceCenter.x*w, fy=state.faceCenter.y*h;
+        for(let i=0;i<w;i+=gridSize) {
+            for(let j=0;j<h;j+=gridSize) {
+                const dist=Math.hypot((i+gridSize/2)-fx,(j+gridSize/2)-fy);
+                const norm=Math.min(dist/(Math.hypot(w,h)/2),1);
+                const hue=Math.round(norm*250), sat=80-norm*40, lum=30+(1-norm)*35, alpha=0.15+(1-norm)*0.5;
+                ctx.strokeStyle=`hsla(${hue},${sat}%,${lum}%,${alpha})`;
+                ctx.lineWidth=0.6; ctx.strokeRect(i,j,gridSize,gridSize);
+                if(Math.random()>0.96+norm*0.03){
+                    ctx.fillStyle=`hsla(${hue},${sat}%,${lum+20}%,${alpha+0.3})`;
+                    ctx.font='9px Share Tech Mono';
+                    ctx.fillText(Math.random().toString(16).slice(2,4).toUpperCase(),i+5,j+15);
                 }
             }
-
-            return fc;
         }
+        const rg=ctx.createRadialGradient(fx,fy,10,fx,fy,120);
+        rg.addColorStop(0,'rgba(255,255,255,0.06)'); rg.addColorStop(1,'rgba(255,255,255,0)');
+        ctx.fillStyle=rg; ctx.fillRect(0,0,w,h);
+    }
 
-        async function buildFacialDatabase() {
-            if (!state.cameraActive) return;
-            addLog("BUILDING FACIAL DB...");
+    // ── STAGE 3: FACE REWRITE（面具貼臉 + 異化） ─
+    else if (state.currentMode === 3) {
+        renderFaceRewrite(w, h);
+    }
+}
 
-            // 等待影片就緒
-            await new Promise(res => setTimeout(res, 500));
+// ─────────────────────────────────────────────
+// Stage 3 核心：面具貼臉 + 異化扭曲
+// ─────────────────────────────────────────────
+function renderFaceRewrite(w, h) {
+    const t   = state.frameCount * 0.016; // 時間（秒）
+    const fx  = state.faceCenter.x * w;
+    const fy  = state.faceCenter.y * h;
+    const dist = state.distortion;        // 0~1 異化強度
 
-            const parts = ['eyes', 'nose', 'mouth'];
-            for (let i = 0; i < 3; i++) {
-                const fc = createFragmentCanvas(parts[i], true);
-                state.facialDatabase[parts[i]] = [fc];
+    // 底層：鏡像影片，低透明度，做為「原臉」殘影
+    ctx.save();
+    ctx.globalAlpha = 0.18 + dist * 0.06;
+    ctx.scale(-1, 1);
+    ctx.drawImage(video, -w, 0, w, h);
+    ctx.restore();
+    ctx.globalAlpha = 1;
+
+    // 若切片未建好，嘗試建立
+    if (!state.maskSlices) buildMaskSlices();
+
+    // 面具覆蓋：density 決定疊加幾層（層數 1~4，每層有更強的位移）
+    for (let layer = 0; layer < state.density; layer++) {
+        const layerPhase = (layer / Math.max(state.density - 1, 1)) * Math.PI; // 各層相位錯開
+        const layerAlpha = layer === 0 ? 0.92 : 0.35 - layer * 0.06;           // 第一層最不透明，後續層越來越透明
+
+        MASK_PARTS.forEach(p => {
+            if (!state.maskSlices || !state.maskSlices[p.id]) return;
+
+            const ps = state.partStates[p.id];
+
+            // ── 基礎貼附位置（臉部中心 + 各部位偏移）──
+            // fo 是相對臉寬/臉高的比例，臉寬約 canvas 高度的 0.55
+            const faceScale = h * 0.55;
+            const baseX = fx + p.fo[0] * faceScale;
+            const baseY = fy + p.fo[1] * faceScale;
+
+            // ── 旋鈕2：異化位移 ──
+            // 每個部位獨立 sin 波，層與層之間相位相差 layerPhase
+            const ampX = dist * 18 * (layer + 1);
+            const ampY = dist * 10 * (layer + 1);
+            const waveX = Math.sin(t * ps.speedX + ps.phaseX + layerPhase) * ampX;
+            const waveY = Math.cos(t * ps.speedY + ps.phaseY + layerPhase) * ampY;
+
+            // ── 隨機 Glitch ──
+            ps.glitchTimer--;
+            if (ps.glitchTimer <= 0) {
+                // 觸發新 glitch
+                ps.glitchTimer    = 40 + Math.random() * 200;
+                ps.glitchOffX     = (Math.random() - 0.5) * dist * 50;
+                ps.glitchOffY     = (Math.random() - 0.5) * dist * 20;
+                ps.glitchScaleX   = 1 + (Math.random() - 0.5) * dist * 0.5;
+                ps.glitchDuration = 3 + Math.floor(Math.random() * 8);
+            }
+            const isGlitching = ps.glitchDuration > 0;
+            if (isGlitching) ps.glitchDuration--;
+
+            const gx = isGlitching ? ps.glitchOffX : 0;
+            const gy = isGlitching ? ps.glitchOffY : 0;
+            const gsx = isGlitching ? ps.glitchScaleX : 1;
+
+            // ── 最終繪製位置 ──
+            const drawX = baseX + waveX + gx + ps.layerOffset * layer;
+            const drawY = baseY + waveY + gy + ps.layerOffset * layer * 0.5;
+
+            const sliceW = p.sw * (1 + layer * 0.04);  // 後層微微放大，強化異化
+            const sliceH = p.sh * (1 + layer * 0.04);
+
+            ctx.save();
+            ctx.translate(drawX, drawY);
+            ctx.scale(gsx, 1);
+
+            // 後層加輕微旋轉（異化感）
+            if (layer > 0) {
+                const tiltAngle = Math.sin(t * 0.3 + ps.phaseX + layer) * dist * 0.08;
+                ctx.rotate(tiltAngle);
             }
 
-            state.dbBuilt = true;
-            addLog("DB INITIALIZED.");
-            buildFragments();
-        }
+            ctx.globalAlpha = layerAlpha;
 
-        function buildFragments() {
-            state.facialFragments = [];
-            const parts = ['eyes', 'nose', 'mouth'];
-            const w = canvas.width, h = canvas.height;
-            const fx = w * state.faceCenter.x, fy = h * state.faceCenter.y;
+            // 彩色發光（近臉第一層最亮）
+            ctx.shadowBlur  = layer === 0 ? 10 + dist * 15 : 5 + dist * 8;
+            ctx.shadowColor = p.col;
 
-            for (let i = 0; i < state.density; i++) {
-                const type = parts[i % 3];
-                // 若 DB 已建立則用 DB canvas，否則動態產生
-                const source = (state.dbBuilt && state.facialDatabase[type][0])
-                    ? state.facialDatabase[type][0]
-                    : createFragmentCanvas(type, false);
+            // 繪製面具切片
+            ctx.drawImage(state.maskSlices[p.id], -sliceW/2, -sliceH/2, sliceW, sliceH);
 
-                // Z 軸決定景深：正值（近）用亮色，負值（遠）用暗色
-                const z = Math.random() * 400 - 200;
+            // 彩色邊框（第一層清晰，後層用 screen 疊加）
+            if (layer === 0) {
+                ctx.strokeStyle = p.gc + '0.75)';
+                ctx.lineWidth   = 1;
+                ctx.strokeRect(-sliceW/2, -sliceH/2, sliceW, sliceH);
 
-                state.facialFragments.push({
-                    canvas: source,
-                    x: fx + (Math.random() - 0.5) * 180,
-                    y: fy + (Math.random() - 0.5) * 180,
-                    z: z,
-                    vx: (Math.random() - 0.5) * 1.5,
-                    vy: (Math.random() - 0.5) * 1.5,
-                    vz: (Math.random() - 0.5) * 1.8,
-                    rotY: Math.random() * 360,
-                    rs: (Math.random() - 0.5) * 1.2,
-                    type: type
-                });
+                // 角落缺角框
+                const cs = 7;
+                const hx = sliceW/2, hy = sliceH/2;
+                ctx.strokeStyle = p.gc + '0.9)';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.moveTo(-hx,-hy+cs); ctx.lineTo(-hx,-hy); ctx.lineTo(-hx+cs,-hy);
+                ctx.moveTo( hx-cs,-hy); ctx.lineTo( hx,-hy); ctx.lineTo( hx,-hy+cs);
+                ctx.moveTo( hx, hy-cs); ctx.lineTo( hx, hy); ctx.lineTo( hx-cs, hy);
+                ctx.moveTo(-hx+cs, hy); ctx.lineTo(-hx, hy); ctx.lineTo(-hx, hy-cs);
+                ctx.stroke();
+
+                // 標籤
+                ctx.fillStyle  = p.col;
+                ctx.font       = '7px Orbitron';
+                ctx.shadowBlur = 6;
+                ctx.fillText(p.label, -hx, -hy - 4);
             }
-        }
 
-        function loop() {
-            state.frameCount++;
-            if (state.isRunning && state.cameraActive) { detectFace(); render(); }
-            requestAnimationFrame(loop);
-        }
-
-        // ==================== 繪製三階段特效 ====================
-
-        function render() {
-            const w = canvas.width, h = canvas.height;
-            ctx.fillStyle = '#000'; ctx.fillRect(0, 0, w, h);
-
-            if (state.currentMode === 1) {
-                // ── STAGE 1: MIRROR / SCAN ──
-                ctx.save();
-                ctx.globalAlpha = 0.45;
-                ctx.scale(-1, 1);
-                ctx.drawImage(video, -w, 0, w, h);
-                ctx.restore();
-                ctx.globalAlpha = 1;
-
-                // 掃描線（雙線，帶尾跡）
-                state.scanProgress = (state.scanProgress + 3) % h;
-                const sp = state.scanProgress;
-
-                // 尾跡漸層
-                const trail = ctx.createLinearGradient(0, sp - 60, 0, sp);
-                trail.addColorStop(0, 'rgba(255,255,255,0)');
-                trail.addColorStop(1, 'rgba(255,255,255,0.06)');
-                ctx.fillStyle = trail;
-                ctx.fillRect(0, sp - 60, w, 60);
-
-                ctx.save();
-                ctx.shadowBlur = 18; ctx.shadowColor = '#fff';
-                ctx.strokeStyle = 'rgba(255,255,255,0.9)'; ctx.lineWidth = 1.5;
-                ctx.beginPath(); ctx.moveTo(0, sp); ctx.lineTo(w, sp); ctx.stroke();
-                ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 1;
-                ctx.beginPath(); ctx.moveTo(0, sp + 4); ctx.lineTo(w, sp + 4); ctx.stroke();
-                ctx.restore();
-
-                // 臉部追蹤框（帶發光）
-                const fx = state.faceCenter.x * w, fy = state.faceCenter.y * h;
-                ctx.save();
-                ctx.shadowBlur = 20; ctx.shadowColor = '#fff';
-                ctx.strokeStyle = 'rgba(255,255,255,0.85)'; ctx.lineWidth = 1;
-
-                // 主框（缺角框風格）
-                const bx = fx - 65, by = fy - 85, bw = 130, bh = 165, cs = 18;
+            // glitch 時加水平掃描撕裂線
+            if (isGlitching && dist > 0.3) {
+                ctx.strokeStyle = p.gc + '0.5)';
+                ctx.lineWidth = 1;
+                ctx.globalCompositeOperation = 'screen';
+                const lineY = -sliceH/2 + Math.random() * sliceH;
                 ctx.beginPath();
-                ctx.moveTo(bx + cs, by); ctx.lineTo(bx + bw - cs, by);
-                ctx.moveTo(bx + bw, by + cs); ctx.lineTo(bx + bw, by + bh - cs);
-                ctx.moveTo(bx + bw - cs, by + bh); ctx.lineTo(bx + cs, by + bh);
-                ctx.moveTo(bx, by + bh - cs); ctx.lineTo(bx, by + cs);
+                ctx.moveTo(-sliceW/2, lineY); ctx.lineTo(sliceW/2, lineY);
                 ctx.stroke();
-
-                // 角落標記
-                ctx.lineWidth = 2;
-                [
-                    [bx, by, cs, 0, cs, 0, 0, cs],
-                    [bx + bw, by, -cs, 0, 0, 0, 0, cs],
-                    [bx + bw, by + bh, -cs, 0, 0, 0, 0, -cs],
-                    [bx, by + bh, cs, 0, 0, 0, 0, -cs],
-                ].forEach(([px, py, dx1, dy1, dx2, dy2, dx3, dy3]) => {
-                    ctx.beginPath();
-                    ctx.moveTo(px + dx1, py + dy1);
-                    ctx.lineTo(px, py);
-                    ctx.lineTo(px + dx3, py + dy3);
-                    ctx.stroke();
-                });
-
-                // 十字中心點
-                ctx.strokeStyle = 'rgba(255,255,255,0.5)'; ctx.lineWidth = 1;
-                ctx.shadowBlur = 10;
-                ctx.beginPath();
-                ctx.moveTo(fx - 10, fy); ctx.lineTo(fx + 10, fy);
-                ctx.moveTo(fx, fy - 10); ctx.lineTo(fx, fy + 10);
-                ctx.stroke();
-
-                // 五官連線（三角骨架）
-                ctx.shadowBlur = 8; ctx.shadowColor = '#fff';
-                ctx.strokeStyle = 'rgba(255,255,255,0.5)'; ctx.lineWidth = 0.8;
-                const eyeL = { x: fx - 35, y: fy - 22 };
-                const eyeR = { x: fx + 35, y: fy - 22 };
-                const noseT = { x: fx, y: fy + 5 };
-                const mouthL = { x: fx - 28, y: fy + 42 };
-                const mouthR = { x: fx + 28, y: fy + 42 };
-                ctx.beginPath();
-                ctx.moveTo(eyeL.x, eyeL.y); ctx.lineTo(eyeR.x, eyeR.y);  // 眼連線
-                ctx.moveTo(eyeL.x, eyeL.y); ctx.lineTo(noseT.x, noseT.y); // 左眼到鼻
-                ctx.moveTo(eyeR.x, eyeR.y); ctx.lineTo(noseT.x, noseT.y); // 右眼到鼻
-                ctx.moveTo(noseT.x, noseT.y); ctx.lineTo(mouthL.x, mouthL.y); // 鼻到嘴
-                ctx.moveTo(mouthL.x, mouthL.y); ctx.lineTo(mouthR.x, mouthR.y); // 嘴連線
-                ctx.moveTo(mouthR.x, mouthR.y); ctx.lineTo(noseT.x, noseT.y);
-                ctx.stroke();
-
-                // 節點小圓
-                ctx.fillStyle = 'rgba(255,255,255,0.8)';
-                [eyeL, eyeR, noseT, mouthL, mouthR].forEach(pt => {
-                    ctx.beginPath(); ctx.arc(pt.x, pt.y, 2.5, 0, Math.PI * 2); ctx.fill();
-                });
-
-                ctx.restore();
-
-            } else if (state.currentMode === 2) {
-                // ── STAGE 2: DATA PROCESS（多色景深） ──
-                ctx.save();
-                ctx.globalAlpha = 0.35;
-                ctx.scale(-1, 1);
-                ctx.drawImage(video, -w, 0, w, h);
-                ctx.restore();
-                ctx.globalAlpha = 1;
-
-                // 全局暗化
-                ctx.fillStyle = 'rgba(0,0,0,0.72)'; ctx.fillRect(0, 0, w, h);
-
-                const gridSize = 24;
-                const fx = state.faceCenter.x * w, fy = state.faceCenter.y * h;
-
-                for (let i = 0; i < w; i += gridSize) {
-                    for (let j = 0; j < h; j += gridSize) {
-                        // 距離臉部中心的相對距離 → 決定顏色/亮度（模擬景深）
-                        const dist = Math.hypot((i + gridSize / 2) - fx, (j + gridSize / 2) - fy);
-                        const maxDist = Math.hypot(w, h) / 2;
-                        const normDist = Math.min(dist / maxDist, 1); // 0=近臉, 1=遠
-
-                        // 色相：近 = 暖色(0°紅), 中 = 青(180°), 遠 = 藍紫(240°+)
-                        const hue = Math.round(normDist * 250);
-                        const sat = 80 - normDist * 40;  // 近臉飽和度高
-                        const lum = 30 + (1 - normDist) * 35;
-                        const alpha = 0.15 + (1 - normDist) * 0.5; // 近臉更亮
-
-                        ctx.strokeStyle = `hsla(${hue}, ${sat}%, ${lum}%, ${alpha})`;
-                        ctx.lineWidth = 0.6;
-                        ctx.strokeRect(i, j, gridSize, gridSize);
-
-                        // 隨機十六進位字元（距離越近出現機率越高）
-                        if (Math.random() > 0.96 + normDist * 0.03) {
-                            ctx.fillStyle = `hsla(${hue}, ${sat}%, ${lum + 20}%, ${alpha + 0.3})`;
-                            ctx.font = '9px Share Tech Mono';
-                            ctx.fillText(
-                                Math.random().toString(16).slice(2, 4).toUpperCase(),
-                                i + 5, j + 15
-                            );
-                        }
-                    }
-                }
-
-                // 臉部高亮光暈（純白）
-                const radGrad = ctx.createRadialGradient(fx, fy, 10, fx, fy, 120);
-                radGrad.addColorStop(0, 'rgba(255,255,255,0.06)');
-                radGrad.addColorStop(1, 'rgba(255,255,255,0)');
-                ctx.fillStyle = radGrad; ctx.fillRect(0, 0, w, h);
-
-            } else if (state.currentMode === 3) {
-                // ── STAGE 3: SYNTH (3D Reconstruction) ──
-                if (state.facialFragments.length === 0) buildFragments();
-
-                // 底層：半透明鏡像影片
-                ctx.save();
-                ctx.globalAlpha = 0.22;
-                ctx.scale(-1, 1);
-                ctx.drawImage(video, -w, 0, w, h);
-                ctx.restore();
-                ctx.globalAlpha = 1;
-
-                const focalLength = 600;
-                const fx = state.faceCenter.x * w, fy = state.faceCenter.y * h;
-
-                // 按 Z 值排序（遠到近，確保正確遮擋）
-                state.facialFragments.sort((a, b) => a.z - b.z);
-
-                state.facialFragments.forEach(f => {
-                    // 微弱引力吸引向臉部中心
-                    f.vx += (fx - f.x) * 0.00012;
-                    f.vy += (fy - f.y) * 0.00012;
-
-                    f.x += f.vx; f.y += f.vy; f.z += f.vz; f.rotY += f.rs;
-
-                    // 軟反彈（範圍限定在臉部附近）
-                    if (f.x < fx - 240 || f.x > fx + 240) f.vx *= -0.85;
-                    if (f.y < fy - 240 || f.y > fy + 240) f.vy *= -0.85;
-                    if (f.z < -230 || f.z > 230) f.vz *= -0.85;
-
-                    // 透視投影
-                    const perspective = focalLength / (focalLength + f.z);
-                    // Z 正規化 0~1（近=1, 遠=0）
-                    const zNorm = (f.z + 230) / 460;
-
-                    const col = FRAG_COLORS[f.type];
-
-                    // 景深透明度：近處清晰，遠處半透明
-                    const depthAlpha = 0.3 + zNorm * 0.65;
-
-                    const drawX = f.x + state.headTiltX * (state.distortion * 80);
-                    const drawY = f.y + state.headTiltY * (state.distortion * 40);
-
-                    ctx.save();
-                    ctx.translate(drawX, drawY);
-                    ctx.scale(perspective, perspective);
-                    // 3D 旋轉模擬 (skew X)
-                    ctx.transform(Math.cos(f.rotY * 0.017), 0, Math.sin(f.rotY * 0.017) * 0.3, 1, 0, 0);
-
-                    ctx.globalAlpha = depthAlpha;
-
-                    // 彩色發光（依景深調整強度）
-                    const glowStr = 6 + zNorm * 18;
-                    ctx.shadowBlur = glowStr;
-                    ctx.shadowColor = col.line;
-
-                    // 繪製碎片影像
-                    ctx.drawImage(f.canvas, -f.canvas.width / 2, -f.canvas.height / 2);
-
-                    // 彩色邊框（近處更亮）
-                    ctx.strokeStyle = col.glow + (0.3 + zNorm * 0.6) + ')';
-                    ctx.lineWidth = 0.8 + zNorm * 0.8;
-                    ctx.strokeRect(-f.canvas.width / 2, -f.canvas.height / 2, f.canvas.width, f.canvas.height);
-
-                    // 角落小三角標記（近處才顯示）
-                    if (zNorm > 0.5) {
-                        const hw = f.canvas.width / 2, hh = f.canvas.height / 2, cs = 5;
-                        ctx.strokeStyle = col.glow + (zNorm * 0.8) + ')';
-                        ctx.lineWidth = 1;
-                        ctx.beginPath();
-                        ctx.moveTo(-hw, -hh + cs); ctx.lineTo(-hw, -hh); ctx.lineTo(-hw + cs, -hh);
-                        ctx.moveTo(hw - cs, -hh); ctx.lineTo(hw, -hh); ctx.lineTo(hw, -hh + cs);
-                        ctx.moveTo(hw, hh - cs); ctx.lineTo(hw, hh); ctx.lineTo(hw - cs, hh);
-                        ctx.moveTo(-hw + cs, hh); ctx.lineTo(-hw, hh); ctx.lineTo(-hw, hh - cs);
-                        ctx.stroke();
-                    }
-
-                    // 類型標籤（近處顯示）
-                    if (zNorm > 0.6) {
-                        ctx.fillStyle = col.label;
-                        ctx.font = `${Math.floor(6 + zNorm * 3)}px Orbitron`;
-                        ctx.shadowBlur = 8;
-                        ctx.fillText(f.type.toUpperCase(), -f.canvas.width / 2, -f.canvas.height / 2 - 4);
-                    }
-
-                    ctx.restore();
-                });
-
-                // 臉部中心十字（白色）
-                ctx.save();
-                ctx.globalAlpha = 0.5;
-                ctx.strokeStyle = '#fff'; ctx.lineWidth = 0.8;
-                ctx.shadowBlur = 8; ctx.shadowColor = '#fff';
-                ctx.beginPath();
-                ctx.moveTo(fx - 12, fy); ctx.lineTo(fx + 12, fy);
-                ctx.moveTo(fx, fy - 12); ctx.lineTo(fx, fy + 12);
-                ctx.stroke();
-                ctx.restore();
+                ctx.globalCompositeOperation = 'source-over';
             }
-        }
 
-        function addLog(msg) {
-            const el = document.getElementById('log-stream');
-            const lines = el.innerHTML.split('<br>');
-            el.innerHTML = `<span style="color:rgba(255,255,255,0.7)">> </span>${msg}<br>${lines.slice(0, 2).join('<br>')}`;
-        }
+            ctx.restore();
+        });
+    }
 
-        function resize() {
-            const container = document.querySelector('.screen-container');
-            if (container) {
-                canvas.width = container.clientWidth;
-                canvas.height = container.clientHeight;
-            }
-        }
+    // ── 臉部中心十字準線 ──
+    ctx.save();
+    ctx.globalAlpha = 0.4;
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 0.7;
+    ctx.shadowBlur  = 6; ctx.shadowColor = '#fff';
+    ctx.beginPath();
+    ctx.moveTo(fx-14,fy); ctx.lineTo(fx+14,fy);
+    ctx.moveTo(fx,fy-14); ctx.lineTo(fx,fy+14);
+    ctx.stroke();
 
-        window.onload = init;
-    </script>
+    // 臉部輪廓橢圓（低透明度，顯示面具覆蓋範圍）
+    ctx.globalAlpha   = 0.12 + dist * 0.1;
+    ctx.strokeStyle   = 'rgba(255,255,255,0.5)';
+    ctx.lineWidth     = 0.8;
+    ctx.setLineDash([4, 8]);
+    ctx.beginPath();
+    ctx.ellipse(fx, fy, h * 0.19, h * 0.28, 0, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
+}
+
+// ─────────────────────────────────────────────
+// 工具
+// ─────────────────────────────────────────────
+function addLog(msg) {
+    const el = document.getElementById('log-stream');
+    const lines = el.innerHTML.split('<br>');
+    el.innerHTML = `<span style="color:rgba(255,255,255,0.6)">></span> ${msg}<br>${lines.slice(0, 2).join('<br>')}`;
+}
+
+function resize() {
+    const c = document.querySelector('.screen-container');
+    if (c) { canvas.width = c.clientWidth; canvas.height = c.clientHeight; }
+}
+
+window.onload = init;
+</script>
 </body>
 </html>
