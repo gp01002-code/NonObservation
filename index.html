@@ -358,11 +358,8 @@ function drawKnobDial(el,deg){
   const kc=el.getContext('2d');
   kc.clearRect(0,0,W,H);
 
-  // 外圈暗底
-  const bg=kc.createRadialGradient(kx,ky,R*.3,kx,ky,R);
-  bg.addColorStop(0,'rgba(32,32,32,.98)');bg.addColorStop(1,'rgba(8,8,8,.99)');
-  kc.fillStyle=bg;kc.beginPath();kc.arc(kx,ky,R,0,Math.PI*2);kc.fill();
-  kc.strokeStyle='rgba(255,255,255,.22)';kc.lineWidth=1;
+  // 外圈邊框（無實心底，鏤空）
+  kc.strokeStyle='rgba(255,255,255,.28)';kc.lineWidth=1.2;
   kc.beginPath();kc.arc(kx,ky,R,0,Math.PI*2);kc.stroke();
 
   // 刻度弧 (-135° → +135°, 270° sweep)
@@ -390,11 +387,8 @@ function drawKnobDial(el,deg){
     kc.shadowBlur=0;
   }
 
-  // 中心暗圓
-  const cg=kc.createRadialGradient(kx,ky,0,kx,ky,R*.58);
-  cg.addColorStop(0,'rgba(50,50,50,1)');cg.addColorStop(1,'rgba(18,18,18,1)');
-  kc.fillStyle=cg;kc.beginPath();kc.arc(kx,ky,R*.58,0,Math.PI*2);kc.fill();
-  kc.strokeStyle='rgba(255,255,255,.10)';kc.lineWidth=.8;
+  // 中心小圓（鏤空，只畫細邊）
+  kc.strokeStyle='rgba(255,255,255,.15)';kc.lineWidth=.8;
   kc.beginPath();kc.arc(kx,ky,R*.58,0,Math.PI*2);kc.stroke();
 
   // 指針 (0→360 映射到 -135→+135, 上方為0)
