@@ -647,14 +647,15 @@ function pointInPoly(px,py,poly){
 // refA/refB: 用來計算尺寸的兩個reference點
 // scaleW/scaleH: ref距離的倍數 = 顯示寬高
 const PARTS_DEF={
-  eyes_L:{type:'eyes',  center:[33,133],    refA:33, refB:133, scaleW:3.2, scaleH:2.2, rot:0},
-  eyes_R:{type:'eyes',  center:[362,263],   refA:362,refB:263, scaleW:3.2, scaleH:2.2, rot:0},
-  nose:  {type:'nose',  center:[1],         refA:49, refB:279, scaleW:2.4, scaleH:3.0, rot:0},
-  mouth: {type:'mouth', center:[0,17],      refA:61, refB:291, scaleW:2.6, scaleH:2.4, rot:0},
-  ears_L:{type:'ears',  center:[127,234],   refA:127,refB:172, scaleW:2.8, scaleH:3.5, rot:-.15},
-  ears_R:{type:'ears',  center:[356,454],   refA:356,refB:397, scaleW:2.8, scaleH:3.5, rot:.15},
+  // scaleW/H = refA↔refB 距離的倍數；maxW/H = 畫面寬/高的最大比例上限
+  eyes_L:{type:'eyes',  center:[33,133],  refA:33, refB:133, scaleW:2.8, scaleH:1.9, maxW:.18, maxH:.12, rot:0},
+  eyes_R:{type:'eyes',  center:[362,263], refA:362,refB:263, scaleW:2.8, scaleH:1.9, maxW:.18, maxH:.12, rot:0},
+  nose:  {type:'nose',  center:[1],       refA:49, refB:279, scaleW:2.1, scaleH:2.6, maxW:.16, maxH:.20, rot:0},
+  mouth: {type:'mouth', center:[0,17],    refA:61, refB:291, scaleW:2.3, scaleH:2.0, maxW:.20, maxH:.14, rot:0},
+  ears_L:{type:'ears',  center:[127,234], refA:127,refB:172, scaleW:1.6, scaleH:2.0, maxW:.13, maxH:.18, rot:-.12},
+  ears_R:{type:'ears',  center:[356,454], refA:356,refB:397, scaleW:1.6, scaleH:2.0, maxW:.13, maxH:.18, rot:.12},
 };
-const PORDER=['ears_L','ears_R','nose','eyes_L','eyes_R','mouth'];
+const PORDER=['ears_L','ears_R','nose','mouth','eyes_L','eyes_R'];
 const PCOL={eyes_L:'#00eeff',eyes_R:'#00eeff',nose:'#ff44cc',mouth:'#ffcc00',ears_L:'#88aaff',ears_R:'#88aaff'};
 
 function buildFrags(){
@@ -742,6 +743,10 @@ function stage3(W,H){
     let dw=refD*D.scaleW;
     let dh=refD*D.scaleH;
 
+    // ── 上限鉗制：不超過畫面的 maxW/maxH 比例 ──
+    if(D.maxW){ const cap=D.maxW*W; if(dw>cap){const r=cap/dw;dw=cap;dh*=r;} }
+    if(D.maxH){ const cap=D.maxH*H; if(dh>cap){const r=cap/dh;dh=cap;dw*=r;} }
+
     // ── 物理漂浮 ── 朝中心靠（吸引力）
     fr.vdx+=(fr.driftX*faceScale-fr.driftX*faceScale)*.0; // 靜止吸引
     // 異化波動
@@ -801,7 +806,9 @@ function stage3(W,H){
     // 立體陰影
     ctx.shadowOffsetX=zN*7;ctx.shadowOffsetY=zN*9;
     ctx.shadowBlur=7+zN*16;ctx.shadowColor='rgba(0,0,0,.7)';
-    ctx.globalAlpha=fr.alpha*(.5+zN*.45);
+    // 耳朵額外降透明度（避免搶占視覺）
+    const earFade=(fr.key==='ears_L'||fr.key==='ears_R')?.72:1;
+    ctx.globalAlpha=fr.alpha*(.5+zN*.45)*earFade;
     ctx.drawImage(img,-dw/2,-dh/2,dw,dh);
 
     // 彩色邊框
