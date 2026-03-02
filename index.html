@@ -20,29 +20,52 @@ body{font-family:'Share Tech Mono',monospace;background:#000;color:#fff;height:1
 
 /* ── MACHINE ── */
 .mw{
-  position:relative;width:95vw;max-width:1000px;aspect-ratio:1000/667;
+  position:relative;
+  width:95vw;max-width:1000px;
+  aspect-ratio:1000/667;
   background:#090909;
-  /* 立體感：多層陰影模擬厚度 */
+  overflow:hidden;   /* 裁掉所有子層溢出 */
+  /* 立體感：邊緣高光 + 多層落影 */
   box-shadow:
-    0 2px 0 rgba(255,255,255,.06),
-    0 6px 20px rgba(0,0,0,.8),
-    0 18px 50px rgba(0,0,0,.7),
-    0 40px 100px rgba(0,0,0,.5),
-    inset 0 1px 0 rgba(255,255,255,.08);
-  transform-style:preserve-3d;
-  perspective:900px;
+    0 0 0 1px rgba(255,255,255,.10),
+    0 1px 0 rgba(255,255,255,.14),
+    0 8px 24px rgba(0,0,0,.85),
+    0 24px 60px rgba(0,0,0,.72),
+    0 50px 120px rgba(0,0,0,.55);
 }
-/* bg = Image2（視差層，JS控制位移） */
-#layerBg{position:absolute;inset:-5%;background:url('Image2.png') center/contain no-repeat;z-index:0;pointer-events:none;animation:bgf 15s ease-in-out infinite;will-change:transform;}
-/* gear = Image3（跟著左旋鈕轉，JS控制） */
-#layerGear{position:absolute;inset:0;background:url('Image3.png') center/contain no-repeat;z-index:1;pointer-events:none;transform-origin:center center;}
-/* fg = Image（最上層前景，輕微浮動） */
-#layerFg{position:absolute;inset:0;background:url('Image.png') center/contain no-repeat;z-index:3;pointer-events:none;animation:fgf 10s ease-in-out infinite;}
-@keyframes bgf{0%,100%{transform:translate(0,0)}50%{transform:translate(-3px,2px)}}
+/* 左上角反光 — 模擬面板正面光澤 */
+.mw::before{
+  content:'';position:absolute;inset:0;z-index:99;pointer-events:none;
+  background:
+    linear-gradient(135deg,rgba(255,255,255,.06) 0%,transparent 45%),
+    linear-gradient(to bottom,rgba(255,255,255,.04) 0%,transparent 30%);
+}
+/* bg = Image2（視差層，overflow:hidden 由 .mw 裁切）*/
+#layerBg{
+  position:absolute;
+  inset:-6%;          /* 多出空間供視差位移，由 .mw overflow:hidden 裁切 */
+  background:url('Image2.png') center/contain no-repeat;
+  z-index:0;pointer-events:none;
+  will-change:transform;
+}
+/* gear = Image3（跟著左旋鈕轉）*/
+#layerGear{
+  position:absolute;inset:0;
+  background:url('Image3.png') center/contain no-repeat;
+  z-index:1;pointer-events:none;
+  transform-origin:center center;
+}
+/* fg = Image（最上層前景）*/
+#layerFg{
+  position:absolute;inset:0;
+  background:url('Image.png') center/contain no-repeat;
+  z-index:3;pointer-events:none;
+  animation:fgf 10s ease-in-out infinite;
+}
 @keyframes fgf{0%,100%{transform:translate(0,0)}50%{transform:translate(2px,-1px)}}
 
 /* ── SCREEN ── */
-.sc{position:absolute;top:8.5%;left:25.5%;width:49%;height:54%;background:var(--crt);border-radius:4px;overflow:hidden;z-index:2;border:1px solid rgba(255,255,255,.22);box-shadow:0 0 18px rgba(255,255,255,.07),inset 0 0 28px rgba(0,0,0,.8);}
+.sc{position:absolute;top:8.5%;left:25.5%;width:49%;height:54%;background:var(--crt);border-radius:4px;overflow:hidden;z-index:5;border:1px solid rgba(255,255,255,.22);box-shadow:0 0 18px rgba(255,255,255,.07),inset 0 0 28px rgba(0,0,0,.8);}
 #cv{width:100%;height:100%;display:block;}
 .crt{position:absolute;inset:0;background:linear-gradient(rgba(0,0,0,0) 50%,rgba(0,0,0,.18) 50%),linear-gradient(90deg,rgba(255,255,255,.015),rgba(255,255,255,.008),rgba(255,255,255,.015));background-size:100% 3px,3px 100%;pointer-events:none;z-index:5;}
 .vig{position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 52%,rgba(0,0,0,.78) 100%);pointer-events:none;z-index:6;}
@@ -54,27 +77,24 @@ body{font-family:'Share Tech Mono',monospace;background:#000;color:#fff;height:1
 .br{bottom:0;right:0;text-align:right;color:rgba(255,255,255,.38);font-size:8px;}
 
 /* ── KNOBS ── */
-.kc{position:absolute;display:flex;flex-direction:column;align-items:center;z-index:10;}
+.kc{position:absolute;display:flex;flex-direction:column;align-items:center;z-index:20;}
 .kl{top:8%;left:6.5%;width:15%;height:25%;}
 .kr{top:8%;right:6.5%;width:15%;height:25%;}
 .ka{width:100%;height:82%;cursor:grab;display:block;}
 .ka:active{cursor:grabbing;}
 .kv{font-size:clamp(11px,1.6vw,16px);color:rgba(255,255,255,.92);text-shadow:0 0 12px #fff,0 0 24px rgba(255,255,255,.45);margin-top:10%;font-weight:bold;letter-spacing:1.5px;font-family:'Orbitron',sans-serif;}
 
-/* ── MODES ──
-   畫面下緣 ≈ bottom 37.5%，指示燈 ≈ bottom 22%，中間點 ≈ 29.75%
-   bottom:30% 讓按鈕更靠近畫面中間，完全在紅綠燈上方可見 */
-.ms{position:absolute;bottom:30%;left:26%;width:48%;height:9%;z-index:10;display:flex;justify-content:space-around;align-items:center;}
+.ms{position:absolute;bottom:30%;left:26%;width:48%;height:9%;z-index:20;display:flex;justify-content:space-around;align-items:center;}
 .mt{flex:1;height:100%;cursor:pointer;display:flex;flex-direction:column;justify-content:center;align-items:center;color:var(--dim);font-size:clamp(9px,1.3vw,13px);font-weight:bold;font-family:'Orbitron',sans-serif;letter-spacing:2px;transition:all .4s;-webkit-tap-highlight-color:transparent;user-select:none;}
 .mt::before{content:'';width:5px;height:5px;background:#1a1a1a;border:1px solid rgba(255,255,255,.1);border-radius:50%;margin-bottom:4px;transition:all .3s;}
 .mt.on{color:#fff;text-shadow:0 0 11px #fff,0 0 24px rgba(255,255,255,.45),0 0 48px rgba(255,255,255,.18);}
 .mt.on::before{background:#fff;box-shadow:0 0 11px #fff,0 0 24px #fff,0 0 48px rgba(255,255,255,.45);border-color:#fff;}
 
 /* ── BUTTONS & LIGHTS ── */
-.btn{position:absolute;cursor:pointer;z-index:10;border-radius:50%;-webkit-tap-highlight-color:transparent;}
+.btn{position:absolute;cursor:pointer;z-index:20;border-radius:50%;-webkit-tap-highlight-color:transparent;}
 .bc{bottom:29.5%;left:19.8%;width:3.5%;height:5.5%;}
 .br2{bottom:29.5%;right:19.8%;width:3.5%;height:5.5%;}
-.li{position:absolute;width:10px;height:10px;border-radius:50%;z-index:10;background:#0a0a0a;}
+.li{position:absolute;width:10px;height:10px;border-radius:50%;z-index:20;background:#0a0a0a;}
 .li::after{content:attr(data-l);position:absolute;top:14px;left:50%;transform:translateX(-50%);font-size:7px;color:rgba(255,255,255,.22);white-space:nowrap;letter-spacing:1px;}
 .ll{bottom:22%;left:15%;}
 .lr{bottom:22%;right:15%;}
