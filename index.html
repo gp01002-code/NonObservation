@@ -19,11 +19,27 @@ body{font-family:'Share Tech Mono',monospace;background:#000;color:#fff;height:1
 .intro button:hover{background:rgba(255,255,255,.06);box-shadow:0 0 36px rgba(255,255,255,.35);}
 
 /* ── MACHINE ── */
-.mw{position:relative;width:95vw;max-width:1000px;aspect-ratio:1000/667;background:#090909;}
-.mw::before{content:'';position:absolute;inset:0;background:url('Image2.png') center/contain no-repeat;z-index:0;pointer-events:none;animation:bg 15s ease-in-out infinite;}
-.mw::after{content:'';position:absolute;inset:0;background:url('Image.png') center/contain no-repeat;z-index:1;pointer-events:none;animation:fg 10s ease-in-out infinite;}
-@keyframes bg{0%,100%{transform:translate(0,0)}50%{transform:translate(-5px,3px)}}
-@keyframes fg{0%,100%{transform:translate(0,0)}50%{transform:translate(3px,-2px)}}
+.mw{
+  position:relative;width:95vw;max-width:1000px;aspect-ratio:1000/667;
+  background:#090909;
+  /* 立體感：多層陰影模擬厚度 */
+  box-shadow:
+    0 2px 0 rgba(255,255,255,.06),
+    0 6px 20px rgba(0,0,0,.8),
+    0 18px 50px rgba(0,0,0,.7),
+    0 40px 100px rgba(0,0,0,.5),
+    inset 0 1px 0 rgba(255,255,255,.08);
+  transform-style:preserve-3d;
+  perspective:900px;
+}
+/* bg = Image2（視差層，JS控制位移） */
+#layerBg{position:absolute;inset:-5%;background:url('Image2.png') center/contain no-repeat;z-index:0;pointer-events:none;animation:bgf 15s ease-in-out infinite;will-change:transform;}
+/* gear = Image3（跟著左旋鈕轉，JS控制） */
+#layerGear{position:absolute;inset:0;background:url('Image3.png') center/contain no-repeat;z-index:1;pointer-events:none;transform-origin:center center;}
+/* fg = Image（最上層前景，輕微浮動） */
+#layerFg{position:absolute;inset:0;background:url('Image.png') center/contain no-repeat;z-index:3;pointer-events:none;animation:fgf 10s ease-in-out infinite;}
+@keyframes bgf{0%,100%{transform:translate(0,0)}50%{transform:translate(-3px,2px)}}
+@keyframes fgf{0%,100%{transform:translate(0,0)}50%{transform:translate(2px,-1px)}}
 
 /* ── SCREEN ── */
 .sc{position:absolute;top:8.5%;left:25.5%;width:49%;height:54%;background:var(--crt);border-radius:4px;overflow:hidden;z-index:2;border:1px solid rgba(255,255,255,.22);box-shadow:0 0 18px rgba(255,255,255,.07),inset 0 0 28px rgba(0,0,0,.8);}
@@ -43,7 +59,7 @@ body{font-family:'Share Tech Mono',monospace;background:#000;color:#fff;height:1
 .kr{top:8%;right:6.5%;width:15%;height:25%;}
 .ka{width:100%;height:82%;cursor:grab;display:block;}
 .ka:active{cursor:grabbing;}
-.kv{font-size:clamp(9px,1.3vw,13px);color:rgba(255,255,255,.88);text-shadow:0 0 10px #fff,0 0 20px rgba(255,255,255,.4);margin-top:5%;font-weight:bold;letter-spacing:1.5px;font-family:'Orbitron',sans-serif;}
+.kv{font-size:clamp(11px,1.6vw,16px);color:rgba(255,255,255,.92);text-shadow:0 0 12px #fff,0 0 24px rgba(255,255,255,.45);margin-top:10%;font-weight:bold;letter-spacing:1.5px;font-family:'Orbitron',sans-serif;}
 
 /* ── MODES ──
    畫面下緣 ≈ bottom 37.5%，指示燈 ≈ bottom 22%，中間點 ≈ 29.75%
@@ -133,6 +149,11 @@ video{display:none;}
 
 <!-- MACHINE -->
 <div class="mw">
+  <!-- 視差背景層 -->
+  <div id="layerBg"></div>
+  <!-- 齒輪層（跟左旋鈕同步旋轉）-->
+  <div id="layerGear"></div>
+
   <div class="sc" id="sc">
     <div class="uit tl">
       <div id="dmode">MODE: MIRROR_STAGE</div>
@@ -143,7 +164,10 @@ video{display:none;}
     <div class="crt"></div>
     <div class="vig"></div>
     <div id="fbar"></div>
-  </div>
+  </div><!-- /.sc -->
+
+  <!-- 前景層（Image.png 覆蓋在最上方）-->
+  <div id="layerFg"></div>
 
   <!-- Knobs (canvas dial) -->
   <div class="kc kl"><canvas class="ka" id="kDen"></canvas><div class="kv" id="vDen">×2</div></div>
@@ -283,6 +307,50 @@ function initFaceMesh(){
   log("FACE MESH INIT...");
 }
 
+// ════════════════════════════════════════════════
+//  PARALLAX — 頭部位置驅動 Image2 視差
+// ════════════════════════════════════════════════
+const PX={
+  // 目標位移（直接由臉部位置計算）
+  targetX:0, targetY:0,
+  // 目前平滑後的位移
+  curX:0, curY:0,
+  // 齒輪目前旋轉角度（度）
+  gearRot:0,
+  // 平滑係數（越小越慢越穩，0.03 = 很低靈敏度）
+  smooth:.03,
+  // 最大位移量（px，相對機器寬）
+  maxShift:22,
+};
+
+function updateParallax(){
+  // 只在有臉且信心足夠時更新目標
+  if(S.lm && S.conf>.3){
+    // noseTip x：0=畫面右側, 1=畫面左側（鏡像）
+    // 臉在右 → noseTip.x 小 → Image2 往右 (正值)
+    const nx=S.lm[4]?.x??0.5; // landmark 4 = noseTip
+    const ny=S.lm[4]?.y??0.5;
+    // 將 0~1 轉為 -1~+1，臉往右 → shift 往右
+    // 攝影機已鏡像：臉在右邊 landmark.x 偏小
+    PX.targetX=(0.5-nx)*2*PX.maxShift;   // 頭往右 → Image2 往右
+    PX.targetY=(ny-0.5)*2*PX.maxShift*0.4; // 垂直輕微
+  }
+
+  // 低通平滑（lerp）
+  PX.curX+=(PX.targetX-PX.curX)*PX.smooth;
+  PX.curY+=(PX.targetY-PX.curY)*PX.smooth;
+
+  // 套用到 layerBg（視差位移，反向：頭左 → 圖右）
+  const bg=document.getElementById('layerBg');
+  if(bg) bg.style.transform=`translate(${PX.curX}px,${PX.curY}px)`;
+
+  // 齒輪旋轉：跟 kDen 旋鈕同步
+  const targetGear=knobDeg['kDen']??90; // 0~360
+  PX.gearRot+=(targetGear-PX.gearRot)*0.08;
+  const gear=document.getElementById('layerGear');
+  if(gear) gear.style.transform=`rotate(${PX.gearRot}deg)`;
+}
+
 function onFaceResults(results){
   if(results.multiFaceLandmarks&&results.multiFaceLandmarks.length>0){
     S.lm=results.multiFaceLandmarks[0];
@@ -291,7 +359,6 @@ function onFaceResults(results){
     S.lm=null;
     S.conf=Math.max(0,S.conf-.04);
   }
-  // 更新信心條
   const bar=document.getElementById('fbar');
   if(bar)bar.style.width=(S.conf*100)+'%';
 }
@@ -502,6 +569,7 @@ function setMode(m){
 // ════════════════════════════════════════════════
 function loop(){
   S.frame++;
+  updateParallax();
   if(S.run&&S.cam){
     if(S.mode===3&&S.fragDirty)buildFrags();
     render();
