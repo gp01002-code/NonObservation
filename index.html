@@ -59,6 +59,15 @@ body{font-family:'Share Tech Mono',monospace;background:#000;color:#fff;height:1
   z-index:2;pointer-events:none;
   transform-origin:center center;
 }
+/* gear右（跟右旋鈕同步）*/
+#layerGearR{
+  position:absolute;
+  right:4.5%; top:6%;
+  width:19%; height:25%;
+  background:url('Image3.png') center/contain no-repeat;
+  z-index:2;pointer-events:none;
+  transform-origin:center center;
+}
 /* fg = Image（最上層前景）*/
 #layerFg{
   position:absolute;inset:0;
@@ -185,8 +194,10 @@ video{display:none;}
 <div class="mw">
   <!-- 視差背景層 -->
   <div id="layerBg"></div>
-  <!-- 齒輪層（跟左旋鈕同步旋轉）-->
+  <!-- 齒輪層左（跟左旋鈕同步旋轉）-->
   <div id="layerGear"></div>
+  <!-- 齒輪層右（跟右旋鈕同步旋轉）-->
+  <div id="layerGearR"></div>
 
   <div class="sc" id="sc">
     <div class="uit tl">
@@ -383,11 +394,18 @@ function updateParallax(){
     bg.style.backgroundPosition=`${bx}% ${by}%`;
   }
 
-  // 齒輪旋轉：跟 kDen 旋鈕同步
-  const targetGear=knobDeg['kDen']??90; // 0~360
+  // 齒輪左：跟 kDen 旋鈕同步
+  const targetGear=knobDeg['kDen']??90;
   PX.gearRot+=(targetGear-PX.gearRot)*0.08;
   const gear=document.getElementById('layerGear');
   if(gear) gear.style.transform=`rotate(${PX.gearRot}deg)`;
+
+  // 齒輪右：跟 kDist 旋鈕同步
+  if(PX.gearRotR===undefined)PX.gearRotR=0.7*360;
+  const targetGearR=knobDeg['kDist']??252;
+  PX.gearRotR+=(targetGearR-PX.gearRotR)*0.08;
+  const gearR=document.getElementById('layerGearR');
+  if(gearR) gearR.style.transform=`rotate(${PX.gearRotR}deg)`;
 }
 
 function onFaceResults(results){
