@@ -48,13 +48,13 @@ body{font-family:'Share Tech Mono',monospace;background:#000;color:#fff;height:1
   z-index:0;pointer-events:none;
   will-change:transform;
 }
-/* gear = Image3（定位在左旋鈕上，與旋鈕 canvas 同大小）
-   左旋鈕：left:6.5%, top:8%, width:15%
-   canvas 高度 = 25% × 82% ≈ 20.5%                        */
+/* gear = Image3（定位在左旋鈕上，略大於旋鈕 canvas）
+   左旋鈕：left:6.5%, top:8%, width:15%, canvas高≈20.5%
+   稍微放大並置中對齊                                      */
 #layerGear{
   position:absolute;
-  left:6.5%; top:8%;
-  width:15%; height:20.5%;
+  left:4.5%; top:6%;
+  width:19%; height:25%;
   background:url('Image3.png') center/contain no-repeat;
   z-index:2;pointer-events:none;
   transform-origin:center center;
@@ -103,12 +103,12 @@ body{font-family:'Share Tech Mono',monospace;background:#000;color:#fff;height:1
   content:attr(data-l);
   position:absolute;top:16px;left:50%;
   transform:translateX(-50%);
-  font-size:clamp(9px,1.3vw,13px);  /* 與三個階段按鈕同大 */
+  font-size:clamp(11px,1.6vw,15px);
   font-family:'Orbitron',sans-serif;
   font-weight:bold;
-  color:rgba(255,255,255,.55);
-  text-shadow:0 0 8px rgba(255,255,255,.3);
-  white-space:nowrap;letter-spacing:1px;
+  color:rgba(255,255,255,.72);
+  text-shadow:0 0 10px rgba(255,255,255,.4);
+  white-space:nowrap;letter-spacing:1.5px;
 }
 .ll{bottom:22%;left:15%;}
 .lr{bottom:22%;right:15%;}
