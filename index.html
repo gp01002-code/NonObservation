@@ -3,91 +3,116 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>自我觀測儀 | SELF-OBSERVATORY</title>
+<title>自我觀測儀 v1.6 | SELF-OBSERVATORY</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap');
-:root{--dim:rgba(255,255,255,0.38);--crt:#020202;}
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
+:root{
+  --dim:rgba(255,255,255,0.38);
+  --crt:#020202;
+  --g:#00FF88;
+  --w:#F0;
+  --c:#00AAFF;
+}
 *{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:'Share Tech Mono',monospace;background:#000;color:#fff;height:100vh;overflow:hidden;display:flex;justify-content:center;align-items:center;}
+body{
+  font-family:'Share Tech Mono',monospace;
+  background:#000;color:#fff;
+  height:100vh;overflow:hidden;
+  display:flex;justify-content:center;align-items:center;
+}
 
 /* ── INTRO ── */
-.intro{position:fixed;inset:0;background:#000;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:9999;padding:24px;transition:opacity .8s;}
+.intro{position:fixed;inset:0;background:#000;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;z-index:9999;padding:24px;transition:opacity .8s;}
 .intro.off{opacity:0;pointer-events:none;}
-.intro h1{font-family:'Orbitron',sans-serif;font-size:clamp(20px,4.5vw,40px);letter-spacing:8px;text-shadow:0 0 28px #fff,0 0 55px rgba(255,255,255,.25);margin-bottom:22px;}
-.intro p{color:var(--dim);font-size:13px;line-height:1.9;text-align:center;max-width:540px;margin-bottom:8px;letter-spacing:.5px;}
-.intro button{margin-top:32px;font-family:'Orbitron',sans-serif;padding:13px 46px;background:transparent;border:1px solid rgba(255,255,255,.75);color:#fff;font-size:14px;cursor:pointer;letter-spacing:4px;box-shadow:0 0 18px rgba(255,255,255,.12);transition:all .3s;}
+.intro h1{font-family:'Orbitron',sans-serif;font-size:clamp(18px,4vw,38px);letter-spacing:8px;
+  text-shadow:0 0 28px #fff,0 0 55px rgba(255,255,255,.25);margin-bottom:18px;}
+.intro p{color:var(--dim);font-size:12px;line-height:1.9;text-align:center;max-width:560px;margin-bottom:6px;letter-spacing:.5px;}
+.intro .warning{color:rgba(255,120,100,.7);font-size:10px;margin-top:8px;
+  border:1px solid rgba(255,120,100,.3);padding:8px 16px;max-width:560px;text-align:center;}
+.intro button{margin-top:28px;font-family:'Orbitron',sans-serif;padding:13px 46px;
+  background:transparent;border:1px solid rgba(255,255,255,.75);color:#fff;
+  font-size:14px;cursor:pointer;letter-spacing:4px;
+  box-shadow:0 0 18px rgba(255,255,255,.12);transition:all .3s;}
 .intro button:hover{background:rgba(255,255,255,.06);box-shadow:0 0 36px rgba(255,255,255,.35);}
 
 /* ── MACHINE ── */
 .mw{
-  position:relative;
-  width:95vw;max-width:1000px;
-  aspect-ratio:1000/667;
-  background:#090909;
-  overflow:hidden;   /* 裁掉所有子層溢出 */
-  /* 立體感：邊緣高光 + 多層落影 */
-  box-shadow:
-    0 0 0 1px rgba(255,255,255,.10),
-    0 1px 0 rgba(255,255,255,.14),
-    0 8px 24px rgba(0,0,0,.85),
-    0 24px 60px rgba(0,0,0,.72),
-    0 50px 120px rgba(0,0,0,.55);
+  position:relative;width:95vw;max-width:1100px;aspect-ratio:1100/680;
+  background:#090909;overflow:hidden;
+  box-shadow:0 0 0 1px rgba(255,255,255,.10),0 1px 0 rgba(255,255,255,.14),
+             0 8px 24px rgba(0,0,0,.85),0 24px 60px rgba(0,0,0,.72);
 }
-/* 左上角反光 — 模擬面板正面光澤 */
-.mw::before{
-  content:'';position:absolute;inset:0;z-index:99;pointer-events:none;
-  background:
-    linear-gradient(135deg,rgba(255,255,255,.06) 0%,transparent 45%),
-    linear-gradient(to bottom,rgba(255,255,255,.04) 0%,transparent 30%);
-}
-/* bg = Image2（視差層，overflow:hidden 由 .mw 裁切）*/
-#layerBg{
-  position:absolute;
-  inset:0;
-  background:url('Image2.png') center/contain no-repeat;
-  z-index:0;pointer-events:none;
-  will-change:transform;
-}
-/* gear = Image3（定位在左旋鈕上，略大於旋鈕 canvas）
-   左旋鈕：left:6.5%, top:8%, width:15%, canvas高≈20.5%
-   稍微放大並置中對齊                                      */
-#layerGear{
-  position:absolute;
-  left:4.5%; top:6%;
-  width:19%; height:25%;
-  background:url('Image3.png') center/contain no-repeat;
-  z-index:8;pointer-events:none;
-  transform-origin:center center;
-}
-/* gear右（跟右旋鈕同步）*/
-#layerGearR{
-  position:absolute;
-  right:4.5%; top:6%;
-  width:19%; height:25%;
-  background:url('Image3.png') center/contain no-repeat;
-  z-index:8;pointer-events:none;
-  transform-origin:center center;
-}
-/* fg = Image（最上層前景）*/
-#layerFg{
-  position:absolute;inset:0;
-  background:url('Image.png') center/contain no-repeat;
-  z-index:3;pointer-events:none;
-  animation:fgf 10s ease-in-out infinite;
-}
+.mw::before{content:'';position:absolute;inset:0;z-index:99;pointer-events:none;
+  background:linear-gradient(135deg,rgba(255,255,255,.05) 0%,transparent 45%),
+             linear-gradient(to bottom,rgba(255,255,255,.03) 0%,transparent 30%);}
+
+/* ── LAYERS ── */
+#layerBg{position:absolute;inset:0;background:url('Image2.png') center/contain no-repeat;z-index:0;pointer-events:none;will-change:transform;}
+#layerGear{position:absolute;left:4.5%;top:6%;width:19%;height:25%;background:url('Image3.png') center/contain no-repeat;z-index:8;pointer-events:none;transform-origin:center;}
+#layerGearR{position:absolute;right:4.5%;top:6%;width:19%;height:25%;background:url('Image3.png') center/contain no-repeat;z-index:8;pointer-events:none;transform-origin:center;}
+#layerFg{position:absolute;inset:0;background:url('Image.png') center/contain no-repeat;z-index:3;pointer-events:none;animation:fgf 10s ease-in-out infinite;}
 @keyframes fgf{0%,100%{transform:translate(0,0)}50%{transform:translate(2px,-1px)}}
 
-/* ── SCREEN ── */
-.sc{position:absolute;top:8.5%;left:25.5%;width:49%;height:54%;background:var(--crt);border-radius:4px;overflow:hidden;z-index:5;border:1px solid rgba(255,255,255,.22);box-shadow:0 0 18px rgba(255,255,255,.07),inset 0 0 28px rgba(0,0,0,.8);}
+/* ── MAIN SCREEN ── */
+.sc{position:absolute;top:8.5%;left:25.5%;width:49%;height:54%;
+  background:var(--crt);border-radius:4px;overflow:hidden;z-index:5;
+  border:1px solid rgba(255,255,255,.22);
+  box-shadow:0 0 18px rgba(255,255,255,.07),inset 0 0 28px rgba(0,0,0,.8);}
 #cv{width:100%;height:100%;display:block;}
-.crt{position:absolute;inset:0;background:linear-gradient(rgba(0,0,0,0) 50%,rgba(0,0,0,.18) 50%),linear-gradient(90deg,rgba(255,255,255,.015),rgba(255,255,255,.008),rgba(255,255,255,.015));background-size:100% 3px,3px 100%;pointer-events:none;z-index:5;}
-.vig{position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 52%,rgba(0,0,0,.78) 100%);pointer-events:none;z-index:6;}
+.crt{position:absolute;inset:0;
+  background:linear-gradient(rgba(0,0,0,0) 50%,rgba(0,0,0,.18) 50%),
+             linear-gradient(90deg,rgba(255,255,255,.015),rgba(255,255,255,.008),rgba(255,255,255,.015));
+  background-size:100% 3px,3px 100%;pointer-events:none;z-index:5;}
+.vig{position:absolute;inset:0;
+  background:radial-gradient(ellipse at center,transparent 52%,rgba(0,0,0,.78) 100%);
+  pointer-events:none;z-index:6;}
+
+/* ── BIOMETRIC TERMINAL (RIGHT) ── */
+#gazePanel{
+  position:absolute;top:8.5%;right:1%;width:23%;height:54%;
+  background:rgba(0,0,0,.92);border:1px solid rgba(0,255,136,.22);
+  border-radius:3px;z-index:20;overflow:hidden;display:flex;flex-direction:column;
+}
+#gazeHeader{
+  padding:5px 8px;font-size:8px;color:#00FF88;
+  border-bottom:1px solid rgba(0,255,136,.18);letter-spacing:2px;
+  display:flex;justify-content:space-between;align-items:center;flex-shrink:0;
+}
+#gazeStatus{width:6px;height:6px;border-radius:50%;background:#1a1a1a;transition:background .3s;}
+#gazeStatus.on{background:#00FF88;box-shadow:0 0 8px #00FF88;}
+#gazeFeed{flex:1;overflow:hidden;padding:6px 8px;display:flex;flex-direction:column-reverse;gap:5px;}
+.ge{border-left:2px solid rgba(0,255,136,.28);padding-left:6px;animation:fin .3s ease;}
+@keyframes fin{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.ge-ts{font-size:7px;color:rgba(255,255,255,.25);margin-bottom:2px;}
+.ge-row{font-size:8px;line-height:1.7;letter-spacing:.4px;}
+.ge-row .k{color:rgba(0,255,136,.65);}
+.ge-row .vi{color:#fff;}
+.ge-row .vm{color:#ffcc44;}
+.ge-row .vl{color:rgba(200,255,230,.45);}
+#gazeBar{height:2px;background:linear-gradient(90deg,#00FF88,#00AAFF);width:0%;transition:width .4s;flex-shrink:0;}
+
+/* ── SYSTEM PANEL (LEFT) ── */
+#infoPanel{
+  position:absolute;top:8.5%;left:1%;width:23%;height:54%;
+  background:rgba(0,0,0,.85);border:1px solid rgba(255,255,255,.10);
+  border-radius:3px;z-index:20;overflow:hidden;display:flex;flex-direction:column;
+}
+#infoHeader{padding:5px 8px;font-size:8px;color:rgba(255,255,255,.45);
+  border-bottom:1px solid rgba(255,255,255,.08);letter-spacing:2px;flex-shrink:0;}
+#infoBody{flex:1;padding:7px 8px;font-size:8px;line-height:1.8;
+  color:rgba(255,255,255,.45);overflow:hidden;}
+#infoBody .lb{color:rgba(255,255,255,.28);}
+#infoBody .vl{color:rgba(255,255,255,.85);}
+#infoBody .hi{color:#00FF88;}
 
 /* ── UI TEXT ── */
-.uit{position:absolute;padding:7px 9px;font-size:9px;pointer-events:none;z-index:4;text-transform:uppercase;color:rgba(255,255,255,.82);text-shadow:0 0 7px rgba(255,255,255,.45);line-height:1.75;letter-spacing:.8px;}
+.uit{position:absolute;padding:7px 9px;font-size:9px;pointer-events:none;z-index:4;
+  text-transform:uppercase;color:rgba(255,255,255,.82);
+  text-shadow:0 0 7px rgba(255,255,255,.45);line-height:1.75;letter-spacing:.8px;}
 .tl{top:0;left:0;}
 .tl div:first-child{color:#fff;font-size:10px;font-weight:bold;text-shadow:0 0 11px #fff;}
-.br{bottom:0;right:0;text-align:right;color:rgba(255,255,255,.38);font-size:8px;}
+.br{bottom:0;right:0;text-align:right;color:rgba(255,255,255,.35);font-size:8px;}
 
 /* ── KNOBS ── */
 .kc{position:absolute;display:flex;flex-direction:column;align-items:center;z-index:20;}
@@ -95,11 +120,19 @@ body{font-family:'Share Tech Mono',monospace;background:#000;color:#fff;height:1
 .kr{top:8%;right:6.5%;width:15%;height:25%;}
 .ka{width:100%;height:82%;cursor:grab;display:block;}
 .ka:active{cursor:grabbing;}
-.kv{font-size:clamp(11px,1.6vw,16px);color:rgba(255,255,255,.92);text-shadow:0 0 12px #fff,0 0 24px rgba(255,255,255,.45);margin-top:10%;font-weight:bold;letter-spacing:1.5px;font-family:'Orbitron',sans-serif;}
+.kv{font-size:clamp(11px,1.6vw,16px);color:rgba(255,255,255,.92);
+  text-shadow:0 0 12px #fff,0 0 24px rgba(255,255,255,.45);
+  margin-top:10%;font-weight:bold;letter-spacing:1.5px;font-family:'Orbitron',sans-serif;}
 
-.ms{position:absolute;bottom:30%;left:26%;width:48%;height:9%;z-index:20;display:flex;justify-content:space-around;align-items:center;}
-.mt{flex:1;height:100%;cursor:pointer;display:flex;flex-direction:column;justify-content:center;align-items:center;color:var(--dim);font-size:clamp(9px,1.3vw,13px);font-weight:bold;font-family:'Orbitron',sans-serif;letter-spacing:2px;transition:all .4s;-webkit-tap-highlight-color:transparent;user-select:none;}
-.mt::before{content:'';width:5px;height:5px;background:#1a1a1a;border:1px solid rgba(255,255,255,.1);border-radius:50%;margin-bottom:4px;transition:all .3s;}
+/* ── MODE ── */
+.ms{position:absolute;bottom:30%;left:26%;width:48%;height:9%;z-index:20;
+  display:flex;justify-content:space-around;align-items:center;}
+.mt{flex:1;height:100%;cursor:pointer;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;color:var(--dim);
+  font-size:clamp(9px,1.3vw,13px);font-weight:bold;font-family:'Orbitron',sans-serif;
+  letter-spacing:2px;transition:all .4s;-webkit-tap-highlight-color:transparent;user-select:none;}
+.mt::before{content:'';width:5px;height:5px;background:#1a1a1a;
+  border:1px solid rgba(255,255,255,.1);border-radius:50%;margin-bottom:4px;transition:all .3s;}
 .mt.on{color:#fff;text-shadow:0 0 11px #fff,0 0 24px rgba(255,255,255,.45),0 0 48px rgba(255,255,255,.18);}
 .mt.on::before{background:#fff;box-shadow:0 0 11px #fff,0 0 24px #fff,0 0 48px rgba(255,255,255,.45);border-color:#fff;}
 
@@ -108,100 +141,63 @@ body{font-family:'Share Tech Mono',monospace;background:#000;color:#fff;height:1
 .bc{bottom:29.5%;left:19.8%;width:3.5%;height:5.5%;}
 .br2{bottom:29.5%;right:19.8%;width:3.5%;height:5.5%;}
 .li{position:absolute;width:10px;height:10px;border-radius:50%;z-index:20;background:#0a0a0a;}
-.li::after{
-  content:attr(data-l);
-  position:absolute;top:16px;left:50%;
-  transform:translateX(-50%);
-  font-size:clamp(11px,1.6vw,15px);
-  font-family:'Orbitron',sans-serif;
-  font-weight:bold;
-  color:rgba(255,255,255,.72);
-  text-shadow:0 0 10px rgba(255,255,255,.4);
-  white-space:nowrap;letter-spacing:1.5px;
-}
+.li::after{content:attr(data-l);position:absolute;top:16px;left:50%;transform:translateX(-50%);
+  font-size:clamp(11px,1.6vw,15px);font-family:'Orbitron',sans-serif;font-weight:bold;
+  color:rgba(255,255,255,.72);text-shadow:0 0 10px rgba(255,255,255,.4);
+  white-space:nowrap;letter-spacing:1.5px;}
 .ll{bottom:22%;left:15%;}
 .lr{bottom:22%;right:15%;}
 .li.gr{background:#0f8;box-shadow:0 0 18px #0f8,0 0 36px rgba(0,255,136,.35);}
 .li.rd{background:#f00;box-shadow:0 0 18px #f00,0 0 36px rgba(255,0,0,.35);animation:bk 1s infinite;}
 @keyframes bk{0%,50%{opacity:1}51%,100%{opacity:.15}}
 
-/* ════════════════════════════════════════════
-   RESPONSIVE — 手機橫式
-   策略：以視窗高度為基準縮放整台機器，
-   確保所有物件（旋鈕/模式鈕/燈）都在視窗內
-   ════════════════════════════════════════════ */
-@media (max-width:900px) and (orientation:landscape){
-  body{align-items:center;justify-content:center;}
-
-  /* 機器整體：改用 100vw × 100vh 中取小者 */
-  .mw{
-    /* 保持 1000:667 比例，但不超出螢幕高度 */
-    width:min(95vw, calc(100vh * 1000/667));
-    max-width:none;
-    /* aspect-ratio 仍有效，但加高度上限讓它不超出 */
-    max-height:98vh;
-  }
-
-  /* 旋鈕值字型縮小 */
-  .kv{font-size:clamp(7px,1.2vw,9px);}
-
-  /* 模式按鈕字型已用 clamp，這裡確保 tap 區夠大 */
-  .mt{min-height:28px;letter-spacing:1px;}
-  .mt::before{width:4px;height:4px;margin-bottom:3px;}
-
-  /* 螢幕內 UI 文字縮小 */
-  .uit{font-size:clamp(6px,1vw,9px);padding:4px 6px;line-height:1.5;}
-  .tl div:first-child{font-size:clamp(7px,1.1vw,10px);}
-
-  /* 指示燈標籤在極小螢幕隱藏 */
-  .li::after{font-size:6px;}
-}
-
-/* 極窄橫式（手機高度 < 420px，如 iPhone SE 橫） */
-@media (max-width:900px) and (orientation:landscape) and (max-height:420px){
-  .mw{
-    width:min(92vw, calc(96vh * 1000/667));
-  }
-  /* 模式選擇器文字再縮 */
-  .mt{font-size:clamp(7px,1.8vw,10px);letter-spacing:.5px;}
-  .mt::before{display:none;} /* 隱藏指示燈點，節省高度 */
-  /* 旋鈕縮小 */
-  .kl,.kr{height:20%;}
-  .kv{font-size:7px;}
-  /* UI 文字 */
-  .uit{font-size:6px;line-height:1.4;}
-}
-
-/* ── FACE STATUS BAR ── */
-#fbar{position:absolute;bottom:1px;left:0;width:0;height:2px;background:linear-gradient(90deg,#0f8,#0cf);z-index:7;transition:width .3s;border-radius:0 2px 2px 0;}
-
+#fbar{position:absolute;bottom:1px;left:0;width:0;height:2px;
+  background:linear-gradient(90deg,#0f8,#0cf);z-index:7;transition:width .3s;border-radius:0 2px 2px 0;}
 video{display:none;}
+#capCanvas{display:none;}
 </style>
 </head>
 <body>
 
-<!-- INTRO -->
 <div class="intro" id="intro">
-  <h1>SELF-OBSERVATORY</h1>
+  <h1>SELF-OBSERVATORY v1.6</h1>
   <p>這是一台解析主體擬像的數位觀測儀器。<br>
-     系統使用 <strong style="color:#0f8">MediaPipe FaceMesh</strong> 追蹤 468 個面部標記點，<br>
-     將你的五官精準替換為陌生人的容貌碎片。</p>
-  <p style="font-size:11px;margin-top:4px;">旋鈕一：碎片密度 &nbsp;|&nbsp; 旋鈕二：異化強度</p>
-  <button onclick="boot()">開始體驗 / START</button>
+     系統使用 <strong style="color:#0f8">MediaPipe FaceMesh</strong> 追蹤 468 個臉部標記，<br>
+     並以即時生物特徵幾何運算生成冷酷的分類標籤。</p>
+  <p style="font-size:11px;margin-top:4px;">旋鈕一：密度 &nbsp;|&nbsp; 旋鈕二：異化強度</p>
+  <div class="warning">警告：右側終端機顯示的標籤直接從你的臉部幾何計算而來。<br>
+    系統並非透明媒介，其分類反映演算法的結構性預設。</div>
+  <button onclick="boot()">進入觀測 / BEGIN OBSERVATION</button>
 </div>
 
-<!-- MACHINE -->
 <div class="mw">
-  <!-- 視差背景層 -->
   <div id="layerBg"></div>
-  <!-- 齒輪層左（跟左旋鈕同步旋轉）-->
   <div id="layerGear"></div>
-  <!-- 齒輪層右（跟右旋鈕同步旋轉）-->
   <div id="layerGearR"></div>
 
+  <!-- LEFT PANEL -->
+  <div id="infoPanel">
+    <div id="infoHeader">SYSTEM_MANIFEST</div>
+    <div id="infoBody">
+      <span class="lb">SUBJECT_ID</span><br>
+      <span class="vl" id="iSubjectId">UNASSIGNED</span><br><br>
+      <span class="lb">SESSION_START</span><br>
+      <span class="vl" id="iSession">--</span><br><br>
+      <span class="lb">MESH_LANDMARKS</span><br>
+      <span class="hi">468 ACTIVE</span><br><br>
+      <span class="lb">BIOMETRIC_CYCLES</span><br>
+      <span class="vl" id="iCycles">0</span><br><br>
+      <span class="lb">CURRENT_CLASS</span><br>
+      <span class="vl" id="iClass" style="color:#ff8">PENDING</span><br><br>
+      <span class="lb">DEPTH_LAYERS</span><br>
+      <span class="hi" id="iDepth">FACE / BODY / BG</span>
+    </div>
+  </div>
+
+  <!-- MAIN SCREEN -->
   <div class="sc" id="sc">
     <div class="uit tl">
-      <div id="dmode">MODE: MIRROR_STAGE</div>
+      <div id="dmode">MODE: LASER_WEB</div>
       <div id="dstat">SYS: STANDBY</div>
     </div>
     <div class="uit br" id="log">AWAITING FACE DATA...</div>
@@ -209,43 +205,251 @@ video{display:none;}
     <div class="crt"></div>
     <div class="vig"></div>
     <div id="fbar"></div>
-  </div><!-- /.sc -->
+  </div>
 
-  <!-- 前景層（Image.png 覆蓋在最上方）-->
   <div id="layerFg"></div>
 
-  <!-- Knobs (canvas dial) -->
+  <!-- KNOBS -->
   <div class="kc kl"><canvas class="ka" id="kDen"></canvas><div class="kv" id="vDen">×2</div></div>
   <div class="kc kr"><canvas class="ka" id="kDist"></canvas><div class="kv" id="vDist">70%</div></div>
 
-  <!-- Mode selector -->
+  <!-- MODE SELECTOR -->
   <div class="ms">
     <div class="mt on" onclick="setMode(1)">REFLEX</div>
     <div class="mt" onclick="setMode(2)">PROCESS</div>
     <div class="mt" onclick="setMode(3)">SYNTH</div>
   </div>
 
-  <!-- Buttons + lights -->
   <div class="btn bc" id="btnC"></div>
   <div class="btn br2" id="btnR"></div>
   <div class="li ll" id="lG" data-l="CAM LINK"></div>
   <div class="li lr" id="lR" data-l="SYS RUN"></div>
+
+  <!-- RIGHT PANEL: BIOMETRIC TERMINAL -->
+  <div id="gazePanel">
+    <div id="gazeHeader">
+      <span>BIOMETRIC_ANALYSIS</span>
+      <div id="gazeStatus"></div>
+    </div>
+    <div id="gazeFeed">
+      <div style="font-size:8px;color:rgba(0,255,136,.3);text-align:center;padding:8px;animation:fin .4s ease infinite alternate;">
+        AWAITING_SUBJECT...
+      </div>
+    </div>
+    <div id="gazeBar"></div>
+  </div>
 </div>
 
 <video id="vid" autoplay playsinline></video>
+<canvas id="capCanvas" width="320" height="240"></canvas>
 
-<!-- MediaPipe FaceMesh CDN -->
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
 
 <script>
 // ════════════════════════════════════════════════
+//  LOCAL BIOMETRIC ENGINE  (no external API)
+// ════════════════════════════════════════════════
+let bioTimer = null;
+let bioCount = 0;
+const BIO_INTERVAL = 5000;
+
+// Blink tracking
+let blinkCount = 0, lastBlinkTime = Date.now();
+let prevEAR = 1;
+
+function computeBiometrics() {
+  if (!S.lm || S.conf < 0.4) return null;
+
+  const lm = S.lm;
+  const W = canvas.width, H = canvas.height;
+
+  // ── Helper ──
+  const p = idx => {
+    if (!lm[idx]) return null;
+    return { x:(1-lm[idx].x)*W, y:lm[idx].y*H, z:lm[idx].z||0 };
+  };
+  const d = (a,b) => a&&b ? Math.sqrt((a.x-b.x)**2+(a.y-b.y)**2) : 0;
+
+  // Eye landmarks
+  const eLL=p(33), eLR=p(133), eLT=p(159), eLB=p(145);
+  const eRL=p(362), eRR=p(263), eRT=p(386), eRB=p(374);
+  // Face geometry
+  const chin=p(152), forehead=p(10), lCheek=p(234), rCheek=p(454);
+  const nose=p(4), mL=p(61), mR=p(291), mT=p(13), mB=p(14);
+  // Brow
+  const lBrow=p(70), rBrow=p(300);
+
+  // ── BILATERAL SYMMETRY (0–1) ──
+  const eyeDist = d(eLL, eRR);
+  const leftDist = lCheek && eLL ? d(lCheek, eLL) : 0;
+  const rightDist = rCheek && eRR ? d(rCheek, eRR) : 0;
+  const bilat = eyeDist > 0
+    ? Math.max(0, 1 - Math.abs(leftDist - rightDist) / (eyeDist * 0.5))
+    : 0.5;
+
+  // ── EAR — Eye Aspect Ratio (fatigue/blink proxy) ──
+  const earL = (eLT&&eLB&&eLL&&eLR) ? d(eLT,eLB) / (d(eLL,eLR)||1) : 0.3;
+  const earR = (eRT&&eRB&&eRL&&eRR) ? d(eRT,eRB) / (d(eRL,eRR)||1) : 0.3;
+  const ear = (earL + earR) / 2;
+  // Blink detection
+  if (prevEAR > 0.2 && ear < 0.15) {
+    blinkCount++;
+    const now = Date.now();
+    if (now - lastBlinkTime > 2000) lastBlinkTime = now;
+  }
+  prevEAR = ear;
+  const blinkRate = blinkCount / Math.max(1, (Date.now()-lastBlinkTime)/60000);
+  const arousal = blinkRate > 25 ? 'ELEVATED' : blinkRate > 12 ? 'NOMINAL' : 'SUPPRESSED';
+
+  // ── AXIS DEVIATION (head tilt angle) ──
+  let axisAngle = 0;
+  if (chin && forehead) {
+    axisAngle = Math.atan2(forehead.x - chin.x, chin.y - forehead.y) * 180 / Math.PI;
+  }
+
+  // ── AFFECT VECTOR (mouth geometry) ──
+  let affect = 'UNDEFINED';
+  if (mL && mR && mT && mB) {
+    const mouthWidth = d(mL, mR);
+    const mouthHeight = d(mT, mB);
+    const mar = mouthHeight / (mouthWidth || 1);
+    const cornerY = (mL.y + mR.y) / 2;
+    const lipCenterY = mT.y;
+    affect = mar > 0.25 ? 'OPEN_STATE' :
+             cornerY < lipCenterY - 2 ? 'POSITIVE_DRIFT' :
+             cornerY > lipCenterY + 2 ? 'SUPPRESSED_NEUTRAL' : 'FLAT_MASK';
+  }
+
+  // ── PROXIMITY CLASS (face size relative to frame) ──
+  const faceH = chin && forehead ? d(chin, forehead) : 0;
+  const proximity = faceH / H;
+  const proxClass = proximity > 0.55 ? 'PROXIMAL_INVASION' :
+                    proximity > 0.35 ? 'STANDARD_CAPTURE' :
+                    proximity > 0.18 ? 'DISTAL_SUBJECT' : 'FRINGE_DETECT';
+
+  // ── GAZE DIRECTION (iris proxy) ──
+  let gazeDir = 'UNDEFINED';
+  if (eLL && eLR && eRL && eRR) {
+    const leftCenter = { x:(eLL.x+eLR.x)/2, y:(eLL.y+eLR.y)/2 };
+    const rightCenter = { x:(eRL.x+eRR.x)/2, y:(eRL.y+eRR.y)/2 };
+    const gaze_x = (leftCenter.x + rightCenter.x) / 2 / W;
+    const gaze_y = (leftCenter.y + rightCenter.y) / 2 / H;
+    if (gaze_x < 0.35) gazeDir = 'LEFT_AVOIDANCE';
+    else if (gaze_x > 0.65) gazeDir = 'RIGHT_DRIFT';
+    else if (gaze_y < 0.35) gazeDir = 'UPWARD_EVASION';
+    else gazeDir = 'DIRECT_LOCK';
+  }
+
+  // ── BROW TENSION ──
+  let browTension = 0;
+  if (lBrow && rBrow && eLL && eRR) {
+    const lBrowToEye = lBrow.y - eLL.y;
+    const rBrowToEye = rBrow.y - eRR.y;
+    browTension = Math.max(0, Math.min(1, 1 - (lBrowToEye + rBrowToEye) / (faceH * 0.3 + 0.001)));
+  }
+
+  // ── IDENTITY CONFIDENCE ──
+  const idConf = S.conf * bilat * (0.5 + 0.5 * (1 - Math.abs(axisAngle)/30));
+
+  // ── CLASSIFICATION ──
+  const classification =
+    idConf > 0.75 ? 'SUBJECT_RESOLVED' :
+    idConf > 0.50 ? 'PARTIAL_ACQUISITION' :
+    idConf > 0.25 ? 'UNSTABLE_PROFILE' : 'UNRESOLVED_SUBJECT';
+
+  return {
+    BILATERAL_SYMMETRY: bilat.toFixed(3),
+    AFFECT_VECTOR: affect,
+    AXIS_DEVIATION: axisAngle.toFixed(1) + 'deg',
+    EAR_INDEX: ear.toFixed(3),
+    AROUSAL_ESTIMATE: arousal,
+    GAZE_VECTOR: gazeDir,
+    BROW_TENSION: browTension.toFixed(3),
+    PROXIMITY_CLASS: proxClass,
+    IDENTITY_CONFIDENCE: idConf.toFixed(3),
+    CLASSIFICATION: classification,
+  };
+}
+
+function triggerBioUpdate() {
+  const bio = computeBiometrics();
+  if (!bio) return;
+
+  bioCount++;
+  document.getElementById('iCycles').textContent = bioCount;
+  document.getElementById('iClass').textContent = bio.CLASSIFICATION;
+
+  addBioEntry(bio);
+
+  // Progress bar flash
+  const bar = document.getElementById('gazeBar');
+  bar.style.width = '100%';
+  setTimeout(() => bar.style.width = '0%', 400);
+
+  document.getElementById('gazeStatus').className = 'on';
+  setTimeout(() => document.getElementById('gazeStatus').className = '', 1000);
+}
+
+function addBioEntry(bio) {
+  const feed = document.getElementById('gazeFeed');
+  const placeholder = feed.querySelector('div[style]');
+  if (placeholder) placeholder.remove();
+
+  const entry = document.createElement('div');
+  entry.className = 'ge';
+
+  const ts = new Date().toLocaleTimeString('en',{hour12:false});
+  const tsDiv = document.createElement('div');
+  tsDiv.className = 'ge-ts';
+  tsDiv.textContent = ts + ' // CYCLE_' + bioCount;
+  entry.appendChild(tsDiv);
+
+  // Show rotating subset of metrics (5 at a time)
+  const keys = Object.keys(bio);
+  const start = (bioCount * 3) % keys.length;
+  const show = [...keys.slice(start), ...keys.slice(0, start)].slice(0, 6);
+
+  show.forEach(k => {
+    const v = bio[k];
+    const row = document.createElement('div');
+    row.className = 'ge-row';
+    const numV = parseFloat(v);
+    let cls = 'vl';
+    if (!isNaN(numV)) {
+      cls = numV > 0.7 ? 'vi' : numV > 0.4 ? 'vm' : 'vl';
+    } else if (['LOCK','INVASION','ELEVATED','RESOLVED'].some(w => v.includes(w))) cls = 'vm';
+    else if (['UNRESOLVED','SUPPRESSED','AVOIDANCE','EVASION'].some(w => v.includes(w))) cls = 'vl';
+    row.innerHTML = `<span class="k">${k}</span>:<span class="${cls}">${v}</span>`;
+    entry.appendChild(row);
+  });
+
+  feed.insertBefore(entry, feed.firstChild);
+  while (feed.children.length > 5) feed.removeChild(feed.lastChild);
+}
+
+function startBioLoop() {
+  clearInterval(bioTimer);
+  setTimeout(triggerBioUpdate, 1500);
+  bioTimer = setInterval(triggerBioUpdate, BIO_INTERVAL);
+}
+function stopBioLoop() { clearInterval(bioTimer); }
+
+// ════════════════════════════════════════════════
+//  SUBJECT ID
+// ════════════════════════════════════════════════
+function generateSubjectId() {
+  const h = () => Math.floor(Math.random()*256).toString(16).padStart(2,'0').toUpperCase();
+  return `SUB-${h()}${h()}-${h()}`;
+}
+
+// ════════════════════════════════════════════════
 //  SOUND
 // ════════════════════════════════════════════════
 const SFX={
   click:new Audio('sounds/click.mp3'),
-  knob: new Audio('sounds/knob.mp3'),
-  mode: new Audio('sounds/mode.mp3'),
+  knob:new Audio('sounds/knob.mp3'),
+  mode:new Audio('sounds/mode.mp3'),
 };
 Object.values(SFX).forEach(a=>{a.volume=.55;a.preload='auto';});
 function sfx(n){try{SFX[n].currentTime=0;SFX[n].play().catch(()=>{});}catch(e){}}
@@ -253,25 +457,29 @@ let knbT=null;
 function sfxKnob(){clearTimeout(knbT);knbT=setTimeout(()=>sfx('knob'),80);}
 
 // ════════════════════════════════════════════════
-//  CANVAS
+//  CANVAS + STATE
 // ════════════════════════════════════════════════
 const canvas=document.getElementById('cv');
 const ctx=canvas.getContext('2d');
 const vid=document.getElementById('vid');
 
 // ════════════════════════════════════════════════
-//  IMAGE LIBRARY  facial-parts/
+//  IMAGE LIBRARY (face parts + bg + body)
 // ════════════════════════════════════════════════
-const TYPES=['eyes','mouth','nose','ears'];
+const TYPES=['eyes','mouth','nose','ears','bg','body'];
 const PCOUNT=50;
 const imgs={};
-let imgLoaded=0,imgTotal=TYPES.length*PCOUNT;
+let imgLoaded=0, imgTotal=TYPES.length*PCOUNT;
+
 TYPES.forEach(t=>{
   imgs[t]=[];
   for(let i=1;i<=PCOUNT;i++){
     const im=new Image();
-    im.src=`facial-parts/${t}/${t}_${String(i).padStart(2,'0')}.png`;
-    im.onload=im.onerror=()=>{imgLoaded++;if(imgLoaded===imgTotal)log("IMG DB READY.");};
+    const folder = ['eyes','mouth','nose','ears'].includes(t)
+      ? `facial-parts/${t}/${t}_${String(i).padStart(2,'0')}.png`
+      : `facial-parts/${t}/${t}_${String(i).padStart(2,'0')}.png`;
+    im.src=folder;
+    im.onload=im.onerror=()=>{imgLoaded++;if(imgLoaded===imgTotal)log('IMG_DB_READY');};
     imgs[t].push(im);
   }
 });
@@ -280,141 +488,79 @@ TYPES.forEach(t=>{
 //  STATE
 // ════════════════════════════════════════════════
 const S={
-  run:false, cam:false, mode:1,
-  density:2,   // 1~5 (層數)
-  dist:.7,
-  frame:0, scanY:0,
-  // FaceMesh 結果
-  lm:null,           // landmarks array (468 points, each {x,y,z})
-  conf:0,            // 0~1 信心值（有臉=1，沒有逐漸衰減）
-  // Stage3 碎片物理
-  frags:[], fragDirty:true,
-  // 旋鈕
-  density_raw:.25,
-  dist_raw:.7,
+  run:false,cam:false,mode:1,
+  density:2,dist:.7,
+  frame:0,scanY:0,
+  lm:null,conf:0,
+  frags:[],fragDirty:true,
+  density_raw:.25,dist_raw:.7,
+  // Depth analysis
+  depthMap:null,
+  depthCanvas:document.createElement('canvas'),
+  // Laser web
+  laserParticles:[],
 };
 
 // ════════════════════════════════════════════════
-//  MEDIAPIPE FACE MESH
+//  MEDIAPIPE
 // ════════════════════════════════════════════════
-let faceMesh=null;
-let mpCamera=null;
-
-// 重要 landmark 索引（MediaPipe 468點的子集）
+let faceMesh=null,mpCamera=null;
 const LM={
-  // 眼睛
-  leftEyeOuter:33, leftEyeInner:133, leftEyeTop:159, leftEyeBot:145,
-  rightEyeOuter:362, rightEyeInner:263, rightEyeTop:386, rightEyeBot:374,
-  // 眉毛
-  leftBrowOuter:70, leftBrowInner:107,
-  rightBrowOuter:300, rightBrowInner:336,
-  // 鼻子
-  noseTip:4, noseBot:2, noseBridgeTop:6,
-  noseLeft:49, noseRight:279,
-  // 嘴巴
-  mouthLeft:61, mouthRight:291,
-  mouthTop:13, mouthBot:14,
-  upperLip:0, lowerLip:17,
-  // 臉輪廓
-  chinBot:152, foreheadTop:10,
-  leftCheek:234, rightCheek:454,
-  leftJaw:172, rightJaw:397,
-  // 耳朵（用臉輪廓最外側推算）
-  leftEar:127, rightEar:356,
+  leftEyeOuter:33,leftEyeInner:133,leftEyeTop:159,leftEyeBot:145,
+  rightEyeOuter:362,rightEyeInner:263,rightEyeTop:386,rightEyeBot:374,
+  leftBrowOuter:70,leftBrowInner:107,rightBrowOuter:300,rightBrowInner:336,
+  noseTip:4,noseBot:2,noseBridgeTop:6,noseLeft:49,noseRight:279,
+  mouthLeft:61,mouthRight:291,mouthTop:13,mouthBot:14,upperLip:0,lowerLip:17,
+  chinBot:152,foreheadTop:10,leftCheek:234,rightCheek:454,leftJaw:172,rightJaw:397,
+  leftEar:127,rightEar:356,
+  // Silhouette
+  jawL:58,jawR:288,
+  shoulderProxy:152, // use chin as shoulder proxy
 };
 
-// 取得某個 landmark 的畫布座標
 function lp(idx){
-  if(!S.lm||!S.lm[idx]) return null;
+  if(!S.lm||!S.lm[idx])return null;
   const p=S.lm[idx];
-  // lm 座標是 0~1 歸一化（但攝影機是鏡像，x 需翻轉）
-  return {
-    x:(1-p.x)*canvas.width,
-    y:p.y*canvas.height
-  };
+  return{x:(1-p.x)*canvas.width,y:p.y*canvas.height,z:p.z||0};
 }
-
-// 兩點中間點
 function mid(a,b){if(!a||!b)return null;return{x:(a.x+b.x)/2,y:(a.y+b.y)/2};}
-
-// 兩點距離
 function dist2(a,b){if(!a||!b)return 0;return Math.sqrt((a.x-b.x)**2+(a.y-b.y)**2);}
 
 function initFaceMesh(){
   faceMesh=new FaceMesh({locateFile:f=>`https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${f}`});
-  faceMesh.setOptions({
-    maxNumFaces:1,
-    refineLandmarks:true,
-    minDetectionConfidence:.5,
-    minTrackingConfidence:.5,
-  });
+  faceMesh.setOptions({maxNumFaces:1,refineLandmarks:true,minDetectionConfidence:.5,minTrackingConfidence:.5});
   faceMesh.onResults(onFaceResults);
-  log("FACE MESH INIT...");
+  log('FACE_MESH_INIT');
 }
 
-// ════════════════════════════════════════════════
-//  PARALLAX — 頭部位置驅動 Image2 視差
-// ════════════════════════════════════════════════
-const PX={
-  // 目標位移（直接由臉部位置計算）
-  targetX:0, targetY:0,
-  // 目前平滑後的位移
-  curX:0, curY:0,
-  // 齒輪目前旋轉角度（度）
-  gearRot:0,
-  // 平滑係數（越小越慢越穩，0.03 = 很低靈敏度）
-  smooth:.03,
-  // 最大位移量（px，相對機器寬）
-  maxShift:22,
-};
-
+const PX={targetX:0,targetY:0,curX:0,curY:0,gearRot:0,smooth:.03,maxShift:22};
 function updateParallax(){
-  // 只在有臉且信心足夠時更新目標
-  if(S.lm && S.conf>.3){
-    // noseTip x：0=畫面右側, 1=畫面左側（鏡像）
-    // 臉在右 → noseTip.x 小 → Image2 往右 (正值)
-    const nx=S.lm[4]?.x??0.5; // landmark 4 = noseTip
-    const ny=S.lm[4]?.y??0.5;
-    // 將 0~1 轉為 -1~+1，臉往右 → shift 往右
-    // 攝影機已鏡像：臉在右邊 landmark.x 偏小
-    PX.targetX=(0.5-nx)*2*PX.maxShift;   // 頭往右 → Image2 往右
-    PX.targetY=(ny-0.5)*2*PX.maxShift*0.4; // 垂直輕微
+  if(S.lm&&S.conf>.3){
+    const nx=S.lm[4]?.x??0.5,ny=S.lm[4]?.y??0.5;
+    PX.targetX=(0.5-nx)*2*PX.maxShift;
+    PX.targetY=(ny-0.5)*2*PX.maxShift*0.4;
   }
-
-  // 低通平滑（lerp）
   PX.curX+=(PX.targetX-PX.curX)*PX.smooth;
   PX.curY+=(PX.targetY-PX.curY)*PX.smooth;
-
-  // 套用到 layerBg（用 background-position 視差，圖片大小完全不變）
   const bg=document.getElementById('layerBg');
-  if(bg){
-    // background-position 預設 50% 50%，加上偏移
-    const bx=50+PX.curX/4;  // 除以4讓移動幅度更細膩
-    const by=50+PX.curY/4;
-    bg.style.backgroundPosition=`${bx}% ${by}%`;
-  }
-
-  // 齒輪左：跟 kDen 旋鈕同步
+  if(bg){bg.style.backgroundPosition=`${50+PX.curX/4}% ${50+PX.curY/4}%`;}
   const targetGear=knobDeg['kDen']??90;
   PX.gearRot+=(targetGear-PX.gearRot)*0.08;
   const gear=document.getElementById('layerGear');
-  if(gear) gear.style.transform=`rotate(${PX.gearRot}deg)`;
-
-  // 齒輪右：跟 kDist 旋鈕同步
+  if(gear)gear.style.transform=`rotate(${PX.gearRot}deg)`;
   if(PX.gearRotR===undefined)PX.gearRotR=0.7*360;
   const targetGearR=knobDeg['kDist']??252;
   PX.gearRotR+=(targetGearR-PX.gearRotR)*0.08;
   const gearR=document.getElementById('layerGearR');
-  if(gearR) gearR.style.transform=`rotate(${PX.gearRotR}deg)`;
+  if(gearR)gearR.style.transform=`rotate(${PX.gearRotR}deg)`;
 }
 
 function onFaceResults(results){
   if(results.multiFaceLandmarks&&results.multiFaceLandmarks.length>0){
     S.lm=results.multiFaceLandmarks[0];
     S.conf=Math.min(1,S.conf+.15);
-  } else {
-    S.lm=null;
-    S.conf=Math.max(0,S.conf-.04);
+  }else{
+    S.lm=null;S.conf=Math.max(0,S.conf-.04);
   }
   const bar=document.getElementById('fbar');
   if(bar)bar.style.width=(S.conf*100)+'%';
@@ -425,13 +571,11 @@ async function startFaceMesh(){
   if(!faceMesh)initFaceMesh();
   if(mpCamera)mpCamera.stop();
   mpCamera=new Camera(vid,{
-    onFrame:async()=>{
-      if(faceMesh&&S.run)await faceMesh.send({image:vid});
-    },
-    width:640, height:480
+    onFrame:async()=>{if(faceMesh&&S.run)await faceMesh.send({image:vid});},
+    width:640,height:480
   });
   mpCamera.start();
-  log("FACE MESH ACTIVE.");
+  log('FACE_MESH_ACTIVE');
 }
 
 // ════════════════════════════════════════════════
@@ -440,31 +584,29 @@ async function startFaceMesh(){
 async function boot(){
   sfx('click');
   document.getElementById('intro').classList.add('off');
-  log("INITIALIZING...");
+  const sid=generateSubjectId();
+  document.getElementById('iSubjectId').textContent=sid;
+  document.getElementById('iSession').textContent=new Date().toLocaleString('en',{hour12:false});
+  log('INITIALIZING...');
   await toggleCam();
   if(!S.run)toggleRun();
 }
 
 function init(){
-  resize();
-  setupEvents();
-  requestAnimationFrame(loop);
-  log("FACE ENGINE v6 (FaceMesh)");
+  resize();setupEvents();requestAnimationFrame(loop);
+  log('GAZE_ENGINE_v1.6 // LOCAL_BIO_ENABLED');
 }
 
 function setupEvents(){
   document.getElementById('btnC').addEventListener('click',()=>{sfx('click');toggleCam();});
   document.getElementById('btnR').addEventListener('click',()=>{sfx('click');toggleRun();});
   setupKnob('kDen',v=>{
-    S.density_raw=v;
-    S.density=Math.max(1,Math.round(1+v*4)); // 1~5
+    S.density_raw=v;S.density=Math.max(1,Math.round(1+v*4));
     document.getElementById('vDen').textContent='×'+S.density;
-    S.fragDirty=true;
-    sfxKnob();
+    S.fragDirty=true;sfxKnob();
   },.25);
   setupKnob('kDist',v=>{
-    S.dist_raw=v;
-    S.dist=v;
+    S.dist_raw=v;S.dist=v;
     document.getElementById('vDist').textContent=~~(v*100)+'%';
     sfxKnob();
   },.7);
@@ -472,21 +614,16 @@ function setupEvents(){
 }
 
 // ════════════════════════════════════════════════
-//  KNOB CANVAS DIAL
+//  KNOB DIAL
 // ════════════════════════════════════════════════
 function drawKnobDial(el,deg){
   const W=el.offsetWidth||80,H=el.offsetHeight||80;
   if(W<4||H<4)return;
   if(el.width!==W||el.height!==H){el.width=W;el.height=H;}
   const kx=W/2,ky=H/2,R=Math.min(W,H)*.44;
-  const kc=el.getContext('2d');
-  kc.clearRect(0,0,W,H);
-
-  // 外圈邊框（無實心底，鏤空）
+  const kc=el.getContext('2d');kc.clearRect(0,0,W,H);
   kc.strokeStyle='rgba(255,255,255,.28)';kc.lineWidth=1.2;
   kc.beginPath();kc.arc(kx,ky,R,0,Math.PI*2);kc.stroke();
-
-  // 刻度弧 (-135° → +135°, 270° sweep)
   const sA=-135*Math.PI/180,sw=270*Math.PI/180;
   kc.strokeStyle='rgba(255,255,255,.08)';kc.lineWidth=2.5;kc.lineCap='round';
   kc.beginPath();kc.arc(kx,ky,R*.78,sA,sA+sw);kc.stroke();
@@ -494,131 +631,87 @@ function drawKnobDial(el,deg){
     const fA=sA+(deg/360)*sw;
     const ag=kc.createLinearGradient(kx-R,ky,kx+R,ky);
     ag.addColorStop(0,'rgba(255,255,255,.45)');ag.addColorStop(1,'rgba(255,255,255,.95)');
-    kc.strokeStyle=ag;kc.lineWidth=2.5;
-    kc.shadowBlur=7;kc.shadowColor='rgba(255,255,255,.6)';
-    kc.beginPath();kc.arc(kx,ky,R*.78,sA,fA);kc.stroke();
-    kc.shadowBlur=0;
+    kc.strokeStyle=ag;kc.lineWidth=2.5;kc.shadowBlur=7;kc.shadowColor='rgba(255,255,255,.6)';
+    kc.beginPath();kc.arc(kx,ky,R*.78,sA,fA);kc.stroke();kc.shadowBlur=0;
   }
-
-  // 刻度線 (11個)
   for(let i=0;i<=10;i++){
     const a=sA+(i/10)*sw,major=i%5===0;
     const r1=R*(major?.70:.80),r2=R*.92;
     kc.strokeStyle=major?'rgba(255,255,255,.65)':'rgba(255,255,255,.22)';
-    kc.lineWidth=major?1.5:.8;kc.lineCap='round';
-    kc.shadowBlur=major?5:0;kc.shadowColor='#fff';
-    kc.beginPath();kc.moveTo(kx+Math.cos(a)*r1,ky+Math.sin(a)*r1);kc.lineTo(kx+Math.cos(a)*r2,ky+Math.sin(a)*r2);kc.stroke();
-    kc.shadowBlur=0;
+    kc.lineWidth=major?1.5:.8;kc.lineCap='round';kc.shadowBlur=major?5:0;kc.shadowColor='#fff';
+    kc.beginPath();kc.moveTo(kx+Math.cos(a)*r1,ky+Math.sin(a)*r1);
+    kc.lineTo(kx+Math.cos(a)*r2,ky+Math.sin(a)*r2);kc.stroke();kc.shadowBlur=0;
   }
-
-  // 中心小圓（鏤空，只畫細邊）
   kc.strokeStyle='rgba(255,255,255,.15)';kc.lineWidth=.8;
   kc.beginPath();kc.arc(kx,ky,R*.58,0,Math.PI*2);kc.stroke();
-
-  // 指針 (0→360 映射到 -135→+135, 上方為0)
-  const nd=-135+(deg/360)*270;
-  const na=(nd-90)*Math.PI/180;
-  const nx=kx+Math.cos(na)*R*.50,ny=ky+Math.sin(na)*R*.50;
+  const nd=-135+(deg/360)*270,na=(nd-90)*Math.PI/180;
+  const nx2=kx+Math.cos(na)*R*.50,ny2=ky+Math.sin(na)*R*.50;
   const nb={x:kx-Math.cos(na)*R*.07,y:ky-Math.sin(na)*R*.07};
-  kc.save();
-  kc.shadowBlur=20;kc.shadowColor='rgba(255,255,255,.95)';
-  const ng2=kc.createLinearGradient(nb.x,nb.y,nx,ny);
-  ng2.addColorStop(0,'rgba(255,255,255,.05)');ng2.addColorStop(.3,'rgba(255,255,255,.8)');ng2.addColorStop(1,'#fff');
-  kc.strokeStyle=ng2;kc.lineWidth=2.5;kc.lineCap='round';
-  kc.beginPath();kc.moveTo(nb.x,nb.y);kc.lineTo(nx,ny);kc.stroke();
-  kc.restore();
-
-  // 中心點
+  kc.save();kc.shadowBlur=20;kc.shadowColor='rgba(255,255,255,.95)';
+  const ng=kc.createLinearGradient(nb.x,nb.y,nx2,ny2);
+  ng.addColorStop(0,'rgba(255,255,255,.05)');ng.addColorStop(.3,'rgba(255,255,255,.8)');ng.addColorStop(1,'#fff');
+  kc.strokeStyle=ng;kc.lineWidth=2.5;kc.lineCap='round';
+  kc.beginPath();kc.moveTo(nb.x,nb.y);kc.lineTo(nx2,ny2);kc.stroke();kc.restore();
   kc.fillStyle='rgba(255,255,255,.85)';kc.shadowBlur=9;kc.shadowColor='#fff';
   kc.beginPath();kc.arc(kx,ky,2.8,0,Math.PI*2);kc.fill();kc.shadowBlur=0;
 }
-
 const knobDeg={kDen:.25*360,kDist:.7*360};
-
-function setupKnob(id,cb,init){
-  let drag=false,lastAngle=null,cur=init;
-  const el=document.getElementById(id);
-  knobDeg[id]=cur*360;
-  cb(cur);
+function setupKnob(id,cb,initV){
+  let drag=false,lastAngle=null,cur=initV;
+  const el=document.getElementById(id);knobDeg[id]=cur*360;cb(cur);
   setTimeout(()=>drawKnobDial(el,cur*360),100);
-
-  // 取得觸點相對於旋鈕中心的角度（弧度）
   function getAngle(ev){
     const rect=el.getBoundingClientRect();
-    const cx=rect.left+rect.width/2;
-    const cy=rect.top+rect.height/2;
+    const cx=rect.left+rect.width/2,cy=rect.top+rect.height/2;
     const clientX=ev.touches?ev.touches[0].clientX:ev.clientX;
     const clientY=ev.touches?ev.touches[0].clientY:ev.clientY;
-    return Math.atan2(clientY-cy, clientX-cx); // -π ~ +π
+    return Math.atan2(clientY-cy,clientX-cx);
   }
-
-  function onStart(ev){
-    ev.preventDefault();
-    drag=true;
-    lastAngle=getAngle(ev);
-  }
-
+  function onStart(ev){ev.preventDefault();drag=true;lastAngle=getAngle(ev);}
   function onMove(ev){
     if(!drag||lastAngle===null)return;
-    const angle=getAngle(ev);
-    // 角度差（處理跨 ±π 邊界）
-    let da=angle-lastAngle;
-    if(da> Math.PI)da-=Math.PI*2;
-    if(da<-Math.PI)da+=Math.PI*2;
-    lastAngle=angle;
-    // da 轉一圈 = 2π → cur 變化 1；縮小靈敏度讓操作更穩
-    cur=Math.min(1,Math.max(0,cur+da/(Math.PI*2)));
-    cb(cur);
-    knobDeg[id]=cur*360;
-    drawKnobDial(el,cur*360);
+    const angle=getAngle(ev);let da=angle-lastAngle;
+    if(da>Math.PI)da-=Math.PI*2;if(da<-Math.PI)da+=Math.PI*2;
+    lastAngle=angle;cur=Math.min(1,Math.max(0,cur+da/(Math.PI*2)));
+    cb(cur);knobDeg[id]=cur*360;drawKnobDial(el,cur*360);
   }
-
-  function onEnd(){ drag=false; lastAngle=null; }
-
-  el.addEventListener('mousedown', onStart);
-  el.addEventListener('touchstart', onStart, {passive:false});
-  window.addEventListener('mousemove', onMove);
-  window.addEventListener('touchmove', ev=>{ if(drag)onMove(ev); }, {passive:false});
-  window.addEventListener('mouseup', onEnd);
-  window.addEventListener('touchend', onEnd);
+  function onEnd(){drag=false;lastAngle=null;}
+  el.addEventListener('mousedown',onStart);el.addEventListener('touchstart',onStart,{passive:false});
+  window.addEventListener('mousemove',onMove);
+  window.addEventListener('touchmove',ev=>{if(drag)onMove(ev);},{passive:false});
+  window.addEventListener('mouseup',onEnd);window.addEventListener('touchend',onEnd);
 }
 
 async function toggleCam(){
   if(!S.cam){
     try{
       vid.srcObject=await navigator.mediaDevices.getUserMedia({video:{width:640,height:480,facingMode:'user'}});
-      S.cam=true;
-      document.getElementById('lG').classList.add('gr');
-      log("CAM LINK: ON");
-    }catch(e){log("ERR: CAM DENIED");}
+      S.cam=true;document.getElementById('lG').classList.add('gr');log('CAM_LINK_ONLINE');
+    }catch(e){log('ERR:CAM_DENIED');}
   }else{
     if(vid.srcObject)vid.srcObject.getTracks().forEach(t=>t.stop());
-    if(mpCamera)mpCamera.stop();
-    S.cam=false;S.lm=null;S.conf=0;
-    document.getElementById('lG').classList.remove('gr');
-    log("CAM LINK: OFF");
+    if(mpCamera)mpCamera.stop();S.cam=false;S.lm=null;S.conf=0;
+    document.getElementById('lG').classList.remove('gr');log('CAM_LINK_OFFLINE');
+    stopBioLoop();
   }
 }
 
 function toggleRun(){
   S.run=!S.run;
   document.getElementById('lR').classList.toggle('rd',S.run);
-  document.getElementById('dstat').textContent='SYS: '+(S.run?'OBSERVING':'STANDBY');
-  if(S.run){
-    S.fragDirty=true;
-    startFaceMesh();
-  }else{
-    if(mpCamera)mpCamera.stop();
-  }
-  log(S.run?"PROC_START":"PROC_HALT");
+  document.getElementById('dstat').textContent='SYS:'+(S.run?'OBSERVING':'STANDBY');
+  if(S.run){S.fragDirty=true;startFaceMesh();startBioLoop();}
+  else{if(mpCamera)mpCamera.stop();stopBioLoop();}
+  log(S.run?'OBSERVATION_START':'OBSERVATION_HALT');
 }
 
 function setMode(m){
   S.mode=m;sfx('mode');
-  const nm=['','MIRROR_STAGE','DATA_DISCIPLINE','FACE_REWRITE'];
-  document.getElementById('dmode').textContent='MODE: '+nm[m];
+  const nm=['','LASER_WEB','DEPTH_STRATA','FULL_REWRITE'];
+  document.getElementById('dmode').textContent='MODE:'+nm[m];
   document.querySelectorAll('.mt').forEach((el,i)=>el.classList.toggle('on',i===m-1));
-  log('STAGE_'+m+' ACTIVATED.');
+  S.fragDirty=true;
+  log('STAGE_'+m+'_ACTIVE');
 }
 
 // ════════════════════════════════════════════════
@@ -633,55 +726,41 @@ function loop(){
   }
   requestAnimationFrame(loop);
 }
-
-// ════════════════════════════════════════════════
-//  RENDER dispatcher
-// ════════════════════════════════════════════════
-// 全螢幕後處理 canvas
-const ppCvs=document.createElement('canvas');
-const ppCtx=ppCvs.getContext('2d');
+const ppCvs=document.createElement('canvas'),ppCtx=ppCvs.getContext('2d');
 
 function render(){
   const W=canvas.width,H=canvas.height;
   if(ppCvs.width!==W||ppCvs.height!==H){ppCvs.width=W;ppCvs.height=H;}
   ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);
-
   if(S.mode===1)stage1(W,H);
   else if(S.mode===2)stage2(W,H);
   else stage3(W,H);
-
-  // 右旋鈕後處理
   postFX(W,H);
 }
 
 // ════════════════════════════════════════════════
-//  POST-FX  (右旋鈕控制)
+//  POST-FX
 // ════════════════════════════════════════════════
 function postFX(W,H){
-  const d=S.dist,t=S.frame*.016;
-  if(d<.05)return;
-  // 色差
+  const d=S.dist,t=S.frame*.016;if(d<.05)return;
   const ca=Math.floor(d*d*16);
   if(ca>=1){
     ppCtx.clearRect(0,0,W,H);ppCtx.drawImage(canvas,0,0);
     ctx.save();ctx.globalCompositeOperation='screen';
     ctx.globalAlpha=.22*d;ctx.drawImage(ppCvs,-ca,0);
-    ctx.globalAlpha=.18*d;ctx.drawImage(ppCvs, ca,0);
+    ctx.globalAlpha=.18*d;ctx.drawImage(ppCvs,ca,0);
     ctx.restore();
   }
-  // 掃描干擾線
   if(d>.28&&Math.random()>.72){
     ctx.save();ctx.globalAlpha=.1*d;
     const lc=Math.floor(d*d*7);
     for(let i=0;i<lc;i++){
       const ly=~~(Math.random()*H);
       ctx.drawImage(canvas,(Math.random()-.5)*d*24,ly,W,3,(Math.random()-.5)*d*24,ly,W,3);
-      ctx.fillStyle=`rgba(255,255,255,${.04+Math.random()*.08})`;
-      ctx.fillRect(0,ly,W,2);
+      ctx.fillStyle=`rgba(255,255,255,${.04+Math.random()*.08})`;ctx.fillRect(0,ly,W,2);
     }
     ctx.restore();
   }
-  // 波浪扭曲
   if(d>.50){
     ppCtx.clearRect(0,0,W,H);ppCtx.drawImage(canvas,0,0);
     ctx.save();ctx.globalAlpha=.9;
@@ -692,7 +771,6 @@ function postFX(W,H){
     }
     ctx.restore();
   }
-  // 紅色暈染
   if(d>.78&&Math.random()>.9){
     ctx.save();ctx.globalAlpha=(d-.78)*4*.1;
     const vg=ctx.createRadialGradient(W/2,H/2,H*.2,W/2,H/2,H*.7);
@@ -702,159 +780,173 @@ function postFX(W,H){
 }
 
 // ════════════════════════════════════════════════
-//  STAGE 1 — MIRROR STAGE
-//  生物特徵掃描儀：低彩度、全 468 點 mesh、
-//  三角剖分線條、測量標注、滾動數據流
+//  STAGE 1 — LASER WEB
+//  每個地標向外放射白色雷射線，延伸進背景
 // ════════════════════════════════════════════════
-// 三角形連線組（精選結構線）
-const MESH_TRIS=[
-  // 眼睛區
-  [33,7,163],[163,144,145],[145,153,154],[154,155,133],
-  [246,161,160],[160,159,158],[158,157,173],
-  [263,249,390],[390,373,374],[374,380,381],[381,382,362],
-  [466,388,387],[387,386,385],[385,384,398],
-  // 嘴巴區
-  [61,185,40],[40,39,37],[37,0,267],[267,269,270],[270,409,291],
-  [61,146,91],[91,181,84],[84,17,314],[314,405,321],[321,375,291],
-  // 鼻子區
-  [168,6,197],[197,195,5],[5,4,1],[1,2,98],[98,97,2],
-  // 臉頰輪廓
-  [234,127,162],[162,21,54],[54,103,67],[67,109,10],
-  [454,356,389],[389,251,284],[284,332,297],[297,338,10],
-  // 額頭
-  [10,151,9],[9,8,168],
-  // 下巴
-  [152,377,400],[400,378,379],[379,365,397],
+const MESH_TRIS=[[33,7,163],[163,144,145],[145,153,154],[154,155,133],[246,161,160],[160,159,158],[158,157,173],[263,249,390],[390,373,374],[374,380,381],[381,382,362],[466,388,387],[387,386,385],[385,384,398],[61,185,40],[40,39,37],[37,0,267],[267,269,270],[270,409,291],[61,146,91],[91,181,84],[84,17,314],[314,405,321],[321,375,291],[168,6,197],[197,195,5],[5,4,1],[1,2,98],[98,97,2],[234,127,162],[162,21,54],[54,103,67],[67,109,10],[454,356,389],[389,251,284],[284,332,297],[297,338,10],[10,151,9],[9,8,168],[152,377,400],[400,378,379],[379,365,397]];
+
+// Key landmarks for laser emission (curated subset for visual impact)
+const LASER_NODES = [
+  // Silhouette
+  10,338,297,332,284,251,389,356,454,
+  323,361,288,397,365,379,378,400,377,152,
+  148,176,149,150,136,172,58,132,93,234,
+  127,162,21,54,103,67,109,
+  // Eyes
+  33,133,159,145,362,263,386,374,
+  // Brows
+  70,107,336,300,
+  // Nose
+  4,49,279,
+  // Mouth
+  61,291,13,14,
+  // Ears
+  127,356,
 ];
 
+// Sparse extra laser nodes (every 8th landmark)
+const SPARSE_NODES = Array.from({length:468},(_, i)=>i).filter(i=>i%9===0);
+
 function stage1(W,H){
-  const t=S.frame*.016;
-  const c=S.conf;
+  const t = S.frame * 0.016;
+  const c = S.conf;
+  const dist = S.dist;
 
-  // ── 底層影片：去飽和（灰階）──
+  // ── Background: desaturated webcam ──
   ctx.save();
-  ctx.filter='saturate(0%) brightness(55%) contrast(110%)';
-  ctx.globalAlpha=.72;
+  ctx.filter='saturate(0%) brightness(42%) contrast(105%)';
+  ctx.globalAlpha=0.68;
   ctx.scale(-1,1);ctx.drawImage(vid,-W,0,W,H);
-  ctx.restore();
-  ctx.filter='none';
+  ctx.restore();ctx.filter='none';
 
-  // 深色覆蓋 → 更沉穩
-  ctx.fillStyle='rgba(0,0,0,.35)';ctx.fillRect(0,0,W,H);
+  // ── Vignette darkening for background ──
+  const vg=ctx.createRadialGradient(W/2,H/2,H*.12,W/2,H/2,H*.78);
+  vg.addColorStop(0,'rgba(0,0,0,0)');
+  vg.addColorStop(1,'rgba(0,0,0,0.55)');
+  ctx.fillStyle=vg;ctx.fillRect(0,0,W,H);
 
-  // ── 移動掃描線 ──
-  S.scanY=(S.scanY+2)%H;
-  const tr=ctx.createLinearGradient(0,S.scanY-80,0,S.scanY+4);
-  tr.addColorStop(0,'rgba(180,220,255,0)');
-  tr.addColorStop(.7,'rgba(180,220,255,.04)');
-  tr.addColorStop(1,'rgba(180,220,255,.14)');
-  ctx.fillStyle=tr;ctx.fillRect(0,S.scanY-80,W,84);
-  ctx.save();ctx.strokeStyle='rgba(200,230,255,.7)';ctx.lineWidth=.8;
-  ctx.shadowBlur=10;ctx.shadowColor='rgba(180,210,255,.5)';
-  ctx.beginPath();ctx.moveTo(0,S.scanY);ctx.lineTo(W,S.scanY);ctx.stroke();ctx.restore();
-
-  // ── 全畫面細網格 ──
-  ctx.save();ctx.strokeStyle='rgba(150,180,220,.04)';ctx.lineWidth=.4;
-  const gs=32;
-  for(let x=0;x<W;x+=gs){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
-  for(let y=0;y<H;y+=gs){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+  // ── Scan line ──
+  S.scanY=(S.scanY+1.5)%H;
+  const sr=ctx.createLinearGradient(0,S.scanY-60,0,S.scanY+4);
+  sr.addColorStop(0,'rgba(200,230,255,0)');
+  sr.addColorStop(.65,'rgba(200,230,255,.03)');
+  sr.addColorStop(1,'rgba(200,230,255,.12)');
+  ctx.fillStyle=sr;ctx.fillRect(0,S.scanY-60,W,64);
+  ctx.save();ctx.strokeStyle='rgba(220,235,255,.55)';ctx.lineWidth=.7;
+  ctx.shadowBlur=8;ctx.shadowColor='rgba(200,220,255,.45)';
+  ctx.beginPath();ctx.moveTo(0,S.scanY);ctx.lineTo(W,S.scanY);ctx.stroke();
   ctx.restore();
 
-  // ── 狀態 HUD ──
-  const sc=c>.65?'rgba(180,255,220,.9)':c>.25?'rgba(255,220,100,.8)':'rgba(255,120,100,.8)';
-  ctx.save();ctx.fillStyle=sc;ctx.font='bold 8px Share Tech Mono';ctx.shadowBlur=6;ctx.shadowColor=sc;
-  ctx.fillText(`BIOMETRIC SCAN  ${~~(c*100)}%  ${c>.65?'[LOCKED]':c>.25?'[ACQUIRING]':'[SEARCHING]'}`,7,H-18);
-  // 進度條
-  ctx.strokeStyle=sc;ctx.lineWidth=.6;ctx.strokeRect(7,H-11,100,.5);
-  ctx.fillStyle=sc;ctx.fillRect(7,H-12,100*c,2.5);
-  ctx.restore();
-
+  // ── No face: rotating search ring ──
   if(!S.lm||c<.12){
-    // 搜尋動畫
     ctx.save();ctx.globalAlpha=.3+Math.sin(t*3)*.15;
-    ctx.strokeStyle='rgba(180,210,255,.6)';ctx.lineWidth=1;
-    ctx.setLineDash([8,16]);
+    ctx.strokeStyle='rgba(180,210,255,.5)';ctx.lineWidth=1;ctx.setLineDash([8,16]);
     ctx.beginPath();ctx.arc(W/2,H/2,60,0,Math.PI*2);ctx.stroke();
-    ctx.beginPath();ctx.arc(W/2,H/2,90,t*-0.5%Math.PI*2,t*-0.5%Math.PI*2+Math.PI*1.5);ctx.stroke();
+    ctx.beginPath();ctx.arc(W/2,H/2,90,t*-0.5%(Math.PI*2),t*-0.5%(Math.PI*2)+Math.PI*1.5);ctx.stroke();
     ctx.setLineDash([]);ctx.restore();
     return;
   }
 
-  const pulse=c>.65?1+Math.sin(t*2.2)*.04:1;
+  // ── Find face center ──
+  const noseTip=lp(4);
+  const cx=noseTip?noseTip.x:W/2;
+  const cy=noseTip?noseTip.y:H/2;
+  const pulse=c>.65?1+Math.sin(t*2.2)*.035:1;
 
-  // ── 全臉 MESH 三角形 ──
+  // ── LASER WEB: each node emits a line outward from face center ──
+  const laserIntensity = 0.6 + dist * 0.4;
+  const laserLen = 25 + dist * dist * 80; // longer with more distortion
+
+  // --- Primary laser nodes (key landmarks, brighter) ---
   ctx.save();
-  ctx.strokeStyle='rgba(160,200,240,.11)';ctx.lineWidth=.45;
-  MESH_TRIS.forEach(([a,b,cc2])=>{
-    const pa=lp(a),pb=lp(b),pc2=lp(cc2);
-    if(!pa||!pb||!pc2)return;
-    const ax=W/2+(pa.x-W/2)*pulse,ay=H/2+(pa.y-H/2)*pulse;
-    const bx=W/2+(pb.x-W/2)*pulse,by=H/2+(pb.y-H/2)*pulse;
-    const cx2=W/2+(pc2.x-W/2)*pulse,cy2=H/2+(pc2.y-H/2)*pulse;
-    ctx.beginPath();ctx.moveTo(ax,ay);ctx.lineTo(bx,by);ctx.lineTo(cx2,cy2);ctx.closePath();ctx.stroke();
+  ctx.lineCap='round';
+
+  LASER_NODES.forEach(idx=>{
+    const pp=lp(idx);if(!pp)return;
+    const px=W/2+(pp.x-W/2)*pulse;
+    const py=H/2+(pp.y-H/2)*pulse;
+    const dx=px-cx, dy=py-cy;
+    const len=Math.sqrt(dx*dx+dy*dy);if(len<1)return;
+    const nx=dx/len, ny=dy/len;
+
+    // Line from landmark outward
+    const lLen = laserLen * (0.7 + Math.random()*0.6);
+    const ex=px+nx*lLen, ey=py+ny*lLen;
+
+    // Brightness pulses per frame (jitter)
+    const bright = (S.frame + idx*7) % 30 < 3 ? 1.0 : 0.0; // brief flash
+    const baseAlpha = (0.18 + laserIntensity*0.25) * laserIntensity;
+
+    const grad=ctx.createLinearGradient(px,py,ex,ey);
+    grad.addColorStop(0,`rgba(255,255,255,${baseAlpha+bright*.4})`);
+    grad.addColorStop(0.4,`rgba(220,235,255,${baseAlpha*0.6})`);
+    grad.addColorStop(1,'rgba(180,210,255,0)');
+
+    ctx.strokeStyle=grad;
+    ctx.lineWidth=bright>0?1.2:0.6;
+    ctx.shadowBlur=bright>0?14:4;
+    ctx.shadowColor=bright>0?'rgba(255,255,255,.9)':'rgba(200,220,255,.4)';
+    ctx.beginPath();ctx.moveTo(px,py);ctx.lineTo(ex,ey);ctx.stroke();
+  });
+
+  // --- Sparse nodes (every 9th, thinner, longer reach) ---
+  SPARSE_NODES.forEach(idx=>{
+    const pp=lp(idx);if(!pp)return;
+    const px=W/2+(pp.x-W/2)*pulse;
+    const py=H/2+(pp.y-H/2)*pulse;
+    const dx=px-cx, dy=py-cy;
+    const len=Math.sqrt(dx*dx+dy*dy);if(len<1)return;
+    const nx=dx/len, ny=dy/len;
+    const lLen=(laserLen*1.8+Math.sin(t+idx)*20)*(0.5+dist*.5);
+    const ex=px+nx*lLen, ey=py+ny*lLen;
+    const a=0.06*laserIntensity;
+    const grad=ctx.createLinearGradient(px,py,ex,ey);
+    grad.addColorStop(0,`rgba(200,220,255,${a})`);
+    grad.addColorStop(1,'rgba(200,220,255,0)');
+    ctx.strokeStyle=grad;ctx.lineWidth=.35;ctx.shadowBlur=0;
+    ctx.beginPath();ctx.moveTo(px,py);ctx.lineTo(ex,ey);ctx.stroke();
+  });
+
+  ctx.shadowBlur=0;
+  ctx.restore();
+
+  // ── Mesh triangles (faint) ──
+  ctx.save();
+  ctx.strokeStyle=`rgba(160,200,240,${0.06+dist*.04})`;
+  ctx.lineWidth=.4;
+  MESH_TRIS.forEach(([a,b,cc])=>{
+    const pa=lp(a),pb=lp(b),pc=lp(cc);if(!pa||!pb||!pc)return;
+    ctx.beginPath();
+    ctx.moveTo(W/2+(pa.x-W/2)*pulse,H/2+(pa.y-H/2)*pulse);
+    ctx.lineTo(W/2+(pb.x-W/2)*pulse,H/2+(pb.y-H/2)*pulse);
+    ctx.lineTo(W/2+(pc.x-W/2)*pulse,H/2+(pc.y-H/2)*pulse);
+    ctx.closePath();ctx.stroke();
   });
   ctx.restore();
 
-  // ── 468 landmark 點（小點，灰白） ──
+  // ── Landmark dots ──
   ctx.save();
   S.lm.forEach((p,i)=>{
     const px=W/2+((1-p.x)*W-W/2)*pulse;
     const py=H/2+(p.y*H-H/2)*pulse;
-    const bright=Math.abs(p.z??0)<0.05?'rgba(200,220,240,.55)':'rgba(140,160,190,.25)';
-    ctx.fillStyle=bright;
-    ctx.beginPath();ctx.arc(px,py,.9,0,Math.PI*2);ctx.fill();
+    const isKey=LASER_NODES.includes(i);
+    ctx.fillStyle=isKey
+      ?`rgba(220,235,255,${.55+dist*.2})`
+      :`rgba(140,160,190,${.15+dist*.1})`;
+    ctx.shadowBlur=isKey?4:0;ctx.shadowColor='rgba(200,220,255,.8)';
+    ctx.beginPath();ctx.arc(px,py,isKey?1.2:.65,0,Math.PI*2);ctx.fill();
   });
-  ctx.restore();
+  ctx.shadowBlur=0;ctx.restore();
 
-  // ── 五官輪廓（淡白色線，不同亮度區分） ──
-  const regions=[
-    {idx:[33,7,163,144,145,153,154,155,133,173,157,158,159,160,161,246],closed:true,al:.75,lw:.9},
-    {idx:[263,249,390,373,374,380,381,382,362,398,384,385,386,387,388,466],closed:true,al:.75,lw:.9},
-    {idx:[61,185,40,39,37,0,267,269,270,409,291,375,321,405,314,17,84,181,91,146],closed:true,al:.65,lw:.9},
-    {idx:[168,6,197,195,5,4,1,19,94,2,98,97,2,326,327],closed:false,al:.5,lw:.7},
-    {idx:[70,63,105,66,107,55,65,52,53,46],closed:false,al:.45,lw:.65},
-    {idx:[300,293,334,296,336,285,295,282,283,276],closed:false,al:.45,lw:.65},
-  ];
-  regions.forEach(({idx,closed,al,lw})=>{
-    const pts=idx.map(i=>lp(i)).filter(Boolean);
-    if(pts.length<2)return;
+  // ── Measurement annotations (when confident) ──
+  if(c>.55){
+    const eL=lp(33),eR=lp(362),topF=lp(10),botF=lp(152),lc2=lp(234),rc2=lp(454);
     ctx.save();
-    ctx.strokeStyle=`rgba(220,235,255,${al*(0.5+c*.5)})`;
-    ctx.lineWidth=lw;ctx.shadowBlur=c>.65?7:3;ctx.shadowColor='rgba(200,220,255,.4)';
-    ctx.beginPath();
-    pts.forEach((p,i)=>{
-      const px=W/2+(p.x-W/2)*pulse,py=H/2+(p.y-H/2)*pulse;
-      i?ctx.lineTo(px,py):ctx.moveTo(px,py);
-    });
-    if(closed)ctx.closePath();ctx.stroke();ctx.restore();
-  });
-
-  // ── 臉部輪廓（鎖定後：亮白虛線） ──
-  const contourIdx=[10,338,297,332,284,251,389,356,454,323,361,288,397,365,379,378,400,377,152,148,176,149,150,136,172,58,132,93,234,127,162,21,54,103,67,109];
-  const cpts=contourIdx.map(i=>lp(i)).filter(Boolean);
-  if(cpts.length>4){
-    ctx.save();ctx.globalAlpha=c>.65?.7:.35;
-    ctx.strokeStyle=c>.65?'rgba(210,235,255,.95)':'rgba(200,220,255,.5)';
-    ctx.shadowBlur=c>.65?12:5;ctx.shadowColor='rgba(200,225,255,.5)';
-    ctx.lineWidth=c>.65?1.1:.7;
-    if(c<=.65)ctx.setLineDash([6,12]);
-    ctx.beginPath();cpts.forEach((p,i)=>{
-      const px=W/2+(p.x-W/2)*pulse,py=H/2+(p.y-H/2)*pulse;
-      i?ctx.lineTo(px,py):ctx.moveTo(px,py);
-    });ctx.closePath();ctx.stroke();
-    ctx.setLineDash([]);ctx.restore();
-  }
-
-  // ── 測量標注：左右眼距、臉寬、臉高 ──
-  if(c>.5){
-    const eL=lp(33),eR=lp(362),topF=lp(10),botF=lp(152);
-    const lc2=lp(234),rc2=lp(454);
-    ctx.save();ctx.strokeStyle='rgba(200,220,255,.35)';ctx.lineWidth=.5;ctx.setLineDash([3,8]);
+    ctx.strokeStyle='rgba(200,220,255,.28)';ctx.lineWidth=.5;ctx.setLineDash([3,8]);
     const anno=(x1,y1,x2,y2,label)=>{
       ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
-      const mx=(x1+x2)/2,my=(y1+y2)/2;
-      ctx.fillStyle='rgba(180,210,255,.7)';ctx.font='6px Share Tech Mono';
-      ctx.fillText(label,mx+4,my-3);
+      ctx.fillStyle='rgba(180,210,255,.65)';ctx.font='6px Share Tech Mono';
+      ctx.fillText(label,(x1+x2)/2+4,(y1+y2)/2-3);
     };
     if(eL&&eR)anno(eL.x,eL.y,eR.x,eR.y,`EYE_D ${~~dist2(eL,eR)}px`);
     if(lc2&&rc2)anno(lc2.x,lc2.y,rc2.x,rc2.y,`FACE_W ${~~dist2(lc2,rc2)}px`);
@@ -862,175 +954,23 @@ function stage1(W,H){
     ctx.setLineDash([]);ctx.restore();
   }
 
-  // ── 鼻尖準線 ──
-  if(c>.65){
-    const nose=lp(4);
-    if(nose){
-      ctx.save();ctx.strokeStyle='rgba(200,230,255,.55)';ctx.lineWidth=.7;
-      ctx.shadowBlur=7;ctx.shadowColor='rgba(180,210,255,.4)';ctx.setLineDash([4,10]);
-      ctx.beginPath();ctx.moveTo(nose.x-18,nose.y);ctx.lineTo(nose.x+18,nose.y);
-      ctx.moveTo(nose.x,nose.y-18);ctx.lineTo(nose.x,nose.y+18);ctx.stroke();
-      ctx.setLineDash([]);ctx.restore();
-    }
-  }
-
-  // ── 右側滾動數據流 ──
-  ctx.save();ctx.fillStyle='rgba(160,200,240,.22)';ctx.font='6px Share Tech Mono';
-  const dataLines=['PROC:FACEMESH_v2',`CONF:${(c*100).toFixed(1)}%`,`LM:468`,
-    `T:${(t*1000).toFixed(0)}ms`,`FRAME:${S.frame}`,
-    `MODE:BIOMETRIC`,`SCAN:ACTIVE`,`KALMAN:ON`,
-    `FX_DIST:${~~(S.dist*100)}%`,`DENS:${S.density}×`];
-  dataLines.forEach((l,i)=>{
-    ctx.globalAlpha=.18+Math.sin(t+i)*.08;
-    ctx.fillText(l,W-85,(12+i*10));
-  });
+  // ── Confidence bar ──
+  const sc=c>.65?'rgba(180,255,220,.9)':c>.25?'rgba(255,220,100,.8)':'rgba(255,120,100,.8)';
+  ctx.save();ctx.fillStyle=sc;ctx.font='bold 8px Share Tech Mono';
+  ctx.shadowBlur=6;ctx.shadowColor=sc;
+  ctx.fillText(`BIOMETRIC_SCAN ${~~(c*100)}% ${c>.65?'[LOCKED]':c>.25?'[ACQUIRING]':'[SEARCHING]'}`,7,H-18);
+  ctx.strokeStyle=sc;ctx.lineWidth=.6;ctx.strokeRect(7,H-11,100,.5);
+  ctx.fillStyle=sc;ctx.fillRect(7,H-12,100*c,2.5);
   ctx.restore();
 }
 
 // ════════════════════════════════════════════════
-//  STAGE 2 — DATA DISCIPLINE
-//  景深分析儀：灰階底圖 + 密集分析格 + 臉部 mesh
-//  + 等高線 + 景深數值標注
+//  STAGE 2 — DEPTH STRATA
+//  三層景深：前景臉、中景身體、遠景背景，各自灰階
 // ════════════════════════════════════════════════
 const s2c=document.createElement('canvas');s2c.width=80;s2c.height=60;
 const s2x=s2c.getContext('2d');
 
-function stage2(W,H){
-  const t=S.frame*.016;
-  s2x.drawImage(vid,0,0,80,60);
-  const pd=s2x.getImageData(0,0,80,60).data;
-
-  // 底層：去飽和灰階影片
-  ctx.save();
-  ctx.filter='saturate(0%) brightness(40%) contrast(130%)';
-  ctx.globalAlpha=.65;
-  ctx.scale(-1,1);ctx.drawImage(vid,-W,0,W,H);
-  ctx.restore();ctx.filter='none';
-  ctx.fillStyle='rgba(0,0,0,.55)';ctx.fillRect(0,0,W,H);
-
-  // ── 臉部數據準備 ──
-  let faceConvex=null,bodyCx=W/2,bodyCy=H*.7,bodyRx=W*.18,bodyRy=H*.32;
-  if(S.lm&&S.conf>.3){
-    const outerIdxs=[10,338,297,332,284,251,389,356,454,323,361,288,397,365,379,378,400,377,152,148,176,149,150,136,172,58,132,93,234,127,162,21,54,103,67,109];
-    faceConvex=outerIdxs.map(i=>{const p=S.lm[i];return p?{x:(1-p.x)*W,y:p.y*H}:null;}).filter(Boolean);
-    const chin=lp(LM.chinBot),topH=lp(LM.foreheadTop),lc2=lp(LM.leftCheek),rc2=lp(LM.rightCheek);
-    if(chin&&topH&&lc2&&rc2){
-      const fH=dist2(topH,chin),fW=dist2(lc2,rc2);
-      bodyCx=(lc2.x+rc2.x)/2;bodyCy=chin.y+fH*.55;bodyRx=fW*.72;bodyRy=fH*1.5;
-    }
-  }
-
-  // ── 分析格（小格10px，大格20px交替） ──
-  const GS=14;
-  for(let gx=0;gx<W;gx+=GS){
-    for(let gy=0;gy<H;gy+=GS){
-      const cx=gx+GS/2,cy=gy+GS/2;
-      const sx=Math.floor((1-cx/W)*80),sy=Math.floor(cy/H*60);
-      const si=(Math.min(79,Math.max(0,sx))+Math.min(59,Math.max(0,sy))*80)*4;
-      const lum=.299*pd[si]+.587*pd[si+1]+.114*pd[si+2];
-
-      const inFace=faceConvex?pointInPoly(cx,cy,faceConvex):false;
-      const bex=(cx-bodyCx)/bodyRx,bey=(cy-bodyCy)/bodyRy;
-      const inBody=bex*bex+bey*bey<1;
-      // z 深度歸一化（0=遠, 1=近）
-      const depth=inFace?(.65+lum/255*.35):inBody?(.25+lum/255*.2):(lum/255*.12);
-
-      // 格子顏色：全灰白，僅亮度區分層次
-      const bright=Math.floor(depth*90+8);
-      const al=inFace?.55:inBody?.22:.09;
-      ctx.strokeStyle=`rgba(${bright+140},${bright+150},${bright+160},${al})`;
-      ctx.lineWidth=inFace?.7:inBody?.45:.28;
-      ctx.strokeRect(gx,gy,GS,GS);
-
-      // 格內數值（僅臉部區域顯示）
-      if(inFace&&Math.random()>.80){
-        const v=~~(depth*999);
-        ctx.fillStyle=`rgba(${bright+160},${bright+170},${bright+180},${al+.3})`;
-        ctx.font='5px Share Tech Mono';
-        ctx.fillText(v.toString(16).toUpperCase().padStart(3,'0'),gx+2,gy+9);
-      }else if(inBody&&Math.random()>.93){
-        ctx.fillStyle=`rgba(160,170,185,.18)`;
-        ctx.font='5px Share Tech Mono';
-        ctx.fillText(Math.random().toString(16).slice(2,4).toUpperCase(),gx+3,gy+10);
-      }
-    }
-  }
-
-  // ── 等高線（每隔一定景深畫一圈輪廓）──
-  if(S.lm&&S.conf>.3){
-    // 用多個縮放比例的臉部輪廓模擬等高線
-    const contourIdx=[10,338,297,332,284,251,389,356,454,323,361,288,397,365,379,378,400,377,152,148,176,149,150,136,172,58,132,93,234,127,162,21,54,103,67,109];
-    const cpts=contourIdx.map(i=>lp(i)).filter(Boolean);
-    const fc=lp(1); // 臉部中心（鼻根）
-    if(cpts.length>4&&fc){
-      [.6,.75,.88,1.0,1.12,1.25].forEach((sc2,li)=>{
-        const al=li===3?.5:.15+li*.05;
-        ctx.save();ctx.strokeStyle=`rgba(200,215,235,${al})`;
-        ctx.lineWidth=li===3?.9:.45;
-        ctx.setLineDash(li%2?[4,8]:[]);
-        ctx.shadowBlur=li===3?6:0;ctx.shadowColor='rgba(200,215,235,.3)';
-        ctx.beginPath();
-        cpts.forEach((p,i)=>{
-          const px=fc.x+(p.x-fc.x)*sc2,py=fc.y+(p.y-fc.y)*sc2;
-          i?ctx.lineTo(px,py):ctx.moveTo(px,py);
-        });ctx.closePath();ctx.stroke();
-        ctx.setLineDash([]);ctx.restore();
-      });
-    }
-
-    // ── 臉部 Mesh 三角形線 ──
-    ctx.save();ctx.strokeStyle='rgba(210,225,245,.09)';ctx.lineWidth=.4;
-    MESH_TRIS.forEach(([a,b,cc2])=>{
-      const pa=lp(a),pb=lp(b),pc2=lp(cc2);
-      if(!pa||!pb||!pc2)return;
-      ctx.beginPath();ctx.moveTo(pa.x,pa.y);ctx.lineTo(pb.x,pb.y);ctx.lineTo(pc2.x,pc2.y);ctx.closePath();ctx.stroke();
-    });
-    ctx.restore();
-
-    // ── 特徵點亮點 ──
-    ctx.save();
-    [4,33,362,61,291,127,356,234,454,152,10].forEach(idx=>{
-      const p=lp(idx);if(!p)return;
-      ctx.fillStyle='rgba(220,235,255,.65)';
-      ctx.shadowBlur=6;ctx.shadowColor='rgba(200,220,255,.5)';
-      ctx.beginPath();ctx.arc(p.x,p.y,2,0,Math.PI*2);ctx.fill();
-    });
-    ctx.restore();
-
-    // ── 測量向量線 ──
-    ctx.save();ctx.strokeStyle='rgba(200,215,240,.28)';ctx.lineWidth=.5;ctx.setLineDash([4,10]);
-    ctx.shadowBlur=3;ctx.shadowColor='rgba(200,215,240,.2)';
-    const pairs=[[33,362],[61,291],[127,356],[10,152],[234,454]];
-    pairs.forEach(([a,b])=>{
-      const pa=lp(a),pb=lp(b);if(!pa||!pb)return;
-      ctx.beginPath();ctx.moveTo(pa.x,pa.y);ctx.lineTo(pb.x,pb.y);ctx.stroke();
-      const mx=(pa.x+pb.x)/2,my=(pa.y+pb.y)/2;
-      ctx.fillStyle='rgba(190,210,240,.5)';ctx.font='5.5px Share Tech Mono';
-      ctx.setLineDash([]);
-      ctx.fillText(`${~~dist2(pa,pb)}px`,mx+3,my-2);
-      ctx.setLineDash([4,10]);
-    });
-    ctx.setLineDash([]);ctx.restore();
-  }
-
-  // ── 掃描帶 ──
-  S.scanY=(S.scanY+1.5)%H;
-  ctx.save();ctx.globalAlpha=.12;
-  const sg=ctx.createLinearGradient(0,S.scanY-30,0,S.scanY+4);
-  sg.addColorStop(0,'rgba(200,220,255,0)');sg.addColorStop(1,'rgba(200,220,255,.5)');
-  ctx.fillStyle=sg;ctx.fillRect(0,S.scanY-30,W,34);
-  ctx.restore();
-
-  // ── 分析標籤 ──
-  ctx.save();ctx.fillStyle='rgba(190,210,240,.55)';ctx.font='bold 7px Share Tech Mono';
-  ctx.fillText('DEPTH_ANALYSIS  v2.4',6,12);
-  ctx.fillStyle='rgba(160,185,220,.35)';ctx.font='6px Share Tech Mono';
-  ctx.fillText(`FACE_MESH:${S.lm?'ACTIVE':'STANDBY'}  CONF:${~~(S.conf*100)}%`,6,22);
-  ctx.fillText(`CONTOUR_LINES:6  GRID:${GS}px`,6,32);
-  ctx.restore();
-}
-
-// 點是否在多邊形內（射線法）
 function pointInPoly(px,py,poly){
   let inside=false;
   for(let i=0,j=poly.length-1;i<poly.length;j=i++){
@@ -1040,106 +980,244 @@ function pointInPoly(px,py,poly){
   return inside;
 }
 
+function stage2(W,H){
+  const t=S.frame*.016;
+
+  // Downsample for pixel data
+  s2x.drawImage(vid,0,0,80,60);
+  const pd=s2x.getImageData(0,0,80,60).data;
+
+  // ── Background layer (blurred, dark) ──
+  ctx.save();
+  ctx.filter='saturate(0%) brightness(28%) contrast(140%) blur(2px)';
+  ctx.globalAlpha=0.92;
+  ctx.scale(-1,1);ctx.drawImage(vid,-W,0,W,H);
+  ctx.restore();ctx.filter='none';
+
+  // ── If no face: pure depth grid ──
+  if(!S.lm||S.conf<.15){
+    ctx.save();
+    ctx.fillStyle='rgba(0,0,0,.55)';ctx.fillRect(0,0,W,H);
+    ctx.globalAlpha=.28+Math.sin(t*3)*.1;
+    ctx.fillStyle='rgba(200,215,240,.8)';ctx.font='bold 10px Orbitron';
+    ctx.textAlign='center';ctx.fillText('DEPTH_CALIBRATION',W/2,H/2);
+    ctx.font='7px Share Tech Mono';ctx.fillStyle='rgba(170,190,220,.5)';
+    ctx.fillText('ALIGN SUBJECT TO SENSOR FIELD',W/2,H/2+18);
+    ctx.textAlign='start';ctx.restore();
+    return;
+  }
+
+  // ── Build face convex hull ──
+  const outerIdxs=[10,338,297,332,284,251,389,356,454,323,361,288,397,365,379,378,400,377,152,148,176,149,150,136,172,58,132,93,234,127,162,21,54,103,67,109];
+  const faceConvex=outerIdxs.map(i=>{
+    const p=S.lm[i];return p?{x:(1-p.x)*W,y:p.y*H}:null;
+  }).filter(Boolean);
+
+  // Estimate body zone (below chin, extended)
+  const chin=lp(LM.chinBot),forehead=lp(LM.foreheadTop);
+  const lCheek=lp(LM.leftCheek),rCheek=lp(LM.rightCheek);
+  let bodyCx=W/2,bodyCy=H*.68,bodyRx=W*.2,bodyRy=H*.28;
+  if(chin&&lCheek&&rCheek){
+    const fW=dist2(lCheek,rCheek);
+    const fH=chin&&forehead?dist2(chin,forehead):fW;
+    bodyCx=(lCheek.x+rCheek.x)/2;
+    bodyCy=chin.y+fH*.55;
+    bodyRx=fW*.75;bodyRy=fH*1.45;
+  }
+
+  // ── Extract Z-depth for face region ──
+  // MediaPipe z: close to 0 at tip, negative behind
+  const getZ=(idx)=>S.lm[idx]?.z??0;
+  const noseZ=getZ(4);
+  const cheekZ=(getZ(234)+getZ(454))/2;
+
+  // ── Depth grid rendering ──
+  const GS=13;
+  const dist=S.dist;
+
+  for(let gx=0;gx<W;gx+=GS){
+    for(let gy=0;gy<H;gy+=GS){
+      const cx2=gx+GS/2,cy2=gy+GS/2;
+      const sx=Math.floor((1-cx2/W)*80);
+      const sy=Math.floor(cy2/H*60);
+      const si=(Math.min(79,Math.max(0,sx))+Math.min(59,Math.max(0,sy))*80)*4;
+      const lum=.299*pd[si]+.587*pd[si+1]+.114*pd[si+2];
+
+      const inFace=faceConvex.length>2?pointInPoly(cx2,cy2,faceConvex):false;
+      const bex=(cx2-bodyCx)/bodyRx,bey=(cy2-bodyCy)/bodyRy;
+      const inBody=bex*bex+bey*bey<1;
+
+      let depth,bright,alpha,strokeW;
+
+      if(inFace){
+        // FOREGROUND: face — bright, high detail
+        depth=0.8+lum/255*.2;
+        bright=Math.floor(depth*110+30);
+        alpha=0.7+dist*.15;
+        strokeW=0.7;
+        ctx.strokeStyle=`rgba(${bright+110},${bright+120},${bright+130},${alpha})`;
+        ctx.lineWidth=strokeW;
+        ctx.strokeRect(gx,gy,GS,GS);
+
+        // Hex depth labels in face zone
+        if(Math.random()>.82){
+          ctx.fillStyle=`rgba(${bright+130},${bright+140},${bright+150},${alpha+.2})`;
+          ctx.font='5px Share Tech Mono';
+          ctx.fillText((~~(depth*999)).toString(16).toUpperCase().padStart(3,'0'),gx+2,gy+9);
+        }
+
+        // Z-contour lines for face
+        if(Math.random()>.92){
+          ctx.save();
+          ctx.strokeStyle=`rgba(255,255,255,${0.15+dist*.1})`;ctx.lineWidth=.3;
+          ctx.beginPath();ctx.arc(cx2,cy2,GS*.4,0,Math.PI*2);ctx.stroke();
+          ctx.restore();
+        }
+      } else if(inBody){
+        // MIDGROUND: body — medium gray, less detail
+        depth=0.3+lum/255*.22;
+        bright=Math.floor(depth*55+8);
+        alpha=0.32+dist*.08;
+        ctx.strokeStyle=`rgba(${bright+80},${bright+85},${bright+90},${alpha})`;
+        ctx.lineWidth=0.45;
+        ctx.strokeRect(gx,gy,GS,GS);
+
+        if(Math.random()>.93){
+          ctx.fillStyle=`rgba(${bright+90},${bright+95},${bright+100},${alpha+.15})`;
+          ctx.font='4px Share Tech Mono';
+          ctx.fillText((~~(depth*99)).toString(16).toUpperCase().padStart(2,'0'),gx+2,gy+8);
+        }
+      } else {
+        // BACKGROUND: dark, minimal
+        depth=lum/255*.08;
+        bright=Math.floor(depth*30+3);
+        alpha=0.10+dist*.04;
+        ctx.strokeStyle=`rgba(${bright+20},${bright+22},${bright+25},${alpha})`;
+        ctx.lineWidth=0.28;
+        ctx.strokeRect(gx,gy,GS,GS);
+      }
+    }
+  }
+
+  // ── DEPTH CONTOUR LINES for face ──
+  if(S.conf>.5&&faceConvex.length>4){
+    ctx.save();
+    // Draw face outline with depth glow
+    ctx.strokeStyle=`rgba(200,220,255,${0.25+dist*.2})`;
+    ctx.lineWidth=1.0;
+    ctx.shadowBlur=12;ctx.shadowColor='rgba(180,200,255,.5)';
+    ctx.beginPath();
+    faceConvex.forEach((p,i)=>i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y));
+    ctx.closePath();ctx.stroke();
+    ctx.shadowBlur=0;
+
+    // Body contour ellipse
+    ctx.strokeStyle=`rgba(140,155,175,${0.12+dist*.08})`;
+    ctx.lineWidth=0.5;
+    ctx.beginPath();ctx.ellipse(bodyCx,bodyCy,bodyRx,bodyRy,0,0,Math.PI*2);ctx.stroke();
+    ctx.restore();
+  }
+
+  // ── Scan sweep ──
+  S.scanY=(S.scanY+1.2)%H;
+  ctx.save();ctx.globalAlpha=.09;
+  const sg=ctx.createLinearGradient(0,S.scanY-25,0,S.scanY+4);
+  sg.addColorStop(0,'rgba(200,220,255,0)');sg.addColorStop(1,'rgba(200,220,255,.5)');
+  ctx.fillStyle=sg;ctx.fillRect(0,S.scanY-25,W,29);ctx.restore();
+
+  // ── Labels ──
+  ctx.save();
+  ctx.fillStyle='rgba(190,210,240,.55)';ctx.font='bold 7px Share Tech Mono';
+  ctx.fillText('DEPTH_STRATA v3.1',6,12);
+  ctx.fillStyle='rgba(160,185,220,.35)';ctx.font='6px Share Tech Mono';
+  ctx.fillText(`FACE[fgd] BODY[mid] BG[bgd] | CONF:${~~(S.conf*100)}%`,6,22);
+  ctx.restore();
+}
+
 // ════════════════════════════════════════════════
-//  STAGE 3 — FACE REWRITE
-//  低彩度環境 + 臉部碎片替換 + 環境數據氛圍
+//  STAGE 3 — FULL REWRITE
+//  背景層 + 身體層 + 臉部碎片層
 // ════════════════════════════════════════════════
-// 低彩度版部位顏色（接近白/灰，極淡色調）
-const PCOL={
-  eyes_L:'rgba(210,230,245,1)',eyes_R:'rgba(210,230,245,1)',
-  nose:'rgba(225,215,230,1)',
-  mouth:'rgba(235,225,210,1)',
-  ears_L:'rgba(205,215,235,1)',ears_R:'rgba(205,215,235,1)'
-};
-// 部位glow色（shadow用，保留極淡色感）
-const PGLOW={
-  eyes_L:'rgba(160,210,240,.6)',eyes_R:'rgba(160,210,240,.6)',
-  nose:'rgba(210,170,220,.5)',
-  mouth:'rgba(240,220,180,.5)',
-  ears_L:'rgba(160,185,230,.5)',ears_R:'rgba(160,185,230,.5)'
-};
 const PARTS_DEF={
-  // scaleW/H = refA↔refB 距離的倍數；maxW/H = 畫面寬/高的最大比例上限
-  eyes_L:{type:'eyes',  center:[33,133],  refA:33, refB:133, scaleW:2.8, scaleH:1.9, maxW:.18, maxH:.12, rot:0},
-  eyes_R:{type:'eyes',  center:[362,263], refA:362,refB:263, scaleW:2.8, scaleH:1.9, maxW:.18, maxH:.12, rot:0},
-  nose:  {type:'nose',  center:[1],       refA:49, refB:279, scaleW:2.1, scaleH:2.6, maxW:.16, maxH:.20, rot:0},
-  mouth: {type:'mouth', center:[0,17],    refA:61, refB:291, scaleW:2.3, scaleH:2.0, maxW:.20, maxH:.14, rot:0},
-  ears_L:{type:'ears',  center:[127,234], refA:127,refB:172, scaleW:1.6, scaleH:2.0, maxW:.13, maxH:.18, rot:-.12},
-  ears_R:{type:'ears',  center:[356,454], refA:356,refB:397, scaleW:1.6, scaleH:2.0, maxW:.13, maxH:.18, rot:.12},
+  eyes_L:{type:'eyes',layer:'face',center:[33,133],refA:33,refB:133,scaleW:2.8,scaleH:1.9,maxW:.18,maxH:.12,rot:0},
+  eyes_R:{type:'eyes',layer:'face',center:[362,263],refA:362,refB:263,scaleW:2.8,scaleH:1.9,maxW:.18,maxH:.12,rot:0},
+  nose:{type:'nose',layer:'face',center:[1],refA:49,refB:279,scaleW:2.1,scaleH:2.6,maxW:.16,maxH:.20,rot:0},
+  mouth:{type:'mouth',layer:'face',center:[0,17],refA:61,refB:291,scaleW:2.3,scaleH:2.0,maxW:.20,maxH:.14,rot:0},
+  ears_L:{type:'ears',layer:'face',center:[127,234],refA:127,refB:172,scaleW:1.6,scaleH:2.0,maxW:.13,maxH:.18,rot:-.12},
+  ears_R:{type:'ears',layer:'face',center:[356,454],refA:356,refB:397,scaleW:1.6,scaleH:2.0,maxW:.13,maxH:.18,rot:.12},
+  // BODY LAYER: anchored to estimated shoulder/torso positions
+  body_c:{type:'body',layer:'body',center:[152],refA:234,refB:454,scaleW:2.5,scaleH:3.5,maxW:.55,maxH:.65,rot:0},
+  // BACKGROUND LAYER: scattered, depth-sorted behind everything
+  bg_1:{type:'bg',layer:'bg',center:[10],refA:234,refB:454,scaleW:4.0,scaleH:3.5,maxW:.75,maxH:.65,rot:0},
+  bg_2:{type:'bg',layer:'bg',center:[152],refA:127,refB:356,scaleW:3.5,scaleH:3.0,maxW:.65,maxH:.55,rot:0},
 };
-const PORDER=['ears_L','ears_R','nose','mouth','eyes_L','eyes_R'];
+const PORDER=['bg_1','bg_2','body_c','ears_L','ears_R','nose','mouth','eyes_L','eyes_R'];
 
 function buildFrags(){
   S.frags=[];
   PORDER.forEach(key=>{
     const D=PARTS_DEF[key];
-    for(let c=0;c<S.density;c++){
-      const spread=c===0?0:c*.08;
+    const count= D.layer==='face' ? S.density :
+                 D.layer==='body' ? Math.max(1,Math.round(S.density*.6)) :
+                 Math.max(1,Math.round(S.density*.4)); // bg: fewer
+    for(let c2=0;c2<count;c2++){
+      const spread=c2===0?0:c2*.10;
       S.frags.push({
         key,def:D,
         imgIdx:~~(Math.random()*PCOUNT),
-        // 漂浮偏移（以faceScale為單位）
         driftX:(Math.random()-.5)*spread,
         driftY:(Math.random()-.5)*spread,
         vdx:0,vdy:0,
-        // 3D旋轉
-        rX:(Math.random()-.5)*30,rY:(Math.random()-.5)*30,rZ:(Math.random()-.5)*10,
-        rsX:(Math.random()-.5)*.25,rsY:(Math.random()-.5)*.20,rsZ:(Math.random()-.5)*.15,
-        // Z深度
-        z:Math.random()*160-80,vz:(Math.random()-.5)*.6,
-        // glitch
-        gt:~~(Math.random()*80),gd:0,gox:0,goy:0,gs:1,
-        alpha:.88+Math.random()*.12,
-        layer:c,
+        rX:(Math.random()-.5)*30,
+        rY:(Math.random()-.5)*30,
+        rZ:(Math.random()-.5)*(D.layer==='bg'?20:10),
+        rsX:(Math.random()-.5)*( D.layer==='bg'?.15:.25),
+        rsY:(Math.random()-.5)*( D.layer==='bg'?.12:.20),
+        rsZ:(Math.random()-.5)*( D.layer==='bg'?.08:.15),
+        z:D.layer==='bg'?Math.random()*60+40:  // bg stays in back
+          D.layer==='body'?Math.random()*40-10 :
+          Math.random()*160-80,
+        vz:(Math.random()-.5)*( D.layer==='bg'?.2:.6),
+        gt:~~(Math.random()*80),
+        gd:0,gox:0,goy:0,gs:1,
+        alpha: D.layer==='bg'?0.35+Math.random()*.25:
+               D.layer==='body'?0.55+Math.random()*.2:
+               0.88+Math.random()*.12,
+        layer:c2,
       });
     }
   });
   S.fragDirty=false;
-
-  // 定時換圖
   clearInterval(S._swapIv);
   S._swapIv=setInterval(()=>{
-    if(S.frags.length){
-      const f=S.frags[~~(Math.random()*S.frags.length)];
-      f.imgIdx=~~(Math.random()*PCOUNT);
-    }
-  },1600);
-  log('FRAGS: '+S.frags.length);
+    if(!S.frags.length)return;
+    const f=S.frags[~~(Math.random()*S.frags.length)];
+    f.imgIdx=~~(Math.random()*PCOUNT);
+  },1400);
 }
 
 function stage3(W,H){
   const t=S.frame*.016,dist=S.dist;
 
-  // ── 底層：強去飽和影片殘影 ──
+  // ── Background webcam (very dim) ──
   ctx.save();
-  ctx.filter='saturate(0%) brightness(32%) contrast(125%)';
-  ctx.globalAlpha=.62+dist*.06;
+  ctx.filter='saturate(0%) brightness(22%) contrast(120%)';
+  ctx.globalAlpha=.55+dist*.06;
   ctx.scale(-1,1);ctx.drawImage(vid,-W,0,W,H);
   ctx.restore();ctx.filter='none';
-  ctx.fillStyle='rgba(0,0,0,.48)';ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='rgba(0,0,0,.5)';ctx.fillRect(0,0,W,H);
 
-  // ── 背景：細分析格氛圍 ──
-  ctx.save();ctx.strokeStyle='rgba(170,185,210,.035)';ctx.lineWidth=.28;
+  // Background grid
+  ctx.save();ctx.strokeStyle='rgba(170,185,210,.03)';ctx.lineWidth=.28;
   const ag=24;
   for(let x=0;x<W;x+=ag){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
   for(let y=0;y<H;y+=ag){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
   ctx.restore();
 
-  // ── 背景：浮動hex數據 ──
-  ctx.save();ctx.font='5.5px Share Tech Mono';
-  for(let i=0;i<24;i++){
-    const hx=((i*137.5+~~(t*.3)*7)%W);
-    const hy=((i*89.3+~~(t*.3)*11)%H);
-    ctx.globalAlpha=.06+Math.sin(t*.7+i)*.04;
-    ctx.fillStyle='rgba(190,205,225,1)';
-    ctx.fillText(((i*1337+S.frame)%256).toString(16).toUpperCase().padStart(2,'0'),hx,hy);
-  }
-  ctx.restore();
-
   if(!S.lm||S.conf<.12){
     ctx.save();ctx.globalAlpha=.32+Math.sin(t*3)*.12;
-    ctx.fillStyle='rgba(200,215,240,.85)';ctx.font='bold 10px Orbitron';ctx.textAlign='center';
-    ctx.shadowBlur=10;ctx.shadowColor='rgba(200,215,240,.35)';
+    ctx.fillStyle='rgba(200,215,240,.85)';ctx.font='bold 10px Orbitron';
+    ctx.textAlign='center';ctx.shadowBlur=10;ctx.shadowColor='rgba(200,215,240,.35)';
     ctx.fillText('ACQUIRING BIOMETRIC DATA',W/2,H/2);
     ctx.font='7px Share Tech Mono';ctx.fillStyle='rgba(170,190,220,.5)';
     ctx.fillText('ALIGN FACE TO SENSOR FIELD',W/2,H/2+18);
@@ -1147,15 +1225,14 @@ function stage3(W,H){
     return;
   }
 
-  const noseTip=lp(LM.noseTip);
-  const chin=lp(LM.chinBot);
+  const noseTip=lp(LM.noseTip),chin=lp(LM.chinBot);
   const faceScale=noseTip&&chin?dist2(noseTip,chin):H*.18;
-
-  // ── 底層臉部 Mesh（定位感） ──
   const pulse=1+Math.sin(t*1.8)*.016;
-  ctx.save();ctx.strokeStyle='rgba(170,190,215,.055)';ctx.lineWidth=.32;
-  MESH_TRIS.forEach(([a,b,cc2])=>{
-    const pa=lp(a),pb=lp(b),pc=lp(cc2);if(!pa||!pb||!pc)return;
+
+  // ── Ghost mesh ──
+  ctx.save();ctx.strokeStyle='rgba(170,190,215,.04)';ctx.lineWidth=.32;
+  MESH_TRIS.forEach(([a,b,cc])=>{
+    const pa=lp(a),pb=lp(b),pc=lp(cc);if(!pa||!pb||!pc)return;
     ctx.beginPath();
     ctx.moveTo(W/2+(pa.x-W/2)*pulse,H/2+(pa.y-H/2)*pulse);
     ctx.lineTo(W/2+(pb.x-W/2)*pulse,H/2+(pb.y-H/2)*pulse);
@@ -1164,38 +1241,56 @@ function stage3(W,H){
   });
   ctx.restore();
 
-  S.frags.sort((a,b)=>a.z-b.z);
+  // ── Draw all fragments sorted by z ──
+  S.frags.sort((a,b)=>b.z-a.z); // back-to-front
 
   S.frags.forEach(fr=>{
     const D=fr.def;
-    const imgs2=imgs[D.type];
-    if(!imgs2)return;
-    const img=imgs2[fr.imgIdx%imgs2.length];
+    const imgSet=imgs[D.type];
+    if(!imgSet||!imgSet.length)return;
+    const img=imgSet[fr.imgIdx%imgSet.length];
     if(!img||!img.complete||img.naturalWidth===0)return;
 
-    let cx=0,cy=0,ccount=0;
-    D.center.forEach(idx=>{const p=lp(idx);if(p){cx+=p.x;cy+=p.y;ccount++;}});
+    // Center position
+    let cx2=0,cy2=0,ccount=0;
+    D.center.forEach(idx=>{const p=lp(idx);if(p){cx2+=p.x;cy2+=p.y;ccount++;}});
     if(!ccount)return;
-    cx/=ccount;cy/=ccount;
+    cx2/=ccount;cy2/=ccount;
 
+    // For body: shift below face
+    if(D.layer==='body'){
+      cy2 += faceScale * 1.3;
+    }
+    // For bg: spread around frame edges
+    if(D.layer==='bg'){
+      const spread = W * 0.15;
+      cx2 += (Math.sin(t*0.3+fr.rZ)*spread);
+      cy2 += (Math.cos(t*0.2+fr.rX)*spread*0.5) - faceScale*0.3;
+    }
+
+    // Sizing
     const pA=lp(D.refA),pB=lp(D.refB);
     const refD=pA&&pB?dist2(pA,pB):faceScale*.3;
     let dw=refD*D.scaleW,dh=refD*D.scaleH;
     if(D.maxW){const cap=D.maxW*W;if(dw>cap){const r=cap/dw;dw=cap;dh*=r;}}
     if(D.maxH){const cap=D.maxH*H;if(dh>cap){const r=cap/dh;dh=cap;dw*=r;}}
 
-    // 物理
+    // Physics: drift
     const wAmp=dist*dist*faceScale*.08;
-    fr.vdx+=Math.sin(t*.85+fr.rZ*.1)*wAmp*.18;
-    fr.vdy+=Math.cos(t*.65+fr.rX*.1)*wAmp*.15;
+    const bgDamp=D.layer==='bg'?.3:1;
+    fr.vdx+=Math.sin(t*.85+fr.rZ*.1)*wAmp*.18*bgDamp;
+    fr.vdy+=Math.cos(t*.65+fr.rX*.1)*wAmp*.15*bgDamp;
     const damp=.84-dist*.12;
     fr.vdx*=damp;fr.vdy*=damp;
     fr.driftX+=fr.vdx;fr.driftY+=fr.vdy;
-    const maxD=faceScale*.18;
+    const maxD=faceScale*(D.layer==='bg'?.35:.18);
     fr.driftX=Math.max(-maxD,Math.min(maxD,fr.driftX));
     fr.driftY=Math.max(-maxD,Math.min(maxD,fr.driftY));
-    fr.vz+=(Math.random()-.5)*.06;fr.vz*=.94;
-    fr.z+=fr.vz;fr.z=Math.max(-80,Math.min(80,fr.z));
+    fr.vz+=(Math.random()-.5)*.06;fr.vz*=.94;fr.z+=fr.vz;
+    const zMin=D.layer==='bg'?0:D.layer==='body'?-30:-80;
+    const zMax=D.layer==='bg'?90:D.layer==='body'?50:80;
+    fr.z=Math.max(zMin,Math.min(zMax,fr.z));
+
     const rm=1+dist*dist*3.5;
     fr.rX+=fr.rsX*rm;fr.rY+=fr.rsY*rm;fr.rZ+=fr.rsZ*(1+dist*2);
 
@@ -1210,99 +1305,53 @@ function stage3(W,H){
       fr.gd=2+~~(Math.random()*(2+dist*7));
     }
     const gl=fr.gd>0;if(gl)fr.gd--;
-
     const persp=500/(500+fr.z);
     dw*=persp*(gl?fr.gs:1);dh*=persp;
     const zN=Math.max(0,Math.min(1,(fr.z+80)/160));
-    const drawX=cx+fr.driftX+(gl?fr.gox:0);
-    const drawY=cy+fr.driftY+(gl?fr.goy:0);
+    const drawX=cx2+fr.driftX+(gl?fr.gox:0);
+    const drawY=cy2+fr.driftY+(gl?fr.goy:0);
+
+    // Layer-specific fade
     const earFade=(fr.key==='ears_L'||fr.key==='ears_R')?.7:1;
+    const layerAlpha=D.layer==='bg'?(0.2+dist*.3)*fr.alpha:
+                     D.layer==='body'?(0.35+dist*.3)*fr.alpha:
+                     fr.alpha*(.52+zN*.42)*earFade;
 
     ctx.save();
     ctx.translate(drawX,drawY);
-    ctx.rotate(D.rot+fr.rZ*Math.PI/180*.45);
+    ctx.rotate(D.rot+fr.rZ*Math.PI/180*(D.layer==='bg'?.2:.45));
     const skX=Math.sin(fr.rY*Math.PI/180)*.4;
     const scXY=Math.abs(Math.cos(fr.rY*Math.PI/180));
     const skY=Math.sin(fr.rX*Math.PI/180)*.3;
     const scYX=Math.abs(Math.cos(fr.rX*Math.PI/180));
     ctx.transform(scXY,skY,skX,scYX,0,0);
 
-    // 圖片：去飽和
     ctx.shadowOffsetX=zN*6;ctx.shadowOffsetY=zN*8;
     ctx.shadowBlur=8+zN*14;ctx.shadowColor='rgba(0,0,0,.6)';
-    ctx.filter='saturate(15%) brightness(90%) contrast(110%)';
-    ctx.globalAlpha=fr.alpha*(.52+zN*.42)*earFade;
+
+    // Layer-specific filter
+    const filterStr=D.layer==='bg'
+      ?'saturate(5%) brightness(65%) contrast(130%)'
+      :D.layer==='body'
+        ?'saturate(8%) brightness(75%) contrast(120%)'
+        :'saturate(15%) brightness(90%) contrast(110%)';
+
+    ctx.filter=filterStr;
+    ctx.globalAlpha=layerAlpha;
     ctx.drawImage(img,-dw/2,-dh/2,dw,dh);
     ctx.filter='none';
 
-    // 邊框：淡白
-    ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetX=0;ctx.shadowOffsetY=0;
-    ctx.shadowBlur=(5+zN*9)*(.3+dist*.65);ctx.shadowColor='rgba(210,220,240,.5)';
-    ctx.strokeStyle=`rgba(210,220,238,${.18+zN*.34})`;
-    ctx.lineWidth=.5+zN*.55;ctx.strokeRect(-dw/2,-dh/2,dw,dh);
-
-    // 角落標記
-    if(zN>.4){
-      const cs=4,hx=dw/2,hy=dh/2;
-      ctx.strokeStyle=`rgba(200,215,235,${.38+zN*.3})`;ctx.lineWidth=.9;ctx.shadowBlur=3;
-      ctx.beginPath();
-      ctx.moveTo(-hx,-hy+cs);ctx.lineTo(-hx,-hy);ctx.lineTo(-hx+cs,-hy);
-      ctx.moveTo(hx-cs,-hy);ctx.lineTo(hx,-hy);ctx.lineTo(hx,-hy+cs);
-      ctx.moveTo(hx,hy-cs);ctx.lineTo(hx,hy);ctx.lineTo(hx-cs,hy);
-      ctx.moveTo(-hx+cs,hy);ctx.lineTo(-hx,hy);ctx.lineTo(-hx,hy-cs);
-      ctx.stroke();
-      if(zN>.65&&fr.layer===0){
-        ctx.fillStyle='rgba(190,210,235,.52)';ctx.font='5.5px Orbitron';ctx.shadowBlur=3;
-        ctx.fillText(fr.key.replace('_',' ').toUpperCase(),-hx,-hy-3);
-      }
-    }
-
-    // 玻璃高光（淡白）
-    if(zN>.28){
-      const gi=zN*(.32+Math.abs(Math.sin(fr.rY*Math.PI/180))*.2);
-      const gg=ctx.createLinearGradient(-dw/2,-dh/2,-dw/2+dw*.44,-dh/2+dh*.44);
-      gg.addColorStop(0,`rgba(240,245,255,${.52*gi})`);
-      gg.addColorStop(.5,`rgba(240,245,255,${.16*gi})`);
-      gg.addColorStop(1,'rgba(240,245,255,0)');
-      ctx.globalCompositeOperation='screen';ctx.globalAlpha=gi*.5;
-      ctx.fillStyle=gg;ctx.fillRect(-dw/2,-dh/2,dw*.44,dh*.44);
-      ctx.globalCompositeOperation='source-over';
-    }
-
-    // Glitch撕裂
-    if(gl&&dist>.15){
-      ctx.strokeStyle='rgba(210,225,245,.38)';ctx.lineWidth=.7;
-      ctx.globalCompositeOperation='screen';ctx.globalAlpha=.45;
-      ctx.beginPath();
-      const ly=-dh/2+Math.random()*dh;
-      ctx.moveTo(-dw/2,ly);ctx.lineTo(dw/2,ly);ctx.stroke();
-      ctx.globalCompositeOperation='source-over';
-    }
+    // Glow outline
+    ctx.shadowColor='transparent';ctx.shadowBlur=0;
+    ctx.shadowOffsetX=0;ctx.shadowOffsetY=0;
+    const glowA=D.layer==='bg'?.06+zN*.08:D.layer==='body'?.1+zN*.15:.18+zN*.34;
+    ctx.shadowBlur=(5+zN*9)*(.3+dist*.65);
+    ctx.shadowColor=D.layer==='bg'?'rgba(180,195,215,.3)':D.layer==='body'?'rgba(195,210,230,.35)':'rgba(210,220,240,.5)';
+    ctx.strokeStyle=D.layer==='bg'?`rgba(170,185,205,${glowA})`:`rgba(210,220,238,${glowA})`;
+    ctx.lineWidth=.5+zN*.55;
+    ctx.strokeRect(-dw/2,-dh/2,dw,dh);
     ctx.restore();
   });
-
-  // 準線
-  if(noseTip){
-    ctx.save();ctx.globalAlpha=.16+S.conf*.12;
-    ctx.strokeStyle='rgba(200,215,240,.5)';ctx.lineWidth=.6;
-    ctx.shadowBlur=4;ctx.shadowColor='rgba(200,215,240,.25)';
-    ctx.beginPath();
-    ctx.moveTo(noseTip.x-10,noseTip.y);ctx.lineTo(noseTip.x+10,noseTip.y);
-    ctx.moveTo(noseTip.x,noseTip.y-10);ctx.lineTo(noseTip.x,noseTip.y+10);
-    ctx.stroke();ctx.restore();
-  }
-
-  // 右側數據流
-  ctx.save();ctx.font='5.5px Share Tech Mono';
-  [`REWRITE:ON`,`DENS:${S.density}×`,`DIST:${~~(dist*100)}%`,
-   `FRAGS:${S.frags.length}`,`PERSP:500mm`,`GLITCH:${~~(dist*56)}Hz`,
-   `ROT:${(dist*3.5).toFixed(1)}x`,`CONF:${~~(S.conf*100)}%`
-  ].forEach((l,i)=>{
-    ctx.globalAlpha=.12+Math.sin(t*.6+i)*.05;
-    ctx.fillStyle='rgba(185,200,225,1)';
-    ctx.fillText(l,W-76,12+i*9);
-  });
-  ctx.restore();
 }
 
 // ════════════════════════════════════════════════
