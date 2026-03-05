@@ -68,42 +68,46 @@ body{
   background:radial-gradient(ellipse at center,transparent 52%,rgba(0,0,0,.78) 100%);
   pointer-events:none;z-index:6;}
 
-/* ── BIOMETRIC TERMINAL (RIGHT) ── */
+/* ── BIOMETRIC TERMINAL (RIGHT) — compact, below knob, aligned to screen bottom ── */
 #gazePanel{
-  position:absolute;top:8.5%;right:1%;width:23%;height:54%;
-  background:rgba(0,0,0,.92);border:1px solid rgba(0,255,136,.22);
+  position:absolute;
+  top:36%;right:1%;width:15%;bottom:37.5%;
+  background:rgba(0,0,0,.88);border:1px solid rgba(0,255,136,.18);
   border-radius:3px;z-index:20;overflow:hidden;display:flex;flex-direction:column;
+  min-height:0;
 }
 #gazeHeader{
-  padding:5px 8px;font-size:8px;color:#00FF88;
-  border-bottom:1px solid rgba(0,255,136,.18);letter-spacing:2px;
+  padding:3px 6px;font-size:7px;color:#00FF88;
+  border-bottom:1px solid rgba(0,255,136,.14);letter-spacing:1.5px;
   display:flex;justify-content:space-between;align-items:center;flex-shrink:0;
 }
-#gazeStatus{width:6px;height:6px;border-radius:50%;background:#1a1a1a;transition:background .3s;}
-#gazeStatus.on{background:#00FF88;box-shadow:0 0 8px #00FF88;}
-#gazeFeed{flex:1;overflow:hidden;padding:6px 8px;display:flex;flex-direction:column-reverse;gap:5px;}
-.ge{border-left:2px solid rgba(0,255,136,.28);padding-left:6px;animation:fin .3s ease;}
+#gazeStatus{width:5px;height:5px;border-radius:50%;background:#1a1a1a;transition:background .3s;}
+#gazeStatus.on{background:#00FF88;box-shadow:0 0 6px #00FF88;}
+#gazeFeed{flex:1;overflow:hidden;padding:3px 5px;display:flex;flex-direction:column-reverse;gap:2px;min-height:0;}
+.ge{border-left:1px solid rgba(0,255,136,.22);padding-left:4px;animation:fin .3s ease;}
 @keyframes fin{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
-.ge-ts{font-size:7px;color:rgba(255,255,255,.25);margin-bottom:2px;}
-.ge-row{font-size:8px;line-height:1.7;letter-spacing:.4px;}
-.ge-row .k{color:rgba(0,255,136,.65);}
+.ge-ts{font-size:6px;color:rgba(255,255,255,.2);margin-bottom:1px;}
+.ge-row{font-size:7px;line-height:1.55;letter-spacing:.2px;}
+.ge-row .k{color:rgba(0,255,136,.60);}
 .ge-row .vi{color:#fff;}
 .ge-row .vm{color:#ffcc44;}
-.ge-row .vl{color:rgba(200,255,230,.45);}
-#gazeBar{height:2px;background:linear-gradient(90deg,#00FF88,#00AAFF);width:0%;transition:width .4s;flex-shrink:0;}
+.ge-row .vl{color:rgba(200,255,230,.42);}
+#gazeBar{height:1px;background:linear-gradient(90deg,#00FF88,#00AAFF);width:0%;transition:width .4s;flex-shrink:0;}
 
-/* ── SYSTEM PANEL (LEFT) ── */
+/* ── SYSTEM PANEL (LEFT) — compact, below knob, aligned to screen bottom ── */
 #infoPanel{
-  position:absolute;top:8.5%;left:1%;width:23%;height:54%;
-  background:rgba(0,0,0,.85);border:1px solid rgba(255,255,255,.10);
+  position:absolute;
+  top:36%;left:1%;width:15%;bottom:37.5%;
+  background:rgba(0,0,0,.80);border:1px solid rgba(255,255,255,.08);
   border-radius:3px;z-index:20;overflow:hidden;display:flex;flex-direction:column;
+  min-height:0;
 }
-#infoHeader{padding:5px 8px;font-size:8px;color:rgba(255,255,255,.45);
-  border-bottom:1px solid rgba(255,255,255,.08);letter-spacing:2px;flex-shrink:0;}
-#infoBody{flex:1;padding:7px 8px;font-size:8px;line-height:1.8;
-  color:rgba(255,255,255,.45);overflow:hidden;}
-#infoBody .lb{color:rgba(255,255,255,.28);}
-#infoBody .vl{color:rgba(255,255,255,.85);}
+#infoHeader{padding:3px 6px;font-size:7px;color:rgba(255,255,255,.38);
+  border-bottom:1px solid rgba(255,255,255,.06);letter-spacing:1.5px;flex-shrink:0;}
+#infoBody{flex:1;padding:4px 5px;font-size:7px;line-height:1.65;
+  color:rgba(255,255,255,.40);overflow:hidden;}
+#infoBody .lb{color:rgba(255,255,255,.22);}
+#infoBody .vl{color:rgba(255,255,255,.80);}
 #infoBody .hi{color:#00FF88;}
 
 /* ── UI TEXT ── */
@@ -853,61 +857,97 @@ function stage1(W,H){
   const cy=noseTip?noseTip.y:H/2;
   const pulse=c>.65?1+Math.sin(t*2.2)*.035:1;
 
-  // ── LASER WEB: each node emits a line outward from face center ──
-  const laserIntensity = 0.6 + dist * 0.4;
-  const laserLen = 25 + dist * dist * 80; // longer with more distortion
+  // ── LASER WEB ──
+  const laserIntensity = 0.55 + dist * 0.45;
+  // Base reach scales with distortion knob + face size
+  const faceR = chin && forehead ? dist2(chin, forehead) : H * 0.2;
+  const baseReach = faceR * (0.9 + dist * 1.8);
 
-  // --- Primary laser nodes (key landmarks, brighter) ---
   ctx.save();
-  ctx.lineCap='round';
+  ctx.lineCap = 'butt';
 
-  LASER_NODES.forEach(idx=>{
-    const pp=lp(idx);if(!pp)return;
-    const px=W/2+(pp.x-W/2)*pulse;
-    const py=H/2+(pp.y-H/2)*pulse;
-    const dx=px-cx, dy=py-cy;
-    const len=Math.sqrt(dx*dx+dy*dy);if(len<1)return;
-    const nx=dx/len, ny=dy/len;
+  // ── PRIMARY LINES: silhouette + key feature nodes ──
+  // Each emits ONE long, solid line from face edge to canvas edge
+  LASER_NODES.forEach(idx => {
+    const pp = lp(idx); if (!pp) return;
+    const px = W/2 + (pp.x - W/2) * pulse;
+    const py = H/2 + (pp.y - H/2) * pulse;
+    const dx = px - cx, dy = py - cy;
+    const d2 = Math.sqrt(dx*dx + dy*dy); if (d2 < 1) return;
+    const nx = dx/d2, ny = dy/d2;
 
-    // Line from landmark outward
-    const lLen = laserLen * (0.7 + Math.random()*0.6);
-    const ex=px+nx*lLen, ey=py+ny*lLen;
+    // Reach: extends all the way across canvas
+    const reach = baseReach + (Math.abs(px - W/2) + Math.abs(py - H/2)) * 0.6;
+    const ex = px + nx * reach;
+    const ey = py + ny * reach;
 
-    // Brightness pulses per frame (jitter)
-    const bright = (S.frame + idx*7) % 30 < 3 ? 1.0 : 0.0; // brief flash
-    const baseAlpha = (0.18 + laserIntensity*0.25) * laserIntensity;
+    // Flash: every ~90 frames each node gets a bright flash
+    const flash = (S.frame * 1.3 + idx * 11) % 90 < 4;
+    const lineAlpha = flash ? 0.85 : (0.15 + laserIntensity * 0.28);
+    const lw = flash ? 1.8 : (0.55 + laserIntensity * 0.55);
 
-    const grad=ctx.createLinearGradient(px,py,ex,ey);
-    grad.addColorStop(0,`rgba(255,255,255,${baseAlpha+bright*.4})`);
-    grad.addColorStop(0.4,`rgba(220,235,255,${baseAlpha*0.6})`);
-    grad.addColorStop(1,'rgba(180,210,255,0)');
+    const grad = ctx.createLinearGradient(px, py, ex, ey);
+    grad.addColorStop(0, `rgba(255,255,255,${lineAlpha})`);
+    grad.addColorStop(0.25, `rgba(230,240,255,${lineAlpha * 0.55})`);
+    grad.addColorStop(0.65, `rgba(200,220,255,${lineAlpha * 0.18})`);
+    grad.addColorStop(1, 'rgba(190,215,255,0)');
 
-    ctx.strokeStyle=grad;
-    ctx.lineWidth=bright>0?1.2:0.6;
-    ctx.shadowBlur=bright>0?14:4;
-    ctx.shadowColor=bright>0?'rgba(255,255,255,.9)':'rgba(200,220,255,.4)';
-    ctx.beginPath();ctx.moveTo(px,py);ctx.lineTo(ex,ey);ctx.stroke();
+    ctx.strokeStyle = grad;
+    ctx.lineWidth = lw;
+    ctx.shadowBlur = flash ? 18 : (3 + laserIntensity * 5);
+    ctx.shadowColor = flash ? 'rgba(255,255,255,.95)' : `rgba(200,225,255,${laserIntensity * 0.4})`;
+    ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(ex, ey); ctx.stroke();
   });
 
-  // --- Sparse nodes (every 9th, thinner, longer reach) ---
-  SPARSE_NODES.forEach(idx=>{
-    const pp=lp(idx);if(!pp)return;
-    const px=W/2+(pp.x-W/2)*pulse;
-    const py=H/2+(pp.y-H/2)*pulse;
-    const dx=px-cx, dy=py-cy;
-    const len=Math.sqrt(dx*dx+dy*dy);if(len<1)return;
-    const nx=dx/len, ny=dy/len;
-    const lLen=(laserLen*1.8+Math.sin(t+idx)*20)*(0.5+dist*.5);
-    const ex=px+nx*lLen, ey=py+ny*lLen;
-    const a=0.06*laserIntensity;
-    const grad=ctx.createLinearGradient(px,py,ex,ey);
-    grad.addColorStop(0,`rgba(200,220,255,${a})`);
-    grad.addColorStop(1,'rgba(200,220,255,0)');
-    ctx.strokeStyle=grad;ctx.lineWidth=.35;ctx.shadowBlur=0;
-    ctx.beginPath();ctx.moveTo(px,py);ctx.lineTo(ex,ey);ctx.stroke();
+  // ── SECONDARY LINES: sparse cross-landmark connectors ──
+  // Connects pairs of landmarks with long fading lines
+  const connPairs = [
+    [33,362],[159,386],[61,291],[10,152],[234,454],
+    [70,300],[127,356],[4,2],[33,234],[362,454],
+    [61,10],[291,10],[61,152],[291,152],
+  ];
+  connPairs.forEach(([a, b]) => {
+    const pa = lp(a), pb = lp(b); if (!pa || !pb) return;
+    const pax = W/2 + (pa.x - W/2) * pulse, pay = H/2 + (pa.y - H/2) * pulse;
+    const pbx = W/2 + (pb.x - W/2) * pulse, pby = H/2 + (pb.y - H/2) * pulse;
+    const dx2 = pbx - pax, dy2 = pby - pay;
+    const len2 = Math.sqrt(dx2*dx2+dy2*dy2); if(len2<1)return;
+    const nx2 = dx2/len2, ny2 = dy2/len2;
+    const extA = (Math.sqrt((pax-cx)**2+(pay-cy)**2)+len2) * (0.4 + dist);
+    const extB = (Math.sqrt((pbx-cx)**2+(pby-cy)**2)+len2) * (0.4 + dist);
+    const ex1 = pax - nx2*extA, ey1 = pay - ny2*extA;
+    const ex2 = pbx + nx2*extB, ey2 = pby + ny2*extB;
+    const a2 = 0.07 + laserIntensity * 0.09;
+    const grad2 = ctx.createLinearGradient(ex1, ey1, ex2, ey2);
+    grad2.addColorStop(0,'rgba(200,220,255,0)');
+    grad2.addColorStop(0.2,`rgba(220,235,255,${a2})`);
+    grad2.addColorStop(0.5,`rgba(240,245,255,${a2*1.4})`);
+    grad2.addColorStop(0.8,`rgba(220,235,255,${a2})`);
+    grad2.addColorStop(1,'rgba(200,220,255,0)');
+    ctx.strokeStyle = grad2; ctx.lineWidth = 0.4 + laserIntensity * 0.3;
+    ctx.shadowBlur = 2; ctx.shadowColor = 'rgba(200,220,255,.2)';
+    ctx.beginPath(); ctx.moveTo(ex1, ey1); ctx.lineTo(ex2, ey2); ctx.stroke();
   });
 
-  ctx.shadowBlur=0;
+  // ── SPARSE BACKGROUND LINES: very long, very faint ──
+  SPARSE_NODES.forEach(idx => {
+    const pp = lp(idx); if (!pp) return;
+    const px = W/2 + (pp.x - W/2) * pulse;
+    const py = H/2 + (pp.y - H/2) * pulse;
+    const dx = px - cx, dy = py - cy;
+    const d2 = Math.sqrt(dx*dx+dy*dy); if(d2<1) return;
+    const nx = dx/d2, ny = dy/d2;
+    const reach2 = W * (0.6 + dist * 0.5);
+    const ex = px + nx * reach2, ey = py + ny * reach2;
+    const a3 = 0.04 + laserIntensity * 0.04;
+    const grad3 = ctx.createLinearGradient(px, py, ex, ey);
+    grad3.addColorStop(0, `rgba(200,215,255,${a3})`);
+    grad3.addColorStop(1, 'rgba(190,210,255,0)');
+    ctx.strokeStyle = grad3; ctx.lineWidth = 0.28; ctx.shadowBlur = 0;
+    ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(ex, ey); ctx.stroke();
+  });
+
+  ctx.shadowBlur = 0;
   ctx.restore();
 
   // ── Mesh triangles (faint) ──
@@ -1031,70 +1071,127 @@ function stage2(W,H){
   const noseZ=getZ(4);
   const cheekZ=(getZ(234)+getZ(454))/2;
 
-  // ── Depth grid rendering ──
-  const GS=13;
-  const dist=S.dist;
+  // ── Depth grid rendering — varied block sizes per zone ──
+  const dist = S.dist;
+  // Three zone grid sizes: face=fine, body=medium, bg=coarse
+  const GS_FACE = 10;
+  const GS_BODY = 16;
+  const GS_BG   = 22;
 
-  for(let gx=0;gx<W;gx+=GS){
-    for(let gy=0;gy<H;gy+=GS){
-      const cx2=gx+GS/2,cy2=gy+GS/2;
+  // ── BG LAYER (coarse blocks, animated flicker) ──
+  for(let gx=0;gx<W;gx+=GS_BG){
+    for(let gy=0;gy<H;gy+=GS_BG){
+      const cx2=gx+GS_BG/2,cy2=gy+GS_BG/2;
       const sx=Math.floor((1-cx2/W)*80);
       const sy=Math.floor(cy2/H*60);
       const si=(Math.min(79,Math.max(0,sx))+Math.min(59,Math.max(0,sy))*80)*4;
       const lum=.299*pd[si]+.587*pd[si+1]+.114*pd[si+2];
-
       const inFace=faceConvex.length>2?pointInPoly(cx2,cy2,faceConvex):false;
       const bex=(cx2-bodyCx)/bodyRx,bey=(cy2-bodyCy)/bodyRy;
       const inBody=bex*bex+bey*bey<1;
+      if(inFace||inBody)continue;
 
-      let depth,bright,alpha,strokeW;
+      // Animated background: blocks drift brightness via sine waves
+      const noise = Math.sin(cx2*0.07+t*0.8) * Math.cos(cy2*0.05+t*0.6);
+      const depth = lum/255*0.10 + noise*0.04 + 0.01;
+      const bright = Math.floor(depth*45+4);
+      const flicker = (S.frame + ~~(cx2/GS_BG)*7 + ~~(cy2/GS_BG)*13) % 120;
+      const alpha = flicker<3 ? (0.18+dist*.06) : (0.06+dist*.03);
+      const lw = flicker<3 ? 0.55 : 0.22;
+      ctx.strokeStyle=`rgba(${bright+15},${bright+17},${bright+22},${alpha})`;
+      ctx.lineWidth=lw;
+      ctx.strokeRect(gx,gy,GS_BG,GS_BG);
 
-      if(inFace){
-        // FOREGROUND: face — bright, high detail
-        depth=0.8+lum/255*.2;
-        bright=Math.floor(depth*110+30);
-        alpha=0.7+dist*.15;
-        strokeW=0.7;
-        ctx.strokeStyle=`rgba(${bright+110},${bright+120},${bright+130},${alpha})`;
-        ctx.lineWidth=strokeW;
-        ctx.strokeRect(gx,gy,GS,GS);
+      // Occasional diagonal cross in bg block
+      if(flicker===0){
+        ctx.strokeStyle=`rgba(${bright+20},${bright+22},${bright+28},${alpha*0.6})`;
+        ctx.lineWidth=0.18;
+        ctx.beginPath();ctx.moveTo(gx,gy);ctx.lineTo(gx+GS_BG,gy+GS_BG);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(gx+GS_BG,gy);ctx.lineTo(gx,gy+GS_BG);ctx.stroke();
+      }
 
-        // Hex depth labels in face zone
-        if(Math.random()>.82){
-          ctx.fillStyle=`rgba(${bright+130},${bright+140},${bright+150},${alpha+.2})`;
-          ctx.font='5px Share Tech Mono';
-          ctx.fillText((~~(depth*999)).toString(16).toUpperCase().padStart(3,'0'),gx+2,gy+9);
-        }
+      // Depth labels scattered in bg (rare)
+      if(Math.random()>.97){
+        ctx.fillStyle=`rgba(${bright+18},${bright+20},${bright+28},${alpha+.08})`;
+        ctx.font='4px Share Tech Mono';
+        ctx.fillText((~~(depth*99)).toString(16).toUpperCase().padStart(2,'0'),gx+2,gy+GS_BG-3);
+      }
+    }
+  }
 
-        // Z-contour lines for face
-        if(Math.random()>.92){
-          ctx.save();
-          ctx.strokeStyle=`rgba(255,255,255,${0.15+dist*.1})`;ctx.lineWidth=.3;
-          ctx.beginPath();ctx.arc(cx2,cy2,GS*.4,0,Math.PI*2);ctx.stroke();
-          ctx.restore();
-        }
-      } else if(inBody){
-        // MIDGROUND: body — medium gray, less detail
-        depth=0.3+lum/255*.22;
-        bright=Math.floor(depth*55+8);
-        alpha=0.32+dist*.08;
-        ctx.strokeStyle=`rgba(${bright+80},${bright+85},${bright+90},${alpha})`;
-        ctx.lineWidth=0.45;
-        ctx.strokeRect(gx,gy,GS,GS);
+  // ── BODY LAYER (medium blocks) ──
+  for(let gx=0;gx<W;gx+=GS_BODY){
+    for(let gy=0;gy<H;gy+=GS_BODY){
+      const cx2=gx+GS_BODY/2,cy2=gy+GS_BODY/2;
+      const sx=Math.floor((1-cx2/W)*80);
+      const sy=Math.floor(cy2/H*60);
+      const si=(Math.min(79,Math.max(0,sx))+Math.min(59,Math.max(0,sy))*80)*4;
+      const lum=.299*pd[si]+.587*pd[si+1]+.114*pd[si+2];
+      const inFace=faceConvex.length>2?pointInPoly(cx2,cy2,faceConvex):false;
+      const bex=(cx2-bodyCx)/bodyRx,bey=(cy2-bodyCy)/bodyRy;
+      const inBody=bex*bex+bey*bey<1;
+      if(!inBody||inFace)continue;
 
-        if(Math.random()>.93){
-          ctx.fillStyle=`rgba(${bright+90},${bright+95},${bright+100},${alpha+.15})`;
-          ctx.font='4px Share Tech Mono';
-          ctx.fillText((~~(depth*99)).toString(16).toUpperCase().padStart(2,'0'),gx+2,gy+8);
-        }
-      } else {
-        // BACKGROUND: dark, minimal
-        depth=lum/255*.08;
-        bright=Math.floor(depth*30+3);
-        alpha=0.10+dist*.04;
-        ctx.strokeStyle=`rgba(${bright+20},${bright+22},${bright+25},${alpha})`;
-        ctx.lineWidth=0.28;
-        ctx.strokeRect(gx,gy,GS,GS);
+      const depth=0.28+lum/255*.24;
+      const bright=Math.floor(depth*60+8);
+      // Body blocks pulse slightly with time
+      const bodyPulse = 0.3 + Math.sin(t*1.1 + cx2*0.02 + cy2*0.015)*0.06;
+      const alpha=bodyPulse+dist*.07;
+      ctx.strokeStyle=`rgba(${bright+75},${bright+80},${bright+88},${alpha})`;
+      ctx.lineWidth=0.5;
+      ctx.strokeRect(gx,gy,GS_BODY,GS_BODY);
+
+      // Body: inner divider lines (halve the block) for denser feel
+      if(lum>80){
+        ctx.strokeStyle=`rgba(${bright+60},${bright+65},${bright+72},${alpha*.35})`;
+        ctx.lineWidth=0.2;
+        ctx.beginPath();ctx.moveTo(gx+GS_BODY/2,gy);ctx.lineTo(gx+GS_BODY/2,gy+GS_BODY);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(gx,gy+GS_BODY/2);ctx.lineTo(gx+GS_BODY,gy+GS_BODY/2);ctx.stroke();
+      }
+
+      if(Math.random()>.90){
+        ctx.fillStyle=`rgba(${bright+85},${bright+90},${bright+100},${alpha+.12})`;
+        ctx.font='4px Share Tech Mono';
+        ctx.fillText((~~(depth*99)).toString(16).toUpperCase().padStart(2,'0'),gx+2,gy+9);
+      }
+    }
+  }
+
+  // ── FACE LAYER (fine blocks) ──
+  for(let gx=0;gx<W;gx+=GS_FACE){
+    for(let gy=0;gy<H;gy+=GS_FACE){
+      const cx2=gx+GS_FACE/2,cy2=gy+GS_FACE/2;
+      const sx=Math.floor((1-cx2/W)*80);
+      const sy=Math.floor(cy2/H*60);
+      const si=(Math.min(79,Math.max(0,sx))+Math.min(59,Math.max(0,sy))*80)*4;
+      const lum=.299*pd[si]+.587*pd[si+1]+.114*pd[si+2];
+      const inFace=faceConvex.length>2?pointInPoly(cx2,cy2,faceConvex):false;
+      if(!inFace)continue;
+
+      const depth=0.78+lum/255*.22;
+      const bright=Math.floor(depth*115+25);
+      // Face blocks: animated scan highlight sweeps down
+      const scanDist = Math.abs(cy2 - S.scanY);
+      const scanBoost = scanDist < GS_FACE*2 ? (1 - scanDist/(GS_FACE*2)) * 0.3 : 0;
+      const alpha=0.65+dist*.15+scanBoost;
+      ctx.strokeStyle=`rgba(${bright+105},${bright+115},${bright+128},${alpha})`;
+      ctx.lineWidth=0.7;
+      ctx.strokeRect(gx,gy,GS_FACE,GS_FACE);
+
+      // Depth number (frequent in face)
+      if(Math.random()>.78){
+        ctx.fillStyle=`rgba(${bright+120},${bright+130},${bright+145},${alpha+.2})`;
+        ctx.font='5px Share Tech Mono';
+        ctx.fillText((~~(depth*999)).toString(16).toUpperCase().padStart(3,'0'),gx+1,gy+8);
+      }
+
+      // Z-contour ring at face features
+      if(Math.random()>.95){
+        ctx.save();
+        ctx.strokeStyle=`rgba(255,255,255,${0.12+dist*.08+scanBoost})`;
+        ctx.lineWidth=.28;
+        ctx.beginPath();ctx.arc(cx2,cy2,GS_FACE*.35,0,Math.PI*2);ctx.stroke();
+        ctx.restore();
       }
     }
   }
