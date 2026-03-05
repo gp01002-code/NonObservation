@@ -71,7 +71,7 @@ body{
 /* ── BIOMETRIC TERMINAL (RIGHT) — compact, below knob, aligned to screen bottom ── */
 #gazePanel{
   position:absolute;
-  top:36%;right:8%;width:13%;bottom:37.5%;
+  top:36%;right:12%;width:13%;bottom:37.5%;
   background:rgba(0,0,0,.88);border:1px solid rgba(0,255,136,.18);
   border-radius:3px;z-index:20;overflow:hidden;display:flex;flex-direction:column;
   min-height:0;
@@ -97,7 +97,7 @@ body{
 /* ── SYSTEM PANEL (LEFT) — compact, below knob, aligned to screen bottom ── */
 #infoPanel{
   position:absolute;
-  top:36%;left:8%;width:13%;bottom:37.5%;
+  top:36%;left:12%;width:13%;bottom:37.5%;
   background:rgba(0,0,0,.80);border:1px solid rgba(255,255,255,.08);
   border-radius:3px;z-index:20;overflow:hidden;display:flex;flex-direction:column;
   min-height:0;
@@ -120,8 +120,8 @@ body{
 
 /* ── KNOBS ── */
 .kc{position:absolute;display:flex;flex-direction:column;align-items:center;z-index:20;}
-.kl{top:8%;left:8%;width:13%;height:25%;}
-.kr{top:8%;right:8%;width:13%;height:25%;}
+.kl{top:8%;left:12%;width:13%;height:25%;}
+.kr{top:8%;right:12%;width:13%;height:25%;}
 .ka{width:100%;height:82%;cursor:grab;display:block;}
 .ka:active{cursor:grabbing;}
 .kv{font-size:clamp(11px,1.6vw,16px);color:rgba(255,255,255,.92);
@@ -142,15 +142,15 @@ body{
 
 /* ── BUTTONS & LIGHTS ── */
 .btn{position:absolute;cursor:pointer;z-index:20;border-radius:50%;-webkit-tap-highlight-color:transparent;}
-.bc{bottom:29.5%;left:19.8%;width:3.5%;height:5.5%;}
-.br2{bottom:29.5%;right:19.8%;width:3.5%;height:5.5%;}
+.bc{bottom:29.5%;left:27%;width:3.5%;height:5.5%;}
+.br2{bottom:29.5%;right:27%;width:3.5%;height:5.5%;}
 .li{position:absolute;width:10px;height:10px;border-radius:50%;z-index:20;background:#0a0a0a;}
 .li::after{content:attr(data-l);position:absolute;top:16px;left:50%;transform:translateX(-50%);
   font-size:clamp(11px,1.6vw,15px);font-family:'Orbitron',sans-serif;font-weight:bold;
   color:rgba(255,255,255,.72);text-shadow:0 0 10px rgba(255,255,255,.4);
   white-space:nowrap;letter-spacing:1.5px;}
-.ll{bottom:22%;left:15%;}
-.lr{bottom:22%;right:15%;}
+.ll{bottom:22%;left:23%;}
+.lr{bottom:22%;right:23%;}
 .li.gr{background:#0f8;box-shadow:0 0 18px #0f8,0 0 36px rgba(0,255,136,.35);}
 .li.rd{background:#f00;box-shadow:0 0 18px #f00,0 0 36px rgba(255,0,0,.35);animation:bk 1s infinite;}
 @keyframes bk{0%,50%{opacity:1}51%,100%{opacity:.15}}
@@ -858,94 +858,117 @@ function stage1(W,H){
   const cy=noseTip?noseTip.y:H/2;
   const pulse=c>.65?1+Math.sin(t*2.2)*.035:1;
 
-  // ── LASER WEB ──
-  const laserIntensity = 0.55 + dist * 0.45;
-  // Base reach scales with distortion knob + face size
+  // ── CHAOTIC LINE WEB ──
+  // Lines are NOT radial — they drift randomly across and through the face,
+  // more like surveillance noise or interference patterns than a starburst.
+  const lineInt = 0.45 + dist * 0.35;
   const faceR = chin && forehead ? dist2(chin, forehead) : H * 0.2;
-  const baseReach = faceR * (0.9 + dist * 1.8);
 
   ctx.save();
-  ctx.lineCap = 'butt';
+  ctx.lineCap = 'round';
 
-  // ── PRIMARY LINES: silhouette + key feature nodes ──
-  // Each emits ONE long, solid line from face edge to canvas edge
+  // ── LAYER A: Landmark-anchored drift lines ──
+  // Each landmark starts a line but the END POINT is offset by a random
+  // perpendicular kick — no radial direction.
   LASER_NODES.forEach(idx => {
     const pp = lp(idx); if (!pp) return;
     const px = W/2 + (pp.x - W/2) * pulse;
     const py = H/2 + (pp.y - H/2) * pulse;
-    const dx = px - cx, dy = py - cy;
-    const d2 = Math.sqrt(dx*dx + dy*dy); if (d2 < 1) return;
-    const nx = dx/d2, ny = dy/d2;
 
-    // Reach: extends all the way across canvas
-    const reach = baseReach + (Math.abs(px - W/2) + Math.abs(py - H/2)) * 0.6;
-    const ex = px + nx * reach;
-    const ey = py + ny * reach;
+    // Seeded-random drift angle (stable per landmark, slow time drift)
+    const seedAngle = (idx * 2.399) + t * 0.12; // golden ratio spread + slow drift
+    const perpAngle = seedAngle + Math.PI * 0.5 + Math.sin(t * 0.3 + idx * 0.07) * 0.6;
+    const lineLen = faceR * (0.6 + Math.sin(idx * 1.3 + t * 0.2) * 0.4 + dist * 0.8);
 
-    // Flash: every ~90 frames each node gets a bright flash
-    const flash = (S.frame * 1.3 + idx * 11) % 90 < 4;
-    const lineAlpha = flash ? 0.85 : (0.15 + laserIntensity * 0.28);
-    const lw = flash ? 1.8 : (0.55 + laserIntensity * 0.55);
+    // Start point: slightly off landmark (adds noise)
+    const jx = px + Math.cos(seedAngle + Math.PI) * faceR * 0.08;
+    const jy = py + Math.sin(seedAngle + Math.PI) * faceR * 0.08;
+    const ex = jx + Math.cos(perpAngle) * lineLen;
+    const ey = jy + Math.sin(perpAngle) * lineLen;
 
-    const grad = ctx.createLinearGradient(px, py, ex, ey);
-    grad.addColorStop(0, `rgba(255,255,255,${lineAlpha})`);
-    grad.addColorStop(0.25, `rgba(230,240,255,${lineAlpha * 0.55})`);
-    grad.addColorStop(0.65, `rgba(200,220,255,${lineAlpha * 0.18})`);
-    grad.addColorStop(1, 'rgba(190,215,255,0)');
+    // Alpha: faint, slightly randomised per frame for flicker
+    const flicker = Math.sin(S.frame * 0.07 + idx * 0.31) * 0.04;
+    const alpha = 0.06 + lineInt * 0.12 + flicker;
+
+    const grad = ctx.createLinearGradient(jx, jy, ex, ey);
+    grad.addColorStop(0, `rgba(230,238,255,0)`);
+    grad.addColorStop(0.15, `rgba(230,238,255,${alpha * 1.4})`);
+    grad.addColorStop(0.55, `rgba(210,225,255,${alpha})`);
+    grad.addColorStop(1, 'rgba(200,218,255,0)');
 
     ctx.strokeStyle = grad;
-    ctx.lineWidth = lw;
-    ctx.shadowBlur = flash ? 18 : (3 + laserIntensity * 5);
-    ctx.shadowColor = flash ? 'rgba(255,255,255,.95)' : `rgba(200,225,255,${laserIntensity * 0.4})`;
-    ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(ex, ey); ctx.stroke();
+    ctx.lineWidth = 0.4 + lineInt * 0.5;
+    ctx.shadowBlur = 0;
+    ctx.beginPath(); ctx.moveTo(jx, jy); ctx.lineTo(ex, ey); ctx.stroke();
   });
 
-  // ── SECONDARY LINES: sparse cross-landmark connectors ──
-  // Connects pairs of landmarks with long fading lines
-  const connPairs = [
-    [33,362],[159,386],[61,291],[10,152],[234,454],
-    [70,300],[127,356],[4,2],[33,234],[362,454],
-    [61,10],[291,10],[61,152],[291,152],
-  ];
-  connPairs.forEach(([a, b]) => {
-    const pa = lp(a), pb = lp(b); if (!pa || !pb) return;
-    const pax = W/2 + (pa.x - W/2) * pulse, pay = H/2 + (pa.y - H/2) * pulse;
-    const pbx = W/2 + (pb.x - W/2) * pulse, pby = H/2 + (pb.y - H/2) * pulse;
-    const dx2 = pbx - pax, dy2 = pby - pay;
-    const len2 = Math.sqrt(dx2*dx2+dy2*dy2); if(len2<1)return;
-    const nx2 = dx2/len2, ny2 = dy2/len2;
-    const extA = (Math.sqrt((pax-cx)**2+(pay-cy)**2)+len2) * (0.4 + dist);
-    const extB = (Math.sqrt((pbx-cx)**2+(pby-cy)**2)+len2) * (0.4 + dist);
-    const ex1 = pax - nx2*extA, ey1 = pay - ny2*extA;
-    const ex2 = pbx + nx2*extB, ey2 = pby + ny2*extB;
-    const a2 = 0.07 + laserIntensity * 0.09;
-    const grad2 = ctx.createLinearGradient(ex1, ey1, ex2, ey2);
-    grad2.addColorStop(0,'rgba(200,220,255,0)');
-    grad2.addColorStop(0.2,`rgba(220,235,255,${a2})`);
-    grad2.addColorStop(0.5,`rgba(240,245,255,${a2*1.4})`);
-    grad2.addColorStop(0.8,`rgba(220,235,255,${a2})`);
-    grad2.addColorStop(1,'rgba(200,220,255,0)');
-    ctx.strokeStyle = grad2; ctx.lineWidth = 0.4 + laserIntensity * 0.3;
-    ctx.shadowBlur = 2; ctx.shadowColor = 'rgba(200,220,255,.2)';
-    ctx.beginPath(); ctx.moveTo(ex1, ey1); ctx.lineTo(ex2, ey2); ctx.stroke();
-  });
-
-  // ── SPARSE BACKGROUND LINES: very long, very faint ──
-  SPARSE_NODES.forEach(idx => {
+  // ── LAYER B: Long cross-canvas interference lines ──
+  // Totally random angles, anchored to various landmarks, extend far offscreen.
+  // These create the "background noise" texture.
+  const bgLineSeeds = [4, 33, 362, 10, 152, 234, 454, 61, 291, 70, 300, 127, 356, 159, 386];
+  bgLineSeeds.forEach((idx, i) => {
     const pp = lp(idx); if (!pp) return;
     const px = W/2 + (pp.x - W/2) * pulse;
     const py = H/2 + (pp.y - H/2) * pulse;
-    const dx = px - cx, dy = py - cy;
-    const d2 = Math.sqrt(dx*dx+dy*dy); if(d2<1) return;
-    const nx = dx/d2, ny = dy/d2;
-    const reach2 = W * (0.6 + dist * 0.5);
-    const ex = px + nx * reach2, ey = py + ny * reach2;
-    const a3 = 0.04 + laserIntensity * 0.04;
-    const grad3 = ctx.createLinearGradient(px, py, ex, ey);
-    grad3.addColorStop(0, `rgba(200,215,255,${a3})`);
-    grad3.addColorStop(1, 'rgba(190,210,255,0)');
-    ctx.strokeStyle = grad3; ctx.lineWidth = 0.28; ctx.shadowBlur = 0;
-    ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(ex, ey); ctx.stroke();
+
+    // Two interference lines per seed at different angles
+    for (let pass = 0; pass < 2; pass++) {
+      const angle = (idx * 1.618 + i * 0.87 + pass * 1.1 + t * 0.04) % (Math.PI * 2);
+      // Extend in BOTH directions from the point (full cross-canvas)
+      const reach = W * (0.7 + dist * 0.4);
+      const ax = px - Math.cos(angle) * reach;
+      const ay = py - Math.sin(angle) * reach;
+      const bx = px + Math.cos(angle) * reach;
+      const by = py + Math.sin(angle) * reach;
+
+      const alpha2 = 0.025 + lineInt * 0.03 + Math.sin(S.frame * 0.05 + idx + pass) * 0.008;
+      const grad2 = ctx.createLinearGradient(ax, ay, bx, by);
+      grad2.addColorStop(0, 'rgba(200,215,248,0)');
+      grad2.addColorStop(0.25, `rgba(215,228,252,${alpha2})`);
+      grad2.addColorStop(0.5, `rgba(225,236,255,${alpha2 * 1.6})`);
+      grad2.addColorStop(0.75, `rgba(215,228,252,${alpha2})`);
+      grad2.addColorStop(1, 'rgba(200,215,248,0)');
+
+      ctx.strokeStyle = grad2;
+      ctx.lineWidth = 0.3 + lineInt * 0.25;
+      ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by); ctx.stroke();
+    }
+  });
+
+  // ── LAYER C: Dense micro-lines between close landmark pairs ──
+  // Short, tangled, like circuit traces — concentrated near face features
+  const microPairs = [
+    [33,133],[362,263],[159,145],[386,374],[61,291],
+    [13,14],[49,279],[33,70],[362,300],[127,162],[356,389],
+    [234,93],[454,323],[10,109],[10,338],[152,377],
+    [145,153],[374,380],[40,37],[267,270]
+  ];
+  microPairs.forEach(([a,b]) => {
+    const pa=lp(a), pb=lp(b); if(!pa||!pb)return;
+    const pax=W/2+(pa.x-W/2)*pulse, pay=H/2+(pa.y-H/2)*pulse;
+    const pbx=W/2+(pb.x-W/2)*pulse, pby=H/2+(pb.y-H/2)*pulse;
+    const mx=(pax+pbx)/2, my=(pay+pby)/2;
+    // Extend the segment to 2.5× its length, with random angular drift
+    const dx=pbx-pax, dy=pby-pay;
+    const len=Math.sqrt(dx*dx+dy*dy); if(len<1)return;
+    const nx2=dx/len, ny2=dy/len;
+    // Drift perpendicular component
+    const driftMag = faceR * 0.06 * dist;
+    const driftX = -ny2 * driftMag * Math.sin(t * 0.5 + a * 0.1);
+    const driftY =  nx2 * driftMag * Math.sin(t * 0.5 + a * 0.1);
+    const ext = len * (0.8 + dist * 0.7);
+    const ex1 = mx - nx2*ext + driftX, ey1 = my - ny2*ext + driftY;
+    const ex2 = mx + nx2*ext + driftX, ey2 = my + ny2*ext + driftY;
+
+    const alpha3 = 0.08 + lineInt * 0.10;
+    const grad3 = ctx.createLinearGradient(ex1, ey1, ex2, ey2);
+    grad3.addColorStop(0, 'rgba(210,228,255,0)');
+    grad3.addColorStop(0.3, `rgba(225,238,255,${alpha3})`);
+    grad3.addColorStop(0.7, `rgba(225,238,255,${alpha3})`);
+    grad3.addColorStop(1, 'rgba(210,228,255,0)');
+    ctx.strokeStyle = grad3;
+    ctx.lineWidth = 0.35 + lineInt * 0.4;
+    ctx.beginPath(); ctx.moveTo(ex1,ey1); ctx.lineTo(ex2,ey2); ctx.stroke();
   });
 
   ctx.shadowBlur = 0;
